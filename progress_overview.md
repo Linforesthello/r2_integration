@@ -129,3 +129,4 @@ Phase 0  Phase 1    Phase 2+3    Phase 4+5
 | FAST-LIO2 编译依赖 | Phase 2 | 🟡 中 | 先编译 livox_ros_driver2 |
 | G354 topic 对接 | Phase 2 | 🟡 中 | remap 或改源码 |
 | Jetson/NUC 跨版本通信 | Phase 4 | 🟡 中 | 先用简单话题验证 |
+
