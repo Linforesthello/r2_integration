@@ -2,7 +2,11 @@
 
 > 将 R2 从"串口键盘遥控"升级为"ROS2 自主导航 + 感知 + AI"的完整机器人系统。
 >
-> 代码在 `~/Lin_workspace/r2_integration/` 下，文档在 `doc/` 中按编号阅读。
+---
+> 代码在 `~/Lin_workspace/r2_integration/` 下，文档在 `doc/` 中按阶段组织。
+>
+> **部署环境**：当前在 VMware 虚拟机中开发，最终部署到 **N97 Mini PC**（实车工控机）。
+> 两环境 ROS2 包一致，区别在于 CAN 硬件接口和串口设备路径。
 
 ---
 
@@ -29,8 +33,16 @@ r2_integration/
 │
 ├── r2_bringup/                        ← ROS2 底盘控制包
 │   ├── r2_bringup/chassis_node.py    核心节点
-│   ├── launch/chassis.launch.py      启动文件
-│   └── config/r2_params.yaml         实车标定参数
+│   ├── launch/chassis.launch.py      底盘启动文件
+│   ├── launch/ekf.launch.py          EKF 融合启动文件
+│   ├── config/r2_params.yaml         实车标定参数
+│   └── config/ekf.yaml               EKF 融合配置
+│
+├── g354_driver/                       ← ROS2 IMU 驱动包
+│   ├── g354_imu_driver/imu_node.py   核心节点（Mahony + ZUPT）
+│   ├── config/g354_imu.rviz          RViz2 配置
+│   ├── doc/                           G354 专题文档
+│   └── scripts/                       测试脚本
 │
 └── scripts/                           ← 标定工具
     ├── measure_r2_ticks.py           编码器 ticks/圈 测量
@@ -65,16 +77,47 @@ Phase 5 系统集成               ◇
 
 ---
 
+## 部署环境
+
+```
+开发时（VMware 虚拟机）
+├──  CAN 总线: slcan 转串口 (USB-CAN 适配器) → CanCmd 工具配置
+├──  IMU/G354: 需 USB 透传或模拟
+└──  LiDAR:    无硬件直连，代码准备
+
+部署时（N97 Mini PC / 实车工控机） 
+├──  CAN 总线: slcan 转串口 (USB-CAN 适配器) → CanCmd 工具配置
+├──  IMU/G354: ttyACM0（串口直连）
+├──  LiDAR:    MID70(VLP16) USB/以太网直连
+├──  视觉:     D435 USB 直连（可选 Jetson 协同）
+└──  OS:       Ubuntu 22.04 + ROS2 Humble
+```
+
+---
+
 ## 快速启动
 
 ```bash
-# 1. CAN 总线
-sudo ip link set can0 up type can bitrate 1000000
+# 0. 工作区编译
+cd ~/Lin_workspace/r2_integration
+colcon build
 
-# 2. 启动底盘
-source ~/Lin_workspace/r2_integration/r2_bringup/install/setup.bash
+# 1. CAN 总线（使用 CanCmd 工具）
+#    从主页面运行 CanCmd → 选择串口设备 → 选择波特率(1M) → 确认
+python3 ~/Lin_workspace/command/can_command.py
+
+# 2. 启动底盘（在终端 1 运行）
+source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch r2_bringup chassis.launch.py
 
-# 3. 键盘控制
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
+# 3. 启动 IMU（在终端 2 运行）
+source ~/Lin_workspace/r2_integration/install/setup.bash
+ros2 run g354_driver imu_node
+
+# 4. 启动 EKF 融合（在终端 3 运行）
+source ~/Lin_workspace/r2_integration/install/setup.bash
+ros2 launch r2_bringup ekf.launch.py
+
+# 观看融合里程计
+ros2 topic echo /odometry/filtered
 ```

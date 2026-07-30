@@ -9,7 +9,7 @@
 
 ```
 Phase 0 底盘CAN控制 ━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
-Phase 1 IMU+EKF融合 ━○○○○○○○○○  0%  ◇ 下一个
+Phase 1 IMU+EKF融合 ━━━━━○○○○○○○  30%  ◆ 进行中
 Phase 2 FAST-LIO2   ━○○○○○○○○○  0%  ◇
 Phase 3 Nav2导航     ━○○○○○○○○○  0%  ◇
 Phase 4 视觉AI       ━○○○○○○○○○  0%  ◇
@@ -37,16 +37,18 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ◇
 | 参数配置 (yaml) | ✅ | 全实车标定值 |
 | 文档 | ✅ | 4 份 .md 同步到 Obsidian |
 
-### Phase 1：IMU + 里程计 EKF 融合 ◇ 0%
+### Phase 1：IMU + 里程计 EKF 融合 ◆ 30%
 
 | 模块 | 状态 | 备注 |
 |:-----|:----:|:------|
-| G354 驱动 | ✅ **已完成** | 单独已验证: `g354_test/imu_node.py` |
-| 轮速里程计 | ✅ **Phase 0 已就绪** | `/odom_wheels` |
-| robot_localization EKF | ◇ **待配置** | 需写 ekf.yaml |
-| 对比测试 | ◇ | 纯轮速 vs EKF |
+| G354 驱动 | ✅ 已完成 | 38 字节 polling + Mahony(Kp=1.0, Ki=0.005) + ZUPT |
+| G354 静置测试 | ✅ 通过 | yaw 漂移 0.006°/min，132s 仅漂 0.005° |
+| 驱动移入工作区 | ✅ 已完成 | `g354_driver/` 在 `r2_integration/` 下 |
+| 轮速里程计 | ✅ Phase 0 已就绪 | `/odom_wheels` |
+| robot_localization EKF | ✅ **已配置** | `config/ekf.yaml` + `launch/ekf.launch.py` |
+| 对比测试: 纯轮速 vs EKF | ◇ **待实车验证** | 需底盘 + IMU + EKF 同时运行 |
 
-**↑ 这是下一个要做的 Phase**
+**下一步：实车验证 EKF 融合效果**
 
 ### Phase 2：MID70 + G354 → FAST-LIO2 SLAM ◇ 0%
 

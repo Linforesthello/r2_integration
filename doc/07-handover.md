@@ -1,6 +1,9 @@
 # R2 集成 · Phase 0 状态交接
 
 > 2026-07-29 完成。下阶段目标: Phase 1 (IMU+里程计 EKF 融合)
+>
+> **部署环境**：开发时在 VMware 虚拟机，最终部署到 N97 Mini PC（实车工控机）。
+> CAN 总线通过 USB-CAN 适配器（slcan 协议）连接，使用 CanCmd 工具配置。
 
 ---
 

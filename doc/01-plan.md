@@ -356,8 +356,10 @@ Phase 0: 底盘 CAN 控制 ──────────────── 前�
 #### 0.1 确认 CAN 总线通信（0.5 天）
 
 ```bash
-# 启动 CAN
-sudo ip link set can0 up type can bitrate 1000000
+# 启动 CAN（使用 CanCmd 工具）
+# 从主页面运行 CanCmd → 选串口设备(如 /dev/ttyACM0) → 选波特率(1M) → 确认
+# slcand 自动创建 can0，SavvyCAN 同时启动
+python3 ~/Lin_workspace/command/can_command.py
 
 # 验证状态帧（应有 4 路 0x323~0x326，每 50ms 一帧）
 candump can0
@@ -366,7 +368,7 @@ candump can0
 ## 测试 0x123 (FL)
 cansend can0 123#113C000000000000  # speed=60
 cansend can0 123#1100000000000000  # stop
-## 同样测 0x124 (FR)、0x125 (RL)、0x126 (RR)
+## 同样测 0x124 (RL)、0x125 (RR)、0x126 (FR)
 ```
 
 **风险点**：确认 wheel 安装方向与运动学公式的符号一致。用 `cansend` 单独发正速度，看轮子实际转向。
@@ -1107,9 +1109,8 @@ Root
 
 ```bash
 # ─── CAN ───
-sudo ip link set can0 up type can bitrate 1000000     # 启动 CAN
-candump can0                                           # 监听所有 CAN 帧
-cansniffer can0                                        # CAN 数据嗅探
+python3 ~/Lin_workspace/command/can_command.py              # 从主页面运行，CanCmd 配置 CAN
+                                                             # 选串口设备 → 波特率(1M) → slcand → SavvyCAN
 
 # ─── G354 ───
 python3 ~/Lin_workspace/g354_test/g354_imu_node.py    # 启动 IMU 驱动

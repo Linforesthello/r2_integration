@@ -241,16 +241,20 @@ TF 树：`odom` → `base_link`
 
 ## 八、启动
 
-```bash
-# CAN 总线
-sudo ip link set can0 up type can bitrate 1000000
-candump can0
+> **部署环境**：开发时在 VMware 虚拟机，最终部署到 N97 Mini PC（实车工控机）。
+> CAN 总线通过 USB-CAN 适配器（slcan 协议）连接，非主板集成 CAN 控制器。
 
-# 启动节点
+```bash
+# 1. CAN 总线 — 使用 CanCmd 工具
+#    从主页面运行 CanCmd → 选择串口设备(如 /dev/ttyACM0) → 选择波特率(1M) → 确认
+#    slcand 自动创建 can0 接口并启动 SavvyCAN 监控
+python3 ~/Lin_workspace/command/can_command.py
+
+# 2. 启动底盘
 source ~/Lin_workspace/r2_integration/r2_bringup/install/setup.bash
 ros2 launch r2_bringup chassis.launch.py
 
-# 键盘控制
+# 3. 键盘控制
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 

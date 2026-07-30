@@ -1,0 +1,52 @@
+# robot_localization EKF 配置 — R2 四全向轮底盘
+#
+# 融合策略:
+#   /odom_wheels → x, y, vx, vy（轮速里程计，长时稳定）
+#   /imu/data    → roll, pitch, yaw, wx, wy, wz（IMU，短时精确）
+#
+# robot_localization 文档:
+#   https://docs.ros.org/en/humble/Tutorials/Understanding-robot-localization.html
+
+ekf_filter_node:
+  ros__parameters:
+    frequency: 50.0
+
+    # ── 轮速里程计输入 ──
+    # 提供: x, y 位置 + vx, vy 速度（来自轮编码器积分）
+    # 不提供: z（地面无变化）, yaw（轮速 yaw 会打滑误差大）
+    odom0: /odom_wheels
+    odom0_config: [true, true, false,      # x, y, z
+                   false, false, false,    # roll, pitch, yaw（轮速不给 yaw）
+                   true, true, false,      # vx, vy, vz
+                   false, false, false,    # vroll, vpitch, vyaw
+                   false, false, false]    # ax, ay, az
+    odom0_differential: false
+    odom0_relative: false
+    odom0_queue_size: 10
+
+    # ── IMU 输入 ──
+    # 提供: roll, pitch, yaw + wx, wy, wz（Mahony 滤波后的姿态）
+    # 加速度计仅用于重力对齐，不用于位置积分
+    imu0: /imu/data
+    imu0_config: [false, false, false,     # x, y, z
+                  true, true, true,        # roll, pitch, yaw ← IMU 提供航向
+                  false, false, false,     # vx, vy, vz
+                  true, true, true,        # vroll, vpitch, vyaw
+                  false, false, false]     # ax, ay, az（不信任加速度计位置积分）
+    imu0_differential: false
+    imu0_relative: false
+    imu0_queue_size: 10
+
+    # ── 坐标系 ──
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom
+
+    # ── 传感器偏移（无需旋转，IMU 与车体坐标系一致） ──
+    # IMU 安装在底盘中心，与 base_link 方向一致
+    imu0_remove_gravitational_acceleration: true
+
+    # ── 协方差调参说明 ──
+    # process_noise_covariance: 默认即可（robot_localization 缺省值）
+    # 各传感器的协方差在消息中自带
