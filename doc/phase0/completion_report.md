@@ -41,7 +41,7 @@
 
 ```
 ~/Lin_workspace/r2_integration/
-├── README.md                          # 五阶段集成方案
+├── doc/01-plan.md                      # 五阶段集成方案
 ├── r2_bringup/                        # ROS2 包
 │   ├── package.xml
 │   ├── setup.py

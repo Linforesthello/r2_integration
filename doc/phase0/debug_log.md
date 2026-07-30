@@ -176,22 +176,13 @@ python3 ~/Lin_workspace/r2_integration/scripts/calibrate_direction.py
 
 ---
 
-## 四、文件清单
+## 四、相关文件
 
-```
-~/Lin_workspace/r2_integration/
-├── README.md                              # 五阶段集成方案总纲
-├── r2_chassis_definition.md               # 底盘完整定义文档
-├── phase0_complete.md                     # Phase 0 完成记录
-├── r2_bringup/                            # ROS2 包
-│   ├── package.xml / setup.py
-│   ├── r2_bringup/
-│   │   └── chassis_node.py                # 底盘控制节点
-│   ├── launch/
-│   │   └── chassis.launch.py
-│   └── config/
-│       └── r2_params.yaml                 # 实车标定参数
-└── scripts/
+完整项目结构和导航见 `README.md`。本阶段关键文件：
+
+- `phase0/completion_report.md` — Phase 0 完成记录
+- `phase0/chassis_definition.md` — 底盘定义（映射/参数/公式）
+- **本文件** ← 踩坑日志
     ├── measure_r2_ticks.py                # 编码器标定
     ├── map_chassis.py                     # CAN ID → 物理位置映射
     └── calibrate_direction.py             # 运动方向标定

@@ -92,21 +92,11 @@ user_vy = -formula_vx
 
 ---
 
-## 三、文件清单
+## 三、相关文件
 
-```
-~/Lin_workspace/r2_integration/
-├── README.md                    # 五阶段集成方案(已标记Phase0完成)
-├── r2_chassis_definition.md     # 底盘完整定义
-├── phase0_complete.md           # Phase0完成记录
-├── phase0_debug_log.md          # 踩坑调试日志
-├── current_state.md             # ← 本文件
-├── r2_bringup/                  # ROS2 包
-│   ├── r2_bringup/chassis_node.py
-│   ├── launch/chassis.launch.py
-│   └── config/r2_params.yaml
-└── scripts/
-    ├── measure_r2_ticks.py
-    ├── map_chassis.py
-    └── calibrate_direction.py
+完整项目结构见 `README.md`。本阶段文件：
+
+- `phase0/chassis_definition.md` — 底盘定义（映射/参数/公式）
+- `phase0/completion_report.md` — Phase 0 完成记录
+- `phase0/debug_log.md` — 踩坑日志
 ```
