@@ -1,0 +1,21 @@
+# R2 底盘物理参数
+# 需要实测校准后更新
+/**:
+  ros__parameters:
+    # CAN 接口
+    can_channel: 'can0'
+
+    # 运动学
+    wheel_half_diagonal: 0.33    # R (m) 车体中心到轮子的半对角线长
+    ticks_per_rev: 4241           # 编码器 ticks/轮圈（实测: FL=4232, FR=4222, RL=4279, RR=4231）
+    wheel_diameter: 0.152         # 轮径 (m)
+    speed_scale: 94.5             # 逻辑速度→m/s 系数（实测: speed=10→940ticks/s→0.106m/s）
+
+    # 控制
+    cmd_timeout: 0.5              # /cmd_vel 超时(s)，之后自动停止
+    odom_publish_rate: 50.0       # odom 发布频率 (Hz)
+
+    # 速度限幅
+    max_vx: 0.5                   # 最大前进速度 (m/s)
+    max_vy: 0.3                   # 最大侧移速度 (m/s)
+    max_omega: 0.8                # 最大旋转速度 (rad/s)
