@@ -34,7 +34,7 @@
     wheel_half_diagonal: 0.33    # R (m)
     ticks_per_rev: 4241           # 编码器 ticks/圈（实测均值）
     wheel_diameter: 0.152         # 轮径 (m)
-    speed_scale: 94.5             # 逻辑速度→m/s 系数
+    speed_scale: 94.5             # m/s→CAN 逻辑速度 系数
     cmd_timeout: 0.5              # /cmd_vel 超时(s)
     odom_publish_rate: 50.0       # odom 发布频率
     max_vx: 0.5                   # 最大前进 (m/s)
@@ -114,7 +114,7 @@ user_vy = -formula_vx
 
 **根因**：ament_python 把 entry point 装在 `bin/`，但 ROS2 在某些版本下期望 `lib/<pkg>/`。跟构建系统的交互问题。
 
-**修复**：launch 文件用 `ExecuteProcess(cmd=['python3', node_script])` 直接调用 Python 文件，绕过 libexec 查找机制。
+**修复**：launch 文件用 `_find_node_executable()` 同时查找 `lib/<pkg>/` 与 `bin/`，取绝对路径传给 `Node(executable=...)`，两种布局都兼容（详见 `retrospect/2026-07-31_chassis_launch_fix.md`）。
 
 ### 坑 5：逆解输出被 int() 截断为 0（🔴 严重）
 
@@ -182,23 +182,23 @@ python3 ~/Lin_workspace/r2_integration/scripts/calibrate_direction.py
 
 - `phase0/completion_report.md` — Phase 0 完成记录
 - `phase0/chassis_definition.md` — 底盘定义（映射/参数/公式）
+- `scripts/measure_r2_ticks.py` — 编码器 ticks/圈 标定
+- `scripts/map_chassis.py` — CAN ID → 物理位置映射
+- `scripts/calibrate_direction.py` — 运动方向标定
 - **本文件** ← 踩坑日志
-    ├── measure_r2_ticks.py                # 编码器标定
-    ├── map_chassis.py                     # CAN ID → 物理位置映射
-    └── calibrate_direction.py             # 运动方向标定
-```
 
 ---
 
 ## 五、启动方法
 
 ```bash
-# 1. CAN 总线
-sudo ip link set can0 up type can bitrate 1000000
+# 1. CAN 总线（CANable2 → /dev/ttyACM0）
+sudo slcand -o -c -s8 /dev/ttyACM0 can0
+sudo ip link set can0 up
 
 # 2. 启动底盘节点
-source ~/Lin_workspace/r2_integration/r2_bringup/install/setup.bash
-ros2 launch ~/Lin_workspace/r2_integration/r2_bringup/launch/chassis.launch.py
+source ~/Lin_workspace/r2_integration/install/setup.bash
+ros2 launch r2_bringup chassis.launch.py
 
 # 3. 键盘控制
 ros2 run teleop_twist_keyboard teleop_twist_keyboard

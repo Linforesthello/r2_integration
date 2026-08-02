@@ -25,6 +25,7 @@ setup(
         'console_scripts': [
             'chassis_node = r2_bringup.chassis_node:main',
             'chassis_test = r2_bringup.chassis_node:test_main',
+            'teleop_keyboard = r2_bringup.teleop_keyboard:main',
         ],
     },
 )

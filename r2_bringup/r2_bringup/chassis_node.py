@@ -59,7 +59,7 @@ FLAG_SATURATED = 0x02
 DEFAULT_HALF_DIAGONAL = 0.33      # R (m) — 车体中心到轮子的半对角线长
 DEFAULT_TICKS_PER_REV = 4241      # ticks/圈 — 实测均值
 DEFAULT_WHEEL_DIAMETER = 0.152     # 轮径 (m)
-# speed_scale: 逻辑速度 → m/s 的换算系数
+# speed_scale: m/s → CAN 逻辑速度 的换算系数（logic = mps * speed_scale）
 # 实测: speed=10 → 940 ticks/s → 0.1058 m/s → 10/0.1058 = 94.5
 # 含义: 按 MCLM 固件的映射，1 m/s 轮速度 = 94.5 逻辑速度单位
 DEFAULT_SPEED_SCALE = 94.5
@@ -183,6 +183,7 @@ class R2ChassisNode(Node):
         self.declare_parameter('speed_scale', DEFAULT_SPEED_SCALE)
         self.declare_parameter('cmd_timeout', 0.5)           # 无 cmd_vel 多久后停 (s)
         self.declare_parameter('odom_publish_rate', 50.0)    # odom 发布频率 (Hz)
+        self.declare_parameter('publish_tf', True)           # 是否发布 odom→base_link TF（EKF 场景设 false，由 EKF 发布）
         self.declare_parameter('max_vx', 0.5)                # m/s
         self.declare_parameter('max_vy', 0.3)                # m/s
         self.declare_parameter('max_omega', 0.8)             # rad/s
@@ -190,9 +191,10 @@ class R2ChassisNode(Node):
         self._R = self.get_parameter('wheel_half_diagonal').value
         self._ticks_per_rev = self.get_parameter('ticks_per_rev').value
         self._wheel_diameter = self.get_parameter('wheel_diameter').value
-        # 逻辑速度 → m/s 换算系数
+        # m/s → CAN 逻辑速度 换算系数
         self._speed_scale = self.get_parameter('speed_scale').value
         self._cmd_timeout = self.get_parameter('cmd_timeout').value
+        self._publish_tf = self.get_parameter('publish_tf').value
         self._max_vx = self.get_parameter('max_vx').value
         self._max_vy = self.get_parameter('max_vy').value
         self._max_omega = self.get_parameter('max_omega').value
@@ -250,7 +252,7 @@ class R2ChassisNode(Node):
         self.get_logger().info(f'  wheel_diameter = {self._wheel_diameter:.3f} m')
         self.get_logger().info(f'  ticks_per_rev = {self._ticks_per_rev}')
         self.get_logger().info(f'  m_per_tick = {self._m_per_tick:.6f} m')
-        self.get_logger().info(f'  speed_scale = {self._speed_scale:.1f} (逻辑速度→m/s)')
+        self.get_logger().info(f'  speed_scale = {self._speed_scale:.1f} (m/s→CAN逻辑速度)')
         self.get_logger().info(f'  限速: vx={self._max_vx}, vy={self._max_vy}, ω={self._max_omega}')
 
     # ────────────────────────────────────────────────
@@ -458,27 +460,44 @@ class R2ChassisNode(Node):
         odom.pose.pose.orientation.y = q[2]
         odom.pose.pose.orientation.z = q[3]
 
+        # ── 协方差（EKF 对全零协方差的测量会拒收，必须填）──
+        # 量级参考: m_per_tick=0.000113，50Hz 下积分误差累积
+        # yaw / yaw 速率不融合（ekf.yaml 中为 false），填 0 即可
+        odom.pose.covariance = [1e-3, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 1e-3, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        odom.twist.covariance = [1e-2, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                 0.0, 1e-2, 0.0, 0.0, 0.0, 0.0,
+                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
         odom.twist.twist.linear.x = vx
         odom.twist.twist.linear.y = vy
         odom.twist.twist.angular.z = omega
 
         self._odom_pub.publish(odom)
 
-        # ── 广播 TF ──
-        t = TransformStamped()
-        t.header.stamp = now.to_msg()
-        t.header.frame_id = 'odom'
-        t.child_frame_id = 'base_link'
+        # ── 广播 TF（publish_tf=false 时由 EKF 发布 odom→base_link，避免双发布者冲突）──
+        if self._publish_tf:
+            t = TransformStamped()
+            t.header.stamp = now.to_msg()
+            t.header.frame_id = 'odom'
+            t.child_frame_id = 'base_link'
 
-        t.transform.translation.x = self._odom_x
-        t.transform.translation.y = self._odom_y
-        t.transform.translation.z = 0.0
-        t.transform.rotation.w = q[0]
-        t.transform.rotation.x = q[1]
-        t.transform.rotation.y = q[2]
-        t.transform.rotation.z = q[3]
+            t.transform.translation.x = self._odom_x
+            t.transform.translation.y = self._odom_y
+            t.transform.translation.z = 0.0
+            t.transform.rotation.w = q[0]
+            t.transform.rotation.x = q[1]
+            t.transform.rotation.y = q[2]
+            t.transform.rotation.z = q[3]
 
-        self._tf_broadcaster.sendTransform(t)
+            self._tf_broadcaster.sendTransform(t)
 
     # ────────────────────────────────────────────────
     # 诊断

@@ -1,6 +1,6 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-07-29
+> 最后更新: 2026-07-31
 > 内容: 截至今日已完成的所有工作的详细记录
 
 ---
@@ -78,17 +78,35 @@ user_vy = -formula_vx
 
 ---
 
-## 二、Phase 1~5 尚未开始
+## 二、Phase 1~5 状态
 
-以下均为待办状态:
+| Phase | 目标 | 前置 | 状态 |
+|:------|:-----|:------|:------|
+| **1** | G354 IMU + 轮速 → EKF 融合 | Phase 0 | ⏳ IMU 驱动完成，EKF 联调中 |
+| **2** | 3D LiDAR SLAM (VLP16 + KISS-ICP) | Phase 0 | ✅ 驱动+里程计+键盘建图全跑通 |
+| **3** | VLP16 + Nav2 导航 | Phase 1+2 | ⏳ |
+| **4** | D435 + Jetson YOLO 视觉 | Phase 0 | ⏳ |
+| **5** | 气动+异常处理+Robocon编排 | 全部 | ⏳ |
 
-| Phase | 目标 | 前置 |
-|:------|:-----|:------|
-| **1** | G354 IMU + 轮速 → EKF 融合 | Phase 0 |
-| **2** | MID70 + G354 → FAST-LIO2 SLAM | Phase 0+1 |
-| **3** | VLP16 + Nav2 导航 | Phase 1+2 |
-| **4** | D435 + Jetson YOLO 视觉 | Phase 0 |
-| **5** | 气动+异常处理+Robocon编排 | 全部 |
+### SLAM 方案探索结论
+
+VLP-16 上尝试了四种 SLAM 方案（详见 `retrospect/vlp16_slam_exploration.md`）：
+
+| 方案 | 类型 | 结论 |
+|:----|:-----|:-----|
+| **slam_toolbox** | 2D SLAM | ❌ 不适合 VLP-16（16线3D雷达） |
+| **Cartographer** | 2D SLAM | ❌ .lua 配置兼容性问题 |
+| **FAST-LIO2** | 3D LIO | ❌ ROS2 分支硬依赖 Livox，编译失败 |
+| **KISS-ICP** | 3D Odom | ✅ 安装简捷，VLP-16 原生支持，已跑通 |
+
+### 当前 VLP-16 工作状态
+
+- [x] VLP-16 驱动（`device_ip:=10.18.18.6`, 目标 IP: `10.18.18.20`，2026-08-02 网段从 10.10.3.x 迁移）
+- [x] TF 标定（`base_footprint → velodyne`, z=0.77m, 车顶水平安装）
+- [x] KISS-ICP 3D 里程计（topic `/velodyne_points` → odom + 注册点云）
+- [x] 键盘控制 + 点云采集建图（2026-08-02 实车跑通，RViz 中 `odom_lidar` 系点云地图随车累积）
+- [ ] IMU 融合（G354 EKF，实车验证挂起中，见 [phase1/ekf-verification.md](phase1/ekf-verification.md)）
+- [ ] 雷达闭环运动（基于 `/kiss_icp/odometry` 的 waypoint 节点，待做）
 
 ---
 
@@ -99,4 +117,3 @@ user_vy = -formula_vx
 - `phase0/chassis_definition.md` — 底盘定义（映射/参数/公式）
 - `phase0/completion_report.md` — Phase 0 完成记录
 - `phase0/debug_log.md` — 踩坑日志
-```

@@ -65,6 +65,10 @@ install 目录加载，脆弱推导立即暴露。
 报错 ② 只是 `AMENT_PREFIX_PATH` 里没有工作区，`~/.bashrc` 未配置，
 每个新终端需手动 `source ~/Lin_workspace/r2_integration/install/setup.bash`。
 
+**已于 2026-07-31 修复**：N97 的 `~/.bashrc` 末尾追加了 ROS2 + 工作区自动 source
+（带存在性判断），交互登录即用。注意：非交互 shell（脚本、单条 ssh 命令）不加载
+.bashrc 末尾代码，脚本内仍须显式 source（`r2_startup.sh` 已如此）。
+
 ---
 
 ## 三、修复方案
@@ -132,4 +136,4 @@ N97 上 `timeout 6 ros2 launch r2_bringup chassis.launch.py` 实测输出：
 | N97 同步 + 重建 | ✅ 已完成 |
 | 启动验证 | ✅ 通过 |
 | git 提交修复 | ⏳ 待办（origin: github.com/Linforesthello/ros-） |
-| N97 .bashrc 自动 source | ⏳ 可选 |
+| N97 .bashrc 自动 source | ✅ 已完成（交互登录即用） |

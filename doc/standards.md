@@ -15,7 +15,7 @@
 |:---------|:-------------|:----------------|
 | 目录结构/文件树 | `README.md` | `见 README.md`，不复制树 |
 | 技术参数 | 最相关的配置/代码文件 | 引用该文件路径，不复制数值 |
-| 进度状态 | `progress.md` | 阶段性文档写"详见 progress.md" |
+| 进度状态 | `02-progress.md` | 阶段性文档写"详见 02-progress.md" |
 | 踩坑记录 | 各自的 `debug_log.md` | 不要在不同文件里重复记同一个坑 |
 
 **反对**：在 `debug_log.md` 里放完整文件树（前车之鉴 ✅ 已修正）
@@ -32,7 +32,9 @@
 | 技术参考 | `chassis_definition.md` | `04-misc.md` |
 | 完成报告 | `completion_report.md` | `done.md` |
 
-**序号前缀只在需要规定阅读顺序时使用**（如 `01-plan.md` → `02-progress.md`），且不应超过 3 个。
+**序号前缀只在需要规定阅读顺序时使用**，且仅用于 `doc/` 顶层的全局文档
+（`01-plan.md` → `02-progress.md` → `03-current_state.md` → `07-handover.md`）；
+`phaseN/`、`retrospect/` 内的文档不用序号（事件记录用日期前缀）。
 
 ---
 
@@ -79,7 +81,8 @@ docs/
 ```
 
 **规则**：
-- 始终用**相对路径**，不用绝对路径（`doc/plan.md` 而非 `/home/user/docs/plan.md`）
+- 仓库内引用始终用**相对路径**（`doc/plan.md` 而非 `/home/user/docs/plan.md`）
+- 跨机器部署/命令示例可用 `~/`（如 `~/Lin_workspace/r2_integration/...`），这是唯一允许的绝对形态
 - 跨文档引用时标注简要说明：`[EKF 配置](phase1/ekf-config.md) — 融合参数详解`
 - Obsidian 双向链接（`[[...]]`）仅用于个人笔记，**不在项目文档中使用**
 
@@ -113,6 +116,35 @@ grep -rn "已废弃文件名\|旧路径" --include="*.md" .
 
 ---
 
+### 1.8 AI 辅助改文档的约束（2026-07-31 教训）
+
+**教训来源**：2026-07-31 校对修复 01-plan.md 时，AI 未经核实就编造了
+KISS-ICP 安装路径、启动命令等细节，与实际记录不符，需返工。
+
+**规则**：
+
+1. **必须指定唯一事实来源**：让 AI 改文档前，明确指定"以哪个文件为准"
+   （如 `retrospect/vlp16_slam_exploration.md`、`config/r2_params.yaml`、实际代码文件），
+   并要求所有改动内容都能从该来源核实
+2. **禁止编造细节**：路径、命令、参数、话题名、状态等，来源里没有的
+   一律不写，或标注"（待核实）"让真人确认
+3. **先读再改**：AI 必须实际读取来源文件后再动手，不允许凭记忆/推测
+4. **残留检查**：改完后 grep 旧关键词确认无残留（见 1.7 第 2 步）
+5. **大改分批审**：超过 20 处的批量修改，先给改动清单让真人过目再落地
+
+---
+
+### 1.9 Obsidian 标签规范
+
+Obsidian 库（`~/Lin_note/Open-Notes-Library/`）的笔记用行内分层标签（`#顶层/二级/...`）。
+**给 Obsidian 镜像/笔记打标签前先读 [obsidian-tags.md](obsidian-tags.md)**：
+
+- 顶层分类只复用不新建，叶子层可扩展
+- 已解决问题用 `#Problems/solving/...`，未解决用 `#Problems/unsolved/...`
+- 镜像侧 = 权威源内容 + 标签增强，标签只加在 Obsidian 镜像侧
+
+---
+
 ## 第二部分：R2 集成项目文档准则
 
 ### 2.1 目录结构
@@ -123,7 +155,9 @@ r2_integration/
 │
 ├── doc/                     ← 所有文档
 │   ├── standards.md         ← 本文件（文档规范本身）
+│   ├── obsidian-tags.md     ← Obsidian 标签体系习惯
 │   ├── 01-plan.md           ← 全局：集成计划总纲
+│   ├── 02-deploy-checklist.md ← 全局：N97 部署清单（部署手册）
 │   ├── 02-progress.md       ← 全局：进度看板
 │   ├── 03-current_state.md  ← 全局：当前状态快照
 │   ├── 07-handover.md       ← 全局：状态交接（新会话用）
@@ -134,13 +168,19 @@ r2_integration/
 │   │   └── debug_log.md
 │   │
 │   ├── phase1/              ← Phase 1 专题
+│   │   ├── g354-wiring.md   G354 接线/配置
 │   │   ├── ekf-config.md    (待建)
 │   │   └── test-report.md   (待建)
 │   │
 │   ├── phase2/              ← Phase 2 专题
 │   ├── phase3/              ← Phase 3 专题
 │   ├── phase4/              ← Phase 4 专题
-│   └── phase5/              ← Phase 5 专题
+│   ├── phase5/              ← Phase 5 专题
+│   │
+│   └── retrospect/          ← 事件记录（日期前缀，按时间排序）
+│       ├── 2026-07-31_chassis_launch_fix.md
+│       ├── 2026-07-31_workspace_check_fix.md
+│       └── vlp16_slam_exploration.md
 │
 ├── r2_bringup/              ← ROS2 包（Phase 0 产物）
 ├── g354_driver/             ← ROS2 包（Phase 1 产物）*
@@ -158,6 +198,7 @@ r2_integration/
 |:-----|:------|:-------|
 | `README.md` | 入口导航、文件树、快速启动、阅读路线 | 项目负责人 |
 | `01-plan.md` | 五阶段路线图、技术方案、步骤详情 | 项目负责人 |
+| `02-deploy-checklist.md` | N97 部署手册（已完成部署，保留作操作指南） | 项目负责人 |
 | `02-progress.md` | 各 Phase 完成度百分比、依赖关系图、风险跟踪 | 项目负责人 |
 | `03-current_state.md` | 当前完成状态细节（最近完成 Phase 的详细记录） | 当前 Phase 负责人 |
 | `07-handover.md` | 新会话/新成员接手时阅读的上下文总结 | 最近修改者 |
@@ -217,7 +258,7 @@ ROS2 包本身的标准文件（`package.xml`、`README.md` 等）由 ROS2 规�
 | `README.md` | ✅ 必须有 | 入口导航，唯一权威来源 |
 | `doc/01-plan.md` | ✅ 可以有 | 总纲文档，需要上下文 |
 | `doc/02-progress.md` | ❌ 不要有 | 进度看板，不需要文件树 |
-| `doc/03-current_state.md` | ❌ 不要有 | 局部文档 |
+| `doc/03-current_state.md` | ❌ 不要有 | 状态快照，关注内容而非结构 |
 | `doc/07-handover.md` | ❌ 不要有 | 交接文档，关注状态而非结构 |
 | `doc/phaseN/*.md` | ❌ 不要有 | 局部文档，最多列「相关文件」 |
 
@@ -240,7 +281,9 @@ touch doc/phaseN/debug_log.md
 #    - 01-plan.md: 文件树增加新目录
 #    - 02-progress.md: 更新进度
 
-# 4. 检查引用
+# 4. 修复/探索类事件 → 记入 retrospect/YYYY-MM-DD_主题.md（不放入 phaseN/）
+
+# 5. 检查引用
 #    grep -rn "旧内容" --include="*.md" .
 ```
 
@@ -258,3 +301,4 @@ touch doc/phaseN/debug_log.md
 | 乱放 ROS2 包 | `doc/phase1/g354_driver/` | 包放工区根目录，doc 放引用 |
 | 路径写死 | `/home/lin/.../file.yaml` | 用 `~/` 或相对路径 |
 | 记坑无结论 | 只写"调了一天没调通" | 写最终怎么解决的，或为什么放弃 |
+| AI 编造细节 | 文档里出现来源文件没有的路径/命令/状态 | 以唯一事实来源为准（见 1.8），来源没有的不写 |

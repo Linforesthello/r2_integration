@@ -35,7 +35,7 @@
 
 ## 串口参数
 
-- 设备路径: `/dev/ttyACM0`
+- 设备路径: `/dev/ttyACM1`（N97 上固定；CANable2 占 ttyACM0，launch 默认即 ttyACM1）
 - 波特率: 460800
 - 数据位: 8
 - 停止位: 1
@@ -45,13 +45,13 @@
 
 ```bash
 # 1. 原始数据测试
-cd ~/Lin_workspace/g354_test
-python3 test_g354.py
+cd ~/Lin_workspace/r2_integration/g354_driver
+python3 scripts/test_g354.py
 # 应看到: [TEMP] 温度  [GYRO] 陀螺仪  [ACCL] 加速度
 
 # 2. ROS2 节点
-source ~/Lin_workspace/g354_test/install/setup.bash
-ros2 run g354_imu_driver imu_node
+source ~/Lin_workspace/r2_integration/install/setup.bash
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
 # 应看到: ✓ 串口已打开 + ✓ IMU 配置完成
 
 # 3. 查看话题
@@ -64,6 +64,6 @@ ros2 topic hz /imu/data
 
 ## 注意事项
 
-- JLink 插上后可能出现 `/dev/ttyACM0` 和 `/dev/ttyACM1`，取决于其他 USB 串口设备
-- 若与其他设备冲突，修改 `imu_node.py` 中的 `serial_port` 参数
+- 设备对应关系固定：`/dev/ttyACM0` = CANable2（CAN 总线）、`/dev/ttyACM1` = G354（JLink OB Mini）
+- 若设备路径变化，用 launch 参数覆盖：`ros2 launch g354_imu_driver g354_rviz.launch.py serial_port:=/dev/ttyACM0 rviz:=false`（`imu_node.py` 代码默认值仍是 ttyACM0，无需改代码）
 - 5V 供电不要接错到 JLink 的 VTref（VTref 是 3.3V 参考电压，非供电）

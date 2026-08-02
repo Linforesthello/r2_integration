@@ -1,7 +1,7 @@
 # R2 集成 · N97 Mini PC 部署清单
 
-> 从 VMware 虚拟机迁移到 N97 Mini PC（实车工控机）
-> N97 需安装 Ubuntu 22.04 + ROS2 Humble
+> ✅ 已部署完成（2026-07-31，N97 Ubuntu 22.04 + ROS2 Humble），本文档保留作部署手册
+> 原目标：从 VMware 虚拟机迁移到 N97 Mini PC（实车工控机），N97 安装 Ubuntu 22.04 + ROS2 Humble
 
 ---
 
@@ -33,7 +33,7 @@ mkdir -p ~/Lin_workspace
 cd ~/Lin_workspace
 
 # 直接拷贝（U盘/网络/版本管理）
-# 从 VMware 把以下目录拷贝过来:
+# ✅ 已完成：从 VMware 把以下目录拷贝过来:
 
 # 核心工作区
 r2_integration/           # → ~/Lin_workspace/r2_integration/
@@ -43,7 +43,7 @@ r2_integration/           # → ~/Lin_workspace/r2_integration/
 
 ```bash
 # CanCmd 工具
-# 从 VMware 拷贝:
+# ✅ 已完成，从 VMware 拷贝:
 ~/Lin_workspace/command/   # → ~/Lin_workspace/command/
 
 # 其中 can_command.py 是 CAN 总线配置工具
@@ -108,10 +108,8 @@ ls -la /dev/ttyACM*
 ```bash
 # 接上 JLink OB Mini，确认设备路径:
 ls -la /dev/ttyACM*
-# 期望: /dev/ttyACM0 或 /dev/ttyACM1
-
-# 如果设备路径不是 /dev/ttyACM0，启动时指定:
-ros2 run g354_imu_driver imu_node --ros-args -p serial_port:=/dev/ttyACM1
+# G354（JLink）固定为 /dev/ttyACM1（/dev/ttyACM0 是 CANable2），用 launch 启动:
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
 ```
 
 ---
@@ -128,6 +126,9 @@ colcon build
 
 ## 六、启动顺序（实车完整流程）
 
+> **推荐一键启动**：`bash ~/Lin_workspace/r2_integration/scripts/r2_startup.sh`
+> 说明：N97 交互登录时 ~/.bashrc 已自动 source ROS2 与工作区环境
+
 ```bash
 # ① CAN 总线
 sudo slcand -o -c -s8 /dev/ttyACM0 can0
@@ -139,14 +140,16 @@ ros2 launch r2_bringup chassis.launch.py
 
 # ③ IMU
 source ~/Lin_workspace/r2_integration/install/setup.bash
-ros2 run g354_imu_driver imu_node
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
 
 # ④ EKF 融合
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch r2_bringup ekf.launch.py
 
 # ⑤ 键盘控制（测试用）
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
+# R2 专用 WASD 遥控节点（w/s/a/d 平移，q/e 旋转，一键一状态；Ctrl-C 退出）
+# 官方 teleop_twist_keyboard 不适用（键位冲突 + 无横移），详见 doc/retrospect/2026-07-31_teleop_keyboard_fix.md
+python3 ~/Lin_workspace/r2_integration/r2_bringup/r2_bringup/teleop_keyboard.py
 ```
 
 ---
@@ -162,8 +165,8 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 | 轮速里程计 | `ros2 topic echo /odom_wheels --once` | 有位置/速度输出 |
 | IMU 数据 | `ros2 topic echo /imu/data --once` | 有姿态/角速度/加速度 |
 | EKF 输出 | `ros2 topic echo /odometry/filtered --once` | 有融合后的里程计 |
-| 键盘控制 | 按 i/j/l/, 等键 | 车子响应运动 |
-| IMU 帧率 | `ros2 topic hz /imu/data` | ~87 Hz |
+| 键盘控制 | 按 w/s/a/d/q/e 等键 | 车子响应运动（w/s 前后，a/d 横移，q/e 旋转） |
+| IMU 帧率 | `ros2 topic hz /imu/data` | ~125 Hz |
 | EKF 帧率 | `ros2 topic hz /odometry/filtered` | ~50 Hz |
 
 ---
@@ -185,7 +188,6 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 |:-----|:------|
 | STM32 固件 | 烧录在芯片内，N97 不运行 |
 | Obsidian 笔记 | 个人知识库，非运行时依赖 |
-| `reference/G354_Attitude-algorithm` | 参考代码，非运行必需 |
 | 旧的 build/install/log 目录 | 到 N97 上重新 colcon build |
 
 ---
@@ -194,8 +196,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
 | 设备 | 接口 | 需确认 |
 |:-----|:------|:--------|
-| USB-CAN 适配器 | USB-A | 设备路径 `/dev/ttyACMx` |
-| JLink OB Mini (G354) | USB-A | 设备路径 `/dev/ttyACMx` |
-| MID70 LiDAR | USB-C/以太网 | Phase 2 才需要 |
-| VLP16 LiDAR | 以太网 | Phase 3 才需要 |
+| USB-CAN 适配器 | USB-A | 设备路径 `/dev/ttyACMx`（当前为 `/dev/ttyACM0`） |
+| JLink OB Mini (G354) | USB-A | 设备路径 `/dev/ttyACMx`（当前为 `/dev/ttyACM1`） |
+| VLP16 LiDAR | 以太网 | ✅ 已使用（Phase 2），设备 IP 10.18.18.6 |
 | D435 相机 | USB-A | Phase 4 才需要 |

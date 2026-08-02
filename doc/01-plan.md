@@ -4,7 +4,7 @@
 >
 > **定位**：基于你现有资产（G354 驱动、VLP16+KISS-ICP、IMU-odom 融合、视觉检测、CAN 协议）的系统集成实施方案。
 >
-> **范围**：只覆盖 NUC/Jetson 侧的 ROS2 集成，不涉及 STM32 固件修改（固件已定型）。
+> **范围**：只覆盖 N97/Jetson 侧的 ROS2 集成，不涉及 STM32 固件修改（固件已定型）。
 
 ---
 
@@ -16,7 +16,7 @@
 - [第四章 集成路线图总览](#第四章-集成路线图总览)
 - [第五章 Phase 0：底盘 ROS2 + CAN 控制](#第五章-phase-0底盘-ros2--can-控制)
 - [第六章 Phase 1：IMU + 里程计 EKF 融合](#第六章-phase-1imu--里程计-ekf-融合)
-- [第七章 Phase 2：MID70 + G354 → FAST-LIO2 SLAM](#第七章-phase-2mid70--g354--fast-lio2-slam)
+- [第七章 Phase 2：VLP16 + KISS-ICP SLAM](#第七章-phase-2vlp16--kiss-icp-slam)
 - [第八章 Phase 3：VLP16 + Nav2 导航](#第八章-phase-3vlp16--nav2-导航)
 - [第九章 Phase 4：D435 + Jetson 视觉 AI](#第九章-phase-4d435--jetson-视觉-ai)
 - [第十章 Phase 5：系统集成与硬化](#第十章-phase-5系统集成与硬化)
@@ -63,7 +63,7 @@
 
 ### 1.3 CAN 协议
 
-命令帧（NUC → MCLM，8 字节）：
+命令帧（N97 → MCLM，8 字节）：
 
 | Byte | 字段 | 类型 | 说明 |
 |:----:|:-----|:----:|------|
@@ -71,7 +71,7 @@
 | 1 | speed | int8 | -100~+100 |
 | 2~7 | reserved | — | 填充 `0x00` |
 
-状态帧（MCLM → NUC，每 50ms 主动上报，8 字节）：
+状态帧（MCLM → N97，每 50ms 主动上报，8 字节）：
 
 | Byte | 字段 | 类型 | 说明 |
 |:----:|:-----|:----:|------|
@@ -97,14 +97,14 @@
 └── 5_ChassisController_t1 — UART↔CAN 网关（当前未用于 R2，架构参考）
 
 层 2 — ROS2 驱动（Linux 侧，已完成）
-├── g354_test/          — G354 IMU 完整 ROS2 驱动
-│   ├── imu_node.py     — 串口解析 + 互补滤波 + /imu/data 发布
-│   ├── test_g354.py    — 原始数据解析验证
-│   ├── launch/         — 一键启动
-│   └── config/         — Rviz 可视化配置
+├── r2_integration/g354_driver/ — G354 IMU 完整 ROS2 驱动（包名 g354_imu_driver）
+│   ├── g354_imu_driver/imu_node.py — 串口解析 + 互补滤波 + /imu/data 发布
+│   ├── scripts/test_g354.py   — 原始数据解析验证
+│   ├── launch/g354_rviz.launch.py — 一键启动（rviz:=/serial_port:= 参数）
+│   └── config/g354_imu.rviz   — Rviz 可视化配置
 │
 ├── vlp16_slam_ws/      — VLP16 + KISS-ICP SLAM
-│   └── install/kiss_icp/ — 已编译通过
+│   └── install/kiss_icp/ — 已编译通过，实车跑通
 │
 ├── imu_odom_ws/        — IMU+里程计融合节点
 │   └── imu_odometry_node.py — 订阅 IMU → /odom + TF
@@ -125,21 +125,20 @@
 
 | 资产 | 已做到 | 还缺什么 |
 |:-----|:-------|:---------|
-| G354 驱动 | 独立的 ROS2 驱动，发布 `/imu/data` | 未接入 FAST-LIO2，未接入 EKF |
-| IMU-odom 节点 | 简单积分模型（yaw=∫gyro, x=∫v·cos(yaw)) | 不是正式 EKF，未用加速度计修正 |
-| VLP16 + KISS-ICP | 已编译，配置文件就绪 | 未实车测试（PoE 网络配置） |
+| G354 驱动 | 独立的 ROS2 驱动，发布 `/imu/data` | EKF 融合联调中 |
+| IMU-odom 节点 | 简单积分模型（yaw=∫gyro, x=∫v·cos(yaw)) | 已被 EKF 取代（联调中） |
+| VLP16 + KISS-ICP | ✅ 已实车跑通（odom + 注册点云） | TF 已标定（z=0.77m 车顶） |
 | R2 底盘控制 | ✅ **ROS2 + CAN 已完成** | 运动学校准、方向标定、里程计均通过 |
 | 视觉球体检测 | 独立运行，输出 3D 坐标 | 未接到导航/控制上 |
 | D435 | SDK 编译 | 未装 ROS2 驱动 |
-| MID70 | 物理设备就位 | 未装 livox_ros_driver2 |
-| Jetson Nano | YOLO 部署经验 | 未配 ROS2，未与 NUC 通信 |
+| Jetson Nano | YOLO 部署经验 | 未配 ROS2，未与 N97 通信 |
 
 ### 2.3 尚未涉及领域
 
-- FAST-LIO2 SLAM（MID70 + IMU 紧耦合）— 核心出活点
-- `robot_localization` EKF 正式配置
+- VLP16 + KISS-ICP SLAM — ✅ 核心出活点已完成（实车跑通，见第七章）
+- `robot_localization` EKF 正式配置 — 已开始联调（见第六章）
 - Nav2 导航堆栈的完整部署
-- NUC ↔ Jetson 跨版本 ROS2 通信
+- N97 ↔ Jetson 跨版本 ROS2 通信
 - 气动系统从 ROS2 层控制
 - 行为树/状态机任务编排
 
@@ -149,7 +148,7 @@
 当前状态：
   传感器驱动 ◇◇◇◇◇ 独立运行，不互通
   底盘控制   ◆◆◆◆◆ ✅ ROS2 + CAN 已跑通
-  SLAM       ◇◇◇◇◇ 部分编译，未实车
+  SLAM       ◆◆◆◆◆ ✅ VLP16 + KISS-ICP 已实车跑通
   导航       ◇◇◇◇◇ 未开始
   视觉 AI    ◇◇◇◇◇ 独立运行，未接入控制
 
@@ -168,36 +167,36 @@
 ### 3.1 硬件拓扑
 
 ```
-                        NUC N100 (ROS2 Humble)
+                      N97 Mini PC 192.168.1.210 (ROS2 Humble)
   ┌──────────────────────────────────────────────────────────────────┐
   │                                                                  │
-  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
-  │  │ G354 IMU │  │ MID70    │  │ VLP16    │  │ D435i            │ │
-  │  │ USB串口   │  │ USB 3.0  │  │ 以太网    │  │ USB 3.0         │ │
-  │  │ /imu/data│  │ /livox/  │  │ /velodyne│  │ /camera/color+   │ │
-  │  │         │  │ lidar    │  │ /points  │  │ depth            │ │
-  │  └────┬────┘  └────┬─────┘  └────┬─────┘  └────────┬─────────┘ │
-  │       │            │             │                   │          │
-  │       └─────┬──────┴──────┬──────┘                   │          │
-  │             │             │                          │          │
-  │       ┌─────▼─────┐  ┌───▼────┐              ┌──────▼──────┐   │
-  │       │ EKF 融合  │  │ SLAM   │              │ 视觉预处理  │   │
-  │       │ robot_    │  │ FAST-  │              │ (压缩转发)   │   │
-  │       │localization│  │ LIO2   │              │             │   │
-  │       └─────┬─────┘  └───┬────┘              └──────┬──────┘   │
-  │             │             │                          │          │
-  │             └──────┬──────┘                          │          │
-  │                    │                                 │          │
-  │              ┌─────▼──────┐                          │          │
-  │              │    Nav2    │←─── /detections ─────────┘          │
-  │              │  导航规划  │                                     │
-  │              └─────┬──────┘                                     │
-  │                    │ /cmd_vel                                    │
-  │              ┌─────▼──────┐                                     │
-  │              │chassis_can │                                     │
-  │              │ _node.py   │  ←── ROS2 → CAN 桥                  │
-  │              │(运动学逆解) │                                     │
-  │              └─────┬──────┘                                     │
+  │  ┌──────────┐  ┌──────────┐  ┌──────────────────┐                │
+  │  │ G354 IMU │  │ VLP16    │  │ D435i            │                │
+  │  │ USB串口   │  │ 以太网    │  │ USB 3.0         │                │
+  │  │ /imu/data│  │ /velodyne│  │ /camera/color+   │                │
+  │  │          │  │ /points  │  │ depth            │                │
+  │  └────┬─────┘  └────┬─────┘  └────────┬─────────┘                │
+  │       │             │                  │                          │
+  │       └──────┬──────┴──────┐           │                          │
+  │              │             │           │                          │
+  │        ┌─────▼─────┐  ┌────▼─────┐  ┌──▼──────────┐               │
+  │        │ EKF 融合  │  │ SLAM     │  │ 视觉预处理  │               │
+  │        │ robot_    │  │ KISS-ICP │  │ (压缩转发)   │               │
+  │        │localization│ │          │  │             │               │
+  │        └─────┬─────┘  └────┬─────┘  └──┬──────────┘               │
+  │              │             │           │                          │
+  │              └──────┬──────┘           │                          │
+  │                     │                  │                          │
+  │               ┌─────▼──────┐           │                          │
+  │               │    Nav2    │←── /detections ──────────────────┘   │
+  │               │  导航规划  │                                      │
+  │               └─────┬──────┘                                      │
+  │                     │ /cmd_vel                                     │
+  │               ┌─────▼──────┐                                      │
+  │               │ chassis_   │                                      │
+  │               │ node.py    │  ←── ROS2 → CAN 桥                   │
+  │               │(运动学逆解) │                                      │
+  │               └─────┬──────┘                                      │
   └────────────────────┼────────────────────────────────────────────┘
                        │ USB
                   ┌────┴─────┐
@@ -213,8 +212,8 @@
   ┌────────────────────────────────────┐
   │  ┌──────────────────────────────┐  │
   │  │ YOLO / TensorRT 推理         │  │
-  │  │ ← /camera/color (from NUC)  │  │
-  │  │ → /detections (to NUC)      │  │
+  │  │ ← /camera/color (from N97)  │  │
+  │  │ → /detections (to N97)      │  │
   │  └──────────────────────────────┘  │
   │  注意: Foxy ≠ Humble，跨版本 DDS  │
   └────────────────────────────────────┘
@@ -225,22 +224,22 @@
 ```
 流向 A：运动控制（实时性要求最高）
   ROS2 /cmd_vel
-    → chassis_can_node (运动学逆解)
+    → chassis_node (运动学逆解)
       → CAN Bus (命令帧 0x123~0x126)
         → MCLM_t2 (PID 100Hz)
           → 电机 → 编码器
             → CAN Bus (状态帧 0x323~0x326)
-              → chassis_can_node (正解 → /odom_wheels)
+              → chassis_node (正解 → /odom_wheels)
 
 流向 B：状态估计（融合 IMU + 轮速）
   /odom_wheels + /imu/data
     → robot_localization EKF
       → /odometry/filtered
 
-流向 C：SLAM 建图（LiDAR + IMU）
-  /livox/lidar + /imu/data
-    → FAST-LIO2
-      → 三维点云地图 + /Odometry
+流向 C：SLAM 里程计（LiDAR-only）
+  /velodyne/points
+    → KISS-ICP
+      → odom + 注册点云（建图用 pcd 累积）
 
 流向 D：导航规划
   /odometry/filtered + 地图
@@ -248,8 +247,8 @@
       → /cmd_vel (闭环回流向 A)
 
 流向 E：视觉 AI（非实时，事件驱动）
-  D435 RGB → NUC → /camera/color/compressed → Jetson
-    → YOLO TensorRT → /detections → NUC
+  D435 RGB → N97 → /camera/color/compressed → Jetson
+    → YOLO TensorRT → /detections → N97
       → 目标 3D 坐标 → Nav2 goal → 流向 D → 流向 A
 ```
 
@@ -257,11 +256,11 @@
 
 | 决策 | 选择 | 理由 |
 |:-----|:-----|:------|
-| IMU 分配 | G354 → FAST-LIO2 + EKF；D435i IMU → 视觉 VIO（可选） | G354 精度高，做主要融合；D435i 的 IMU 只是辅助 |
+| IMU 分配 | G354 → EKF；D435i IMU → 视觉 VIO（可选） | G354 精度高，做主要融合；D435i 的 IMU 只是辅助 |
 | CAN 还是串口 | CAN（通过 CANable） | MCLM 固件用 CAN，串口是旧方案 |
-| R2 用 ChassisController 吗 | **不用**。NUC 直连 CAN | ChassisController 是为 R1 舵轮设计的网关。R2 全向轮运动学简单，NUC 直接算更高效 |
+| R2 用 ChassisController 吗 | **不用**。N97 直连 CAN | ChassisController 是为 R1 舵轮设计的网关。R2 全向轮运动学简单，N97 直接算更高效 |
 | Jetson 角色 | **纯 AI 推理协处理器**，不参与控制环路 | 控制环路要求实时性，不能经过 Jetson |
-| ROS2 跨版本 | NUC Humble ↔ Jetson Foxy 通过 DDS | 物理上同一网段，DDS 自动发现 |
+| ROS2 跨版本 | N97 Humble ↔ Jetson Foxy 通过 DDS | 物理上同一网段，DDS 自动发现 |
 
 ---
 
@@ -270,16 +269,16 @@
 ### 4.1 Phase 依赖关系
 
 ```
-Phase 0: 底盘 CAN 控制 ──────────────── 前提，所有 Phase 的实车测试基础
+Phase 0: 底盘 CAN 控制 ──────────────── 前提，所有 Phase 的实车测试基础（✅ 已完成）
        │
        ├──→ Phase 1: IMU+odom EKF ──→ Phase 3: Nav2 导航
        │                                    ↑
-       └──→ Phase 2: FAST-LIO2 SLAM ───────┘
+       └──→ Phase 2: VLP16+KISS-ICP SLAM ──┘  （Phase 0~2 已完成）
                 │
                 └──→ Phase 4: D435+Jetson ──→ Phase 5: 系统集成
 
 可并行：
-  Phase 1 (EKF 配置，纯软件) 和 Phase 2 (FAST-LIO2 编译) 可同时进行
+  Phase 1 (EKF 配置) 和 Phase 2 (VLP16 网络 + KISS-ICP) 可同时进行（均已执行完毕）
   VLP16 网络配置 (Phase 3 的一部分) 可提早开始
   Jetson 环境搭建 (Phase 4 的一部分) 可提早开始
 ```
@@ -289,8 +288,8 @@ Phase 0: 底盘 CAN 控制 ──────────────── 前�
 | Phase | 定位 | 难度 | 依赖 | 实车可测 |
 |:-----|:-----|:----:|:----:|:--------:|
 | **0** | **基石** — ROS2 + CAN 控制 ✅ | ✅ 已完成 | 无 | ✅ 实车验证通过 |
-| **1** | **精度** — 让里程计不漂 | ⭐⭐ | Phase 0 | ✅ 需要车动 |
-| **2** | **出活** — SLAM 建图，核心能力 | ⭐⭐⭐⭐ | Phase 0+1 | ✅ 需要车动 |
+| **1** | **精度** — 让里程计不漂 | ⭐⭐ | Phase 0 | ✅ 联调中 |
+| **2** | **出活** — SLAM 建图，核心能力 | ⭐⭐⭐⭐ | Phase 0+1 | ✅ VLP16+KISS-ICP 已实车跑通 |
 | **3** | **自主** — 导航到目标点 | ⭐⭐⭐ | Phase 1+2 | ✅ 需要车动 |
 | **4** | **感知** — AI 视觉接入 | ⭐⭐⭐ | Phase 0 | ✅ 静态可测 |
 | **5** | **可靠** — 异常处理+编排 | ⭐⭐ | 全部 | ✅ 需要全系统 |
@@ -311,18 +310,16 @@ Phase 0: 底盘 CAN 控制 ──────────────── 前�
 
 **关键并行路径**：
 - VLP16 网络配置（Phase 3 的步骤 3.1）**不受任何 Phase 依赖**，第 1 天就可以开始搞
-- Jetson 的 ROS2 环境搭建（Phase 4 的步骤 4.2）也**不受其他 Phase 依赖**，可以在等 FAST-LIO2 编译时抽空做
-- Phase 1（EKF 配置）和 Phase 2（FAST-LIO2 编译）**互不依赖**，可以同时做
+- Jetson 的 ROS2 环境搭建（Phase 4 的步骤 4.2）也**不受其他 Phase 依赖**，可以提早开始
+- Phase 1（EKF 配置）和 Phase 2（VLP16 网络 + KISS-ICP）**互不依赖**，已并行执行完毕
 
 ### 4.4 风险预警
 
 | 风险 | 发生在 | 概率 | 影响 | 缓解措施 |
 |:-----|:-------|:----:|:----:|:---------|
-| VLP16 网络不通（PoE/静态IP） | Phase 3 | 🔴 高 | 卡住 | 提前开始网络配置，准备好 PoE 交换机/注入器 |
-| FAST-LIO2 编译依赖冲突（PCL/Eigen 版本） | Phase 2 | 🟡 中 | 1~3天 | 先编译 livox_ros_driver2，确认 ROS2 Humble 环境正常 |
-| G354 IMU 驱动与 FAST-LIO2 的 IMU topic 不匹配 | Phase 2 | 🟡 中 | 1天 | 通过 remap 或修改 laserMapping.cpp |
-| Jetson ROS2 Foxy 与 NUC Humble DDS 通信失败 | Phase 4 | 🟡 中 | 1~2天 | 先用 `ros2 topic pub/test` 跨版本验证 |
-| D435 USB 带宽不足（与 MID70 抢 USB） | Phase 4 | 🟢 低 | — | D435 用 USB3，MID70 也用 USB3，N100 通常有多个 USB3 口 |
+| VLP16 网络不通（PoE/静态IP/ARP 固化） | Phase 3 | 🔴 高 | 卡住 | 提前开始网络配置，准备好 PoE 交换机/注入器；ARP 固化问题见 `retrospect/vlp16_slam_exploration.md` |
+| Jetson ROS2 Foxy 与 N97 Humble DDS 通信失败 | Phase 4 | 🟡 中 | 1~2天 | 先用 `ros2 topic pub/test` 跨版本验证 |
+| D435 USB 带宽不足 | Phase 4 | 🟢 低 | — | D435 用 USB3 口 |
 | 全向轮里程计标定不准（R 值、ticks/rev） | Phase 0 | 🟢 低 | 半天 | 用卷尺实测，走直线验证后校准 |
 
 ---
@@ -347,7 +344,7 @@ Phase 0: 底盘 CAN 控制 ──────────────── 前�
 **核心产出：**
 - `r2_bringup/` ROS2 包（chassis_node + launch + config）
 - 标定脚本（measure_r2_ticks / map_chassis / calibrate_direction）
-- 完整踩坑记录见 [[当前项目文档/R2_Integration/phase0/debug_log.md]]
+- 完整踩坑记录见 `doc/phase0/debug_log.md`
 
 ### 5.3 步骤总览（已执行完毕，留存参考）
 
@@ -382,9 +379,9 @@ r2_bringup/
 │   └── __init__.py
 ├── launch/
 │   ├── chassis.launch.py  # CAN 启动 + 底盘节点
-│   └── r2_bringup.launch.py  # 全系统启动入口
+│   └── ekf.launch.py      # EKF 融合启动（Phase 1 产物）
 ├── config/
-│   ├── can_params.yaml    # CAN 接口参数
+│   ├── ekf.yaml           # EKF 融合参数（Phase 1 产物）
 │   └── r2_params.yaml     # R2 物理参数（R, ticks/rev, 轮径...）
 ├── setup.py
 └── package.xml
@@ -412,7 +409,7 @@ class R2ChassisNode(Node):
         super().__init__('r2_chassis_node')
         
         # 参数
-        self.declare_parameter('wheel_half_diagonal', 0.15)  # R (m)
+        self.declare_parameter('wheel_half_diagonal', 0.33)  # R (m)（实测标定值）
         self.declare_parameter('can_channel', 'can0')
         self.R = self.get_parameter('wheel_half_diagonal').value
         
@@ -484,15 +481,15 @@ CAN 验证：
 
 纯轮速里程计（Phase 0 产物）存在固有缺陷：轮子打滑、地面不平、轮胎磨损都会导致积分误差累积。IMU 可以提供加速度和角速度参考，修正这些误差。
 
-**为什么要先做 EKF 再做 SLAM**：FAST-LIO2 需要好的初始位姿估计。EKF 融合后的 odom 质量直接影响 SLAM 的收敛速度和鲁棒性。
+**为什么要先做 EKF 再做 SLAM**：好的 odom 估计是后续建图与定位的基础。EKF 融合后的 odom 质量直接影响 Phase 2/3 建图定位的收敛速度和鲁棒性。
 
 ### 6.2 当前状态 → 目标
 
 ```
-当前：
+当前（联调中）：
   - G354 驱动独立运行，发 /imu/data（已完成）
   - 里程计独立运行，发 /odom_wheels（Phase 0 产物）
-  - 没有任何融合
+  - EKF 联调中（ekf.launch.py 已实现，r2_eKF_test.bag 已采集）
 
 目标：
   /odom_wheels + /imu/data → robot_localization EKF → /odometry/filtered
@@ -504,8 +501,8 @@ CAN 验证：
 #### 1.1 确认 G354 驱动正常（0.5 天）
 
 ```bash
-# 启动 G354（从 Lin_workspace）
-python3 ~/Lin_workspace/g354_test/g354_imu_node.py
+# 启动 G354（工作区包 g354_imu_driver，SSH/无显示器时 rviz:=false）
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false
 
 # 另一个终端验证
 ros2 topic echo /imu/data
@@ -515,10 +512,11 @@ ros2 topic echo /imu/data
 #   温控: temperature 应稳定（G354 内部温补）
 ```
 
-**如果你上次测试后改过接线或换过 NUC**，需要确认串口设备名：
+**如果你上次测试后改过接线或换过主机**，需要确认串口设备名（G354 固定为 /dev/ttyACM1）：
 ```bash
-ls -l /dev/ttyACM*  # 或 /dev/ttyUSB*
-# 如果设备名变了，修改 imu_node.py 或通过参数传入
+ls -l /dev/ttyACM*
+# 如果设备名变了，用 launch 参数覆盖，无需改代码：
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
 ```
 
 #### 1.2 安装 robot_localization（0.5 天）
@@ -567,22 +565,32 @@ ekf_filter_node:
     world_frame: odom
 ```
 
-#### 1.4 写 launch 文件启动 EKF
+#### 1.4 EKF launch 文件（✅ 已实际完成）
+
+`launch/ekf.launch.py` 已实现（2026-07-31 联调使用），配置路径用绝对路径定位：
 
 ```python
-# launch/ekf.launch.py
+# launch/ekf.launch.py（r2_bringup 包内，已实际完成）
+import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
 def generate_launch_description():
+    pkg_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     return LaunchDescription([
         Node(
             package='robot_localization',
             executable='ekf_node',
             name='ekf_filter_node',
-            parameters=['config/ekf.yaml'],
+            parameters=[os.path.join(pkg_dir, 'config', 'ekf.yaml')],
+            output='screen',
         ),
     ])
+```
+
+```bash
+# 启动 EKF
+ros2 launch r2_bringup ekf.launch.py
 ```
 
 #### 1.5 验证标准
@@ -602,122 +610,103 @@ def generate_launch_description():
 
 ---
 
-## 第七章 Phase 2：MID70 + G354 → FAST-LIO2 SLAM
+## 第七章 Phase 2：VLP16 + KISS-ICP SLAM（✅ 已完成）
 
 ### 7.1 定位
 
-**这是整个系统的核心出活点**。FAST-LIO2 是 LiDAR-IMU 紧耦合 SLAM，利用 MID70 的非重复扫描特性和 G354 的高频 IMU，实现实时三维建图与定位。
+**这是整个系统的核心出活点**。VLP-16 提供 360° 三维点云，KISS-ICP（LiDAR-only ICP 里程计）实车已跑通，输出 odom 与注册点云，为 Phase 3 导航提供定位与建图基础。
+
+> **历史注记**：曾尝试 FAST-LIO2/MID70 方案，后弃用 —— FAST-LIO2 的 ROS2 分支原生硬依赖 Livox 消息类型与回调，对 VLP-16 需近乎重写，编译失败；完整探索记录见 `retrospect/vlp16_slam_exploration.md`。
 
 ### 7.2 当前状态 → 目标
 
 ```
-当前：
-  - G354 驱动就绪（输出 /imu/data）
-  - MID70 物理设备就位
-  - FAST-LIO2 源码确定
+当前：✅ 已完成（2026-07-31 实车跑通）
+  - VLP-16 驱动就绪（设备 IP 10.18.18.6，目标 IP 10.18.18.20）
+  - KISS-ICP 实车跑通（/velodyne_points → odom + 注册点云）
+  - TF 已标定（base_footprint → velodyne，z=0.77m，车顶水平安装）
 
-目标：
-  MID70 + G354 → FAST-LIO2 → 实时三维点云地图 + /Odometry
-  拿着 R2 在房间走一圈，Rviz 建出可辨识的地图
+目标：✅ 已达成
+  VLP16 → KISS-ICP → odom + 三维点云
+  推着 R2 走一圈，Rviz 实时显示建图
 ```
 
-### 7.3 步骤
+### 7.3 步骤（已执行完毕，留存参考）
 
-#### 2.1 编译 livox_ros_driver2（1 天）
+#### 2.1 VLP-16 网络配置（半天）
+
+VLP-16 经 PoE 供电，设备 IP 为 10.18.18.6，目标 IP 为 10.18.18.20（本机 N97）：
 
 ```bash
-cd ~
-mkdir -p mid70_ws/src
-cd mid70_ws/src
-git clone https://github.com/Livox-SDK/livox_ros_driver2.git
-cd ..
-colcon build --packages-select livox_ros_driver2
-source install/setup.bash
+# 主机（N97）以太网口配置
+sudo ip addr add 10.18.18.20/24 dev enp1s0
+sudo ip link set enp1s0 up
 
-# 验证：查看 MID70 点云
-ros2 launch livox_ros_driver2 rviz_MID70.launch.py
+# 验证连接
+ping 10.18.18.6
 ```
 
-**可能遇到的问题**：
-- `livox_ros_driver2` 某些版本与 Humble 不完全兼容，可能需要 checkout 特定分支
-- CMake 版本要求 ≥ 3.16（Ubuntu 22.04 默认 3.22，没问题）
+**踩坑记录**：VLP-16 单向 UDP 流（2368 端口）不触发 ARP 更新，改 IP 或换网段后缓存固化，需独立 IP 隔离或改雷达目标 IP，详见 `retrospect/vlp16_slam_exploration.md`。
 
-#### 2.2 编译 FAST-LIO2（1 天）
+#### 2.2 安装 KISS-ICP（半天）
 
 ```bash
-cd ~/mid70_ws/src
-git clone https://github.com/hku-mars/FAST-LIO2.git
-cd ..
-colcon build --packages-select fast_lio
+# C++ ROS2 包（需要 CMake >= 3.24）
+pip3 install cmake --upgrade   # 升级 cmake
+git clone https://github.com/PRBonn/kiss-icp.git ~/kiss-icp
+mkdir -p ~/kiss_icp_ws/src
+cp -r ~/kiss-icp/ros ~/kiss_icp_ws/src/kiss_icp
+
+cd ~/kiss_icp_ws
+colcon build --symlink-install --packages-select kiss_icp \
+  --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+# 也可用纯 Python 版本（备选，无 ROS2 节点）
+pip3 install kiss-icp
 ```
 
-**关键改动**：FAST-LIO2 默认 IMU topic 是 `/livox/imu`，需要改为你的 `/imu/data`（G354）。
+#### 2.3 组合启动（半天）
 
 ```bash
-# 方案一：在 launch 文件中 remap
-# 修改 FAST-LIO2/launch/mapping_avia.launch.py，在 Node 参数中添加：
-# remappings=[('/livox/imu', '/imu/data')]
+# 终端1: VLP-16 驱动（N97 定制 launch，含 device_ip/port 参数）
+ros2 launch ~/.ros/velodyne_n97.launch.py
 
-# 方案二（更可靠）：修改源码
-# 编辑 FAST-LIO2/src/laserMapping.cpp，找到：
-#   imuSub = nh.subscribe<sensor_msgs::Imu>("/livox/imu", ...)
-# 改为：
-#   imuSub = nh.subscribe<sensor_msgs::Imu>("/imu/data", ...)
+# 终端2: KISS-ICP
+source ~/kiss_icp_ws/install/setup.bash
+ros2 launch kiss_icp odometry.launch.py \
+  topic:=/velodyne_points \
+  visualize:=false \    # SSH 无 GUI 时设 false
+  base_frame:=velodyne
+
+# 终端3: Rviz（查看点云+定位，Fixed Frame = odom_lidar）
+rviz2
 ```
 
-#### 2.3 外参标定（半天）
+**KISS-ICP 输出话题**：
 
-测量 MID70 和 G354 在 R2 上的安装位置：
+| 话题 | 类型 | 说明 |
+|------|------|------|
+| `/kiss_icp/odometry` | Odometry | 里程计数据 |
+| `/kiss_icp/points` | PointCloud2 | 注册后的全局点云 |
+| `/kiss_icp/deskewed_points` | PointCloud2 | 去畸变的当前帧 |
 
-```yaml
-# FAST-LIO2/config/avia.yaml 中的关键参数
-# 注意: FAST-LIO2 使用 livox_avia 的配置作为 MID70 的模板
+**已知限制**：不发布 `/map` 话题（不是 full SLAM），无回环检测，长距离会有漂移，需配合 EKF 融合提升精度。
 
-extrinsic_T: [0.0, 0.0, 0.0]  # LiDAR→IMU 平移 (m)
-# 根据实测修改。比如 MID70 在 G354 前方 5cm：
-# extrinsic_T: [0.05, 0.0, 0.0]
+#### 2.4 实车建图测试（半天）
 
-extrinsic_R: [1, 0, 0,  # LiDAR→IMU 旋转矩阵
-              0, 1, 0,  # 如果两者安装方向一致，就是单位阵
-              0, 0, 1]
-```
-
-**初始估算方法**：
-- 卷尺测量物理偏移，填入 `extrinsic_T`
-- 如果 IMU 和 LiDAR 的安装朝向一致，`extrinsic_R` 用单位阵
-- FAST-LIO2 在运行时会在线精化外参，初始估算不必精确到毫米
-
-#### 2.4 组合启动（半天）
-
-```bash
-# 终端1: MID70 驱动
-ros2 launch livox_ros_driver2 msg_MID70.launch.py
-
-# 终端2: G354 IMU
-python3 ~/Lin_workspace/g354_test/g354_imu_node.py
-
-# 终端3: FAST-LIO2
-ros2 launch fast_lio mapping_avia.launch.py
-
-# 终端4: Rviz（查看点云+定位）
-rviz2 -d ~/mid70_ws/src/FAST-LIO2/config/avia.rviz
-```
-
-#### 2.5 实车建图测试（半天）
-
-1. 手持/遥控 R2 在房间走一圈（5m×5m 即可）
+1. 键盘遥控/推 R2 在房间走一圈（5m×5m 即可）
 2. 观察 Rviz 中点云地图的构建
 3. 回到起点，检查点云闭合情况
-4. 如果建图质量差，调整参数或检查外参
+4. 如果建图质量差，调整 KISS-ICP 参数（voxel、icp 阈值）
 
-#### 2.6 验证标准
+#### 2.5 验证标准
 
 ```
-□ Rviz 中看到实时三维点云地图，房间轮廓可辨识
-□ FAST-LIO2 输出的 /Odometry 话题频率 ≥ 10Hz
+□ Rviz 中看到实时三维点云，房间轮廓可辨识
+□ /kiss_icp/odometry 话题频率 ≥ 10Hz
 □ 走 10m 路径回到起点，点云闭合误差 < 10cm
-□ 快速旋转时点云不严重畸变（IMU 补偿正常）
-□ 导出地图用于后续 Nav2 导航
+□ 快速旋转时点云不严重畸变
+□ 导出点云/录 bag 用于后续 Nav2 导航
 ```
 
 ---
@@ -726,14 +715,13 @@ rviz2 -d ~/mid70_ws/src/FAST-LIO2/config/avia.rviz
 
 ### 8.1 定位
 
-在 Phase 2 已建图的基础上，让 R2 实现自主导航。VLP16 提供 360° 环境感知用于避障，FAST-LIO2 提供定位。
+在 Phase 2 已建图的基础上，让 R2 实现自主导航。VLP16 提供 360° 环境感知用于避障，KISS-ICP 提供定位。
 
 ### 8.2 当前状态 → 目标
 
 ```
 当前：
-  - KISS-ICP（VLP16 的 LiDAR-only SLAM）已编译
-  - FAST-LIO2 建图（Phase 2）已就绪
+  - KISS-ICP（VLP16 的 LiDAR-only SLAM）已实车跑通（Phase 2）
   - 无导航能力
 
 目标：
@@ -747,17 +735,18 @@ rviz2 -d ~/mid70_ws/src/FAST-LIO2/config/avia.rviz
 这是最容易被卡住的一步，建议尽早开始。
 
 ```bash
-# VLP16 默认出厂配置：
-#   IP: 192.168.1.201
+# VLP16 实际配置（见 retrospect/vlp16_slam_exploration.md）：
+#   设备 IP: 10.18.18.6
+#   目标 IP: 10.18.18.20
 #   数据端口: 2368
 #   配置端口: 串口 115200 8N1
 
-# NUC 以太网口配置
-sudo ip addr add 192.168.1.100/24 dev eth0
-sudo ip link set eth0 up
+# N97 以太网口配置
+sudo ip addr add 10.18.18.20/24 dev enp1s0
+sudo ip link set enp1s0 up
 
 # 验证连接
-ping 192.168.1.201
+ping 10.18.18.6
 
 # 如果 ping 不通：
 #   1. 检查 PoE 供电（PoE 注入器或 PoE 交换机）
@@ -788,10 +777,11 @@ colcon build
 
 #### 3.3 两种导航方案对比
 
+> 注：曾考虑 FAST-LIO2 → octomap 3D 导航方案，因 FAST-LIO2 弃用（见第七章）不再纳入。
+
 | 方案 | SLAM | 地图类型 | 优点 | 缺点 | 推荐 |
 |:-----|:------|:---------|:-----|:-----|:----:|
-| **A：SLAM Toolbox** | KISS-ICP 测距 + 2D 投影 | 2D 占用网格 | 简单直接，Nav2 原生支持 | 只支持 2D 导航 | **推荐优先** |
-| **B：FAST-LIO2 → octomap** | FAST-LIO2 | 3D 八叉树 | 支持 3D 导航 | 配置复杂 | 后续升级 |
+| **A：SLAM Toolbox** | KISS-ICP 测距 + 2D 投影 | 2D 占用网格 | 简单直接，Nav2 原生支持 | 只支持 2D 导航；VLP-16 只用单环数据（见 retrospect） | **推荐优先** |
 
 方案 A 步骤：
 ```bash
@@ -863,7 +853,7 @@ local_costmap:
   - 但三者相互独立，没有形成链路
 
 目标：
-  D435 → RGB → Jetson YOLO → 目标检测 → NUC Nav2 → 导航到目标
+  D435 → RGB → Jetson YOLO → 目标检测 → N97 Nav2 → 导航到目标
 ```
 
 ### 9.3 步骤
@@ -892,25 +882,25 @@ ros2 topic hz /camera/depth/image_raw   # ~30Hz
 # Jetson Nano (Ubuntu 18.04) 安装 ROS2 Foxy
 # 注意：18.04 最高只支持到 Foxy
 
-# 确认 NUC ↔ Jetson 网络互通
+# 确认 N97 ↔ Jetson 网络互通
 # 推荐：以太网直连，静态 IP
-# NUC:    192.168.2.100/24
+# N97:    192.168.2.100/24
 # Jetson: 192.168.2.101/24
 
 # 跨版本 ROS2 测试
-# NUC:    ros2 topic pub /test std_msgs/String "data: hello"
+# N97:    ros2 topic pub /test std_msgs/String "data: hello"
 # Jetson: ros2 topic echo /test  # 应能收到
 ```
 
 #### 4.3 YOLO 推理节点（Jetson 侧，1 天）
 
 ```python
-# NUC → Jetson 的图像转发已经在 NUC 侧用 compressed 格式降低带宽
+# N97 → Jetson 的图像转发已经在 N97 侧用 compressed 格式降低带宽
 # Jetson 侧订阅 /camera/color/compressed
 
 class JetsonYoloNode(Node):
     def __init__(self):
-        # 订阅压缩图像（来自 NUC）
+        # 订阅压缩图像（来自 N97）
         self.sub = self.create_subscription(
             CompressedImage, '/camera/color/compressed',
             self.detect_cb, 10)
@@ -926,10 +916,10 @@ class JetsonYoloNode(Node):
         pass
 ```
 
-#### 4.4 视觉导航集成（NUC 侧，1 天）
+#### 4.4 视觉导航集成（N97 侧，1 天）
 
 ```python
-# NUC 订阅 /detections → 目标 3D 坐标 → Nav2 goal
+# N97 订阅 /detections → 目标 3D 坐标 → Nav2 goal
 
 def on_detection(self, msg):
     for det in msg.detections:
@@ -969,7 +959,7 @@ def on_detection(self, msg):
 ```
 Phase 0  → 底盘 CAN 控制            ┐
 Phase 1  → EKF 状态估计              │
-Phase 2  → FAST-LIO2 SLAM           ├─ 运动控制核心
+Phase 2  → VLP16 + KISS-ICP SLAM    ├─ 运动控制核心
 Phase 3  → Nav2 导航                 │
 Phase 4  → 视觉 AI                  ┘
           └ 3_Diacifa_t1（气动系统） ── 执行机构
@@ -988,30 +978,29 @@ Phase 4  → 视觉 AI                  ┘
 def generate_launch_description():
     return LaunchDescription([
         # 底层驱动
-        Node(package='r2_bringup', exec='chassis_node'),
-        Node(package='g354_imu_driver', exec='g354_imu_node'),
+        Node(package='r2_bringup', executable='chassis_node'),
+        Node(package='g354_imu_driver', executable='imu_node'),
         
         # 传感器
-        Node(package='livox_ros_driver2', exec='livox_ros_driver2_node'),
-        Node(package='realsense2_camera', exec='realsense2_camera_node'),
+        Node(package='realsense2_camera', executable='realsense2_camera_node'),
         
         # 融合
-        Node(package='robot_localization', exec='ekf_node'),
+        Node(package='robot_localization', executable='ekf_node'),
         
-        # SLAM
-        Node(package='fast_lio', exec='fast_lio_mapping'),
+        # SLAM（KISS-ICP 建议独立终端运行，见第七章）
+        # ros2 launch kiss_icp odometry.launch.py topic:=/velodyne_points
         
         # 导航
-        Node(package='nav2_bringup', exec='bringup_launch.py'),
+        Node(package='nav2_bringup', executable='bringup'),
         
         # 视觉（通过条件变量控制是否启动）
-        # Node(package='vision', exec='detection_node'),
+        # Node(package='vision', executable='detection_node'),
     ])
 ```
 
 #### 5.2 气动系统接入 ROS2
 
-`3_Diacifa_t1`（CAN ID 0x141/0x341）已经是独立 MCU，NUC 需要能发命令：
+`3_Diacifa_t1`（CAN ID 0x141/0x341）已经是独立 MCU，N97 需要能发命令：
 
 ```python
 class PneumaticNode(Node):
@@ -1113,15 +1102,15 @@ python3 ~/Lin_workspace/command/can_command.py              # 从主页面运行
                                                              # 选串口设备 → 波特率(1M) → slcand → SavvyCAN
 
 # ─── G354 ───
-python3 ~/Lin_workspace/g354_test/g354_imu_node.py    # 启动 IMU 驱动
-rviz2 -d ~/Lin_workspace/g354_test/config/g354_imu.rviz  # 可视化
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false  # 启动 IMU 驱动
+                                                              # 可视化由 rviz:=true（默认）控制
 
-# ─── MID70 ───
-ros2 launch livox_ros_driver2 msg_MID70.launch.py     # 启动 MID70 驱动
-
-# ─── VLP16 ───
-sudo ip addr add 192.168.1.100/24 dev eth0             # 配置 IP
-ros2 launch velodyne_driver velodyne_driver_node.py   # 启动 VLP16 驱动
+# ─── VLP16 + KISS-ICP ───
+sudo ip addr add 10.18.18.20/24 dev enp1s0          # 配置 IP（设备 10.18.18.6）
+ros2 launch ~/.ros/velodyne_n97.launch.py           # 启动 VLP16 驱动
+source ~/kiss_icp_ws/install/setup.bash             # KISS-ICP SLAM 里程计
+ros2 launch kiss_icp odometry.launch.py topic:=/velodyne_points \
+  use_sim_time:=false base_frame:=velodyne          # 必须 use_sim_time:=false（实车无 /clock）
 
 # ─── D435 ───
 ros2 launch realsense2_camera rs_launch.py             # 启动 D435
@@ -1135,14 +1124,10 @@ ros2 topic pub /cmd_vel geometry_msgs/Twist \
 
 ```
 ~/Lin_workspace/
-├── g354_test/                       # G354 IMU 驱动（已完成）
-│   ├── g354_imu_driver/imu_node.py  #   ROS2 驱动节点
-│   ├── test_g354.py                 #   原始数据验证
-│   ├── launch/g354_rviz.launch.py   #   一键启动
-│   └── config/g354_imu.rviz         #   Rviz 配置
-│
-├── vlp16_slam_ws/                   # VLP16 SLAM（已编译）
+├── vlp16_slam_ws/                   # VLP16 SLAM（已编译，实车跑通）
 │   └── install/kiss_icp/            #   KISS-ICP SLAM
+│
+├── ~/kiss-icp + ~/kiss_icp_ws/      # KISS-ICP 源码 + 工作区（见 retrospect）
 │
 ├── imu_odom_ws/                     # IMU+里程计融合（已完成）
 │   └── imu_odometry_node.py         #   基础 odom 节点
@@ -1163,28 +1148,32 @@ ros2 topic pub /cmd_vel geometry_msgs/Twist \
 │
 ├── r2_integration/                  # ← 当前文档所在
 │   ├── README.md                    #   入口导航
+│   ├── g354_driver/                 #   G354 IMU 驱动（包名 g354_imu_driver）
+│   │   ├── g354_imu_driver/imu_node.py # ROS2 驱动节点
+│   │   ├── scripts/test_g354.py     #   原始数据验证
+│   │   ├── launch/g354_rviz.launch.py # 一键启动（rviz:=/serial_port:= 参数）
+│   │   └── config/g354_imu.rviz     #   Rviz 配置
 │   ├── doc/                         #   文档目录
-│   │   ├── standards.md              #   文档标准
-│   │   ├── 01-plan.md              #   ← 本文件
+│   │   ├── standards.md             #   文档标准
+│   │   ├── 01-plan.md               #   ← 本文件
 │   │   ├── 02-progress.md           #   全局进度
+│   │   ├── 02-deploy-checklist.md   #   N97 部署清单
 │   │   ├── 03-current_state.md      #   当前状态
 │   │   ├── 07-handover.md           #   状态交接
 │   │   ├── phase0/                  #   Phase 0 专题
 │   │   │   ├── chassis_definition.md #   底盘定义
 │   │   │   ├── completion_report.md #   Phase0记录
 │   │   │   └── debug_log.md         #   踩坑日志
-│   │   └── phase1/                  #   Phase 1 专题（待填充）
-│   ├── r2_bringup/                  #   ROS2包
+│   │   ├── phase1/                  #   Phase 1 专题
+│   │   │   └── g354-wiring.md       #   G354 接线
+│   │   └── retrospect/              #   事件记录
+│   │       ├── vlp16_slam_exploration.md # VLP16 SLAM 方案探索
+│   │       └── 2026-07-31_*.md      #   chassis launch / workspace 修复记录
+│   ├── r2_bringup/                  #   ROS2 包（chassis_node + EKF launch）
 │   └── scripts/                     #   标定脚本
 │
 └── STM32_Now/                       # 嵌入式固件（已定型）
     └── doc/01-arch/chassis_model.md # 底盘构型设计文档
-
-~/mid70_ws/                          # MID70 + FAST-LIO2（待搭建）
-├── src/
-│   ├── livox_ros_driver2/           # MID70 驱动
-│   └── FAST-LIO2/                   # LiDAR-IMU SLAM
-└── ...
 ```
 
 ### C. 术语对照
@@ -1194,7 +1183,7 @@ ros2 topic pub /cmd_vel geometry_msgs/Twist \
 | MCLM | Motor Control Low Machine | 电机控制器固件项目 |
 | ChassisController | 底盘控制器 | UART↔CAN 网关（当前未用于 R2） |
 | Diacifa | 气动系统 | 气泵+电磁阀控制 |
-| FAST-LIO2 | Fast LiDAR-Inertial Odometry | LiDAR-IMU 紧耦合 SLAM |
+| FAST-LIO2 | Fast LiDAR-Inertial Odometry | LiDAR-IMU 紧耦合 SLAM（已弃用，Phase 2 改用 KISS-ICP） |
 | KISS-ICP | Keep It Simple, ICP | LiDAR-only SLAM（用于 VLP16） |
 | EKF | Extended Kalman Filter | IMU+轮速融合 |
 | Nav2 | ROS2 Navigation Stack | 自主导航堆栈 |

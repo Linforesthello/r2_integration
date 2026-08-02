@@ -202,7 +202,7 @@ omega = -(FL + FR + RL + RR) / (4 * R)
     wheel_half_diagonal: 0.33    # R (m)
     ticks_per_rev: 4241           # ticks/圈
     wheel_diameter: 0.152         # 轮径 (m)
-    speed_scale: 94.5             # CAN 速度→m/s 系数
+    speed_scale: 94.5             # m/s→CAN 逻辑速度 系数
     cmd_timeout: 0.5              # 超时(s)
     odom_publish_rate: 50.0       # 里程计频率
     can_channel: 'can0'

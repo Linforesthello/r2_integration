@@ -81,9 +81,12 @@ python3 scripts/test_g354.py
 ### 3. ROS2 节点
 
 ```bash
-source ~/Lin_workspace/g354_test/install/setup.bash
-ros2 run g354_imu_driver imu_node
+source ~/Lin_workspace/r2_integration/install/setup.bash
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false   # 无显示器（SSH）用 rviz:=false
 ```
+
+> 串口设备路径默认 `/dev/ttyACM1`，可用参数覆盖:
+> `ros2 launch g354_imu_driver g354_rviz.launch.py serial_port:=/dev/ttyACM0 rviz:=false`
 
 启动后自动执行:
 1. 打开串口 → 配置 IMU（125 Sps）
@@ -92,18 +95,11 @@ ros2 run g354_imu_driver imu_node
 
 ### 4. RViz2 可视化
 
-节点启动后，新开终端:
+有显示器环境下默认随节点一起启动，也可单独查看:
 
 ```bash
-source ~/Lin_workspace/g354_test/install/setup.bash
-rviz2 -d ~/Lin_workspace/g354_test/config/g354_imu.rviz
-```
-
-或一键启动:
-
-```bash
-source ~/Lin_workspace/g354_test/install/setup.bash
-ros2 launch g354_imu_driver g354_rviz.launch.py
+source ~/Lin_workspace/r2_integration/install/setup.bash
+ros2 launch g354_imu_driver g354_rviz.launch.py   # 节点 + RViz2 一起
 ```
 
 ---
