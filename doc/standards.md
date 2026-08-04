@@ -145,6 +145,39 @@ Obsidian 库（`~/Lin_note/Open-Notes-Library/`）的笔记用行内分层标签
 
 ---
 
+### 1.10 Git 提交规范
+
+**提交信息 = 标题 + 描述体（body）**。标题一行，描述体在空行后，
+用来说明"改了什么、为什么、有什么影响"——让 `git log` 就能回溯，不用翻文档。
+
+**标题格式（必填）**：`模块|主题`，一行
+
+| 要素 | 规则 | 示例 |
+|:-----|:-----|:-----|
+| 模块 | R2 / Arm / MCLM / Syc / Note 等（首字母大写） | `R2|` |
+| 主题 | 一句话说清"改了什么"，≤50 字 | `G354轴映射与两处符号修正` |
+
+**描述体（推荐；多文件/修复类必填）**：空行后写三部分，用 bullet 列表：
+
+```
+R2|G354轴映射与两处符号修正，传感器安装定义留档
+
+- 改动: imu_node.py +mount_axes 轴映射; init/Mahony 两处符号修正; 新增 sensor-mount.md
+- 原因: G354 出厂轴定义(z下)与驱动假设不符, 两处符号 bug 被 z 朝下双负抵消掩盖
+- 影响/注意: 启动须带 mount_axes:=y_front_x_left_z_down; 关联 retrospect/2026-08-02_ekf_tf_fusion_fix.md
+```
+
+**规则**：
+
+1. **阶段完成即提交**（修复验证通过 / 文档更新完就 commit），不留积压——
+   避免"发现没同步才一步更新"的被动提交
+2. **排障/修复类提交**：body 必须关联排障文档（`retrospect/YYYY-MM-DD_*.md`）
+3. **build/install/log/*.bag 不入库**（`.gitignore` 已配置，提交前 `git status` 确认无意外文件）
+4. **多机器同步**：VM 提交推送 → N97 `git pull`（不再 scp 拷贝代码）
+5. **Co-Authored-By**：AI 辅助的提交，末尾加 `Co-Authored-By: Claude <noreply@anthropic.com>`
+
+---
+
 ## 第二部分：R2 集成项目文档准则
 
 ### 2.1 目录结构
