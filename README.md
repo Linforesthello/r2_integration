@@ -36,9 +36,13 @@ r2_integration/
 │   │   └── ekf-verification.md       EKF 实车验证清单（测试方法+判合格标准）
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
-│       ├── 2026-08-02_ekf_tf_fusion_fix.md    EKF/TF 融合排障全记录（7 问题）
-│       ├── 2026-07-31_chassis_launch_fix.md   chassis.launch.py 路径修复
-│       └── vlp16_slam_exploration.md          VLP-16 SLAM 方案探索
+│       ├── 2026-08-03_r2_repo_repair.md           r2_integration 仓库修复全记录
+│       ├── 2026-08-02_ekf_tf_fusion_fix.md        EKF/TF 融合排障全记录（7 问题）
+│       ├── 2026-07-31_chassis_launch_fix.md       chassis.launch.py 路径修复
+│       ├── 2026-07-31_claude_md_import_setup.md   流程模式：Claude 优先读到文档
+│       ├── 2026-07-31_teleop_keyboard_fix.md      键盘控制修复全记录（WASD 遥控）
+│       ├── 2026-07-31_workspace_check_fix.md      r2_integration 工作区检查与修复
+│       └── vlp16_slam_exploration.md              VLP-16 SLAM 方案探索
 │
 ├── r2_bringup/                        ← ROS2 底盘控制包
 │   ├── r2_bringup/chassis_node.py    核心节点
@@ -80,7 +84,7 @@ r2_integration/
 
 ```
 Phase 0 底盘 ROS2 + CAN 控制            ✅ 100% 完成
-Phase 1 G354 IMU + EKF 融合            ⏳ 进行中（IMU 驱动完成，EKF 联调中）
+Phase 1 G354 IMU + EKF 融合            ⏳ 驱动+轴映射修复完成（8-03），实车验证待做
 Phase 2 3D LiDAR SLAM (VLP16+KISS-ICP)  ✅ 驱动 + 3D 里程计已跑通
 Phase 3 VLP16 + Nav2 导航              ⏳
 Phase 4 D435 + Jetson 视觉             ⏳
@@ -125,11 +129,12 @@ python3 ~/Lin_workspace/command/can_command.py
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch r2_bringup chassis.launch.py
 
-# 3. 启动 IMU（在终端 2 运行）
+# 3. 启动 IMU（在终端 2 运行；保持静止 3s 等校准完成）
+#    mount_axes:=y_front_x_left_z_down 是 R2 的 G354 出厂轴定义（x左/y前/z下），见 doc/phase0/sensor-mount.md
 source ~/Lin_workspace/r2_integration/install/setup.bash
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false   # 有显示器可去掉 rviz:=false
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
 
-# 4. 启动 EKF 融合（在终端 3 运行）
+# 4. 启动 EKF 融合（在终端 3 运行；⚠️ 必须在 IMU 校准完成后启动）
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch r2_bringup ekf.launch.py
 

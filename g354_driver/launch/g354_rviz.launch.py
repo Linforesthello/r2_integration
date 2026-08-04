@@ -34,13 +34,16 @@ def generate_launch_description():
                               description='G354 串口设备路径'),
         DeclareLaunchArgument('rviz', default_value='true',
                               description='是否启动 RViz2 可视化（SSH 下设为 false）'),
+        DeclareLaunchArgument('mount_axes', default_value='x_front_y_left_z_up',
+                              description='IMU 安装朝向: x_front_y_left_z_up(标准) / y_front_x_left_z_down(R2)'),
 
         # IMU 驱动节点
         Node(
             executable=_find_node_executable('g354_imu_driver', 'imu_node'),
             name='g354_imu_node',
             output='screen',
-            parameters=[{'serial_port': LaunchConfiguration('serial_port')}],
+            parameters=[{'serial_port': LaunchConfiguration('serial_port'),
+                         'mount_axes': LaunchConfiguration('mount_axes')}],
         ),
 
         # RViz2 可视化（可选）

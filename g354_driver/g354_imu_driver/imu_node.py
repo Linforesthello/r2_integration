@@ -77,10 +77,13 @@ def mahony_update(q, gx_dps, gy_dps, gz_dps,
     ex = ey = ez = 0.0
     if 0.85 < acc_norm < 1.15 and acc_norm > 1e-12:
         inv = 1.0 / acc_norm
-        # Real gravity direction = -specific_force
-        ax_n = -ax_g * inv
-        ay_n = -ay_g * inv
-        az_n = -az_g * inv
+        # 世界上方向(z+)在传感器系 = specific force(比力)方向（静止时比力向上）
+        # 修正(2026-08-03): 原实现用 -比力(重力方向)，与下方 v(世界上方向)约定相反，
+        # 初始有微小倾斜时 e 非零会把姿态推向"翻转 180°"伪稳定点。
+        # 之前 R2 的 IMU 倒装(z朝下)使 a 恰好与 v 同向，掩盖了该问题。
+        ax_n = ax_g * inv
+        ay_n = ay_g * inv
+        az_n = az_g * inv
 
         # Predicted gravity in body frame
         vx = 2.0 * (qx * qz - qw * qy)
@@ -130,9 +133,13 @@ def init_from_accelerometer(ax_mg, ay_mg, az_mg, yaw_deg=0.0):
     if norm < 1e-12:
         return (1.0, 0.0, 0.0, 0.0)
 
-    gx = -ax_g / norm
-    gy = -ay_g / norm
-    gz = -az_g / norm
+    # 世界上方向(z+)在传感器系 w = specific force(比力)方向: 静止时比力向上
+    # 修正(2026-08-03): 原实现 w 取反(-f)——z朝上安装时 roll 翻转 180°，
+    # 之前 R2 的 IMU 倒装(z朝下, az=-1g)与负号双负抵消才"看似正常"。
+    # pitch 公式保持标准欧拉角 atan2(-wx, sqrt(wy²+wz²))。
+    gx =  ax_g / norm
+    gy =  ay_g / norm
+    gz =  az_g / norm
 
     roll = math.atan2(gy, gz)
     pitch = math.atan2(-gx, math.sqrt(gy*gy + gz*gz))
@@ -286,10 +293,15 @@ class G354IMUNode(Node):
         self.declare_parameter('serial_port', '/dev/ttyACM0')
         self.declare_parameter('baudrate', 460800)
         self.declare_parameter('frame_id', 'imu_link')
+        # IMU 传感器轴 → 车体轴（车体标准系: x前 y左 z上）的安装朝向
+        #   x_front_y_left_z_up    = 标准安装（传感器 x 前 y 左 z 上）
+        #   y_front_x_left_z_down  = G354 出厂轴定义（模块正放）：传感器 y 前 x 左 z 下
+        self.declare_parameter('mount_axes', 'x_front_y_left_z_up')
 
         port = self.get_parameter('serial_port').value
         baud = self.get_parameter('baudrate').value
         self.frame_id_ = self.get_parameter('frame_id').value
+        self.mount_axes_ = self.get_parameter('mount_axes').value
 
         self.imu_pub_ = self.create_publisher(Imu, '/imu/data', 10)
 
@@ -372,6 +384,17 @@ class G354IMUNode(Node):
             return
 
         gx, gy, gz, ax, ay, az = parse_g354_frame(frame)
+
+        # ── 安装朝向映射（传感器轴 → 车体轴）──
+        # 必须在 bias 校准/Mahony 之前做，使后续所有处理都基于车体标准系
+        # 车体标准系: x 前, y 左, z 上（REP-103）
+        if self.mount_axes_ == 'y_front_x_left_z_down':
+            # 传感器 y 朝车前(x+), 传感器 x 朝车左(y+), 传感器 z 朝车下(z-)
+            gx, gy, gz = gy, gx, -gz
+            ax, ay, az = ay, ax, -az
+        elif self.mount_axes_ != 'x_front_y_left_z_up':
+            self.get_logger().warn(
+                f'未知 mount_axes={self.mount_axes_}，按标准安装处理')
 
         # dt from loop timing (clamped)
         now = time.monotonic()

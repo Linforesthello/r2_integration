@@ -1,7 +1,7 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-08-02（全面彻查后）
-> 当前进度: Phase 0 ✅ 100%｜Phase 1 EKF 配置完成，实车验证挂起｜Phase 2 ✅ 驱动+里程计+键盘建图全跑通
+> 最后更新: 2026-08-03
+> 当前进度: Phase 0 ✅ 100%｜Phase 1 EKF 配置 + IMU 轴映射修复完成（8-03），实车验证待做｜Phase 2 ✅ 驱动+里程计+键盘建图全跑通
 > 下一阶段: Phase 1 EKF 实车验证（清单见 [ekf-verification.md](phase1/ekf-verification.md)）→ Phase 3 Nav2；另评估 FAST-LIO2 替代 KISS-ICP
 >
 > **部署环境**：N97 Mini PC（192.168.1.210，Ubuntu 22.04 + Humble），enp1s0: 10.18.18.20/24
@@ -121,6 +121,19 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 | chassis 启动崩溃 | 协方差 int 非 float | 0→0.0 |
 | EKF yaw 大跳 + z 漂 12m | N97 ekf.yaml 坏配置（6 值 vs 15 值） | 同步正确配置 |
 
+### 8-03 新增：IMU 轴定义修复（✅ 已完成）
+
+G354 **出厂轴定义为 x 左/y 前/z 下**（模块正放安装），与驱动假设的标准朝向不符 →
+EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修复三处（[imu_node.py](../../g354_driver/g354_imu_driver/imu_node.py)）：
+
+1. +`mount_axes` 参数与轴映射（`y_front_x_left_z_down`）
+2. `init_from_accelerometer` w 方向符号 bug（被 z 朝下双负抵消掩盖）
+3. Mahony a/v 符号约定不一致 → 翻转伪稳定点（"过肩摔"）
+
+实车验证：左转/右转/左倾/右倾全部正确，RViz odom→base_link 姿态正常。
+安装定义见 [phase0/sensor-mount.md](phase0/sensor-mount.md)。
+**启动纪律**：IMU 校准完成（Init quat）后才可启动 EKF；EKF 在 IMU 校准前启动会输出 NaN。
+
 ### 遗留现象（算法本底，非故障）
 
 - **KISS-ICP 静止/运动均有毫米~厘米级抖动**：纯激光配准本底（无 IMU 融合）
@@ -137,6 +150,9 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 - [ ] 雷达掉帧调查（/velodyne_points std 0.089s，600rpm 下帧间隔不稳）
 - [ ] 可选：VLP-16 rpm 600→1200（20Hz）试验（帧内畸变减半，需重启雷达驱动）
 - [ ] waypoint 雷达闭环（基于 /kiss/odometry 自主行走）
+- [ ] **8-03 新增**：IMU/雷达坐标基准待确认（base_footprint vs base_link）→ 补静态 TF 平移，见 [sensor-mount.md](phase0/sensor-mount.md)
+- [ ] **8-03 新增**：雷达高度 65cm vs 旧记录 77cm 冲突待确认
+- [ ] **8-03 新增**：N97 已恢复纯拷贝（git 操作撤销）；GitHub `Lin_workspace` 仓库内容=整个 workspace 快照，仓库管理方案待重新决策
 - [ ] z 轴 process noise 漂移（3D 场景再处理）
 
 ---
