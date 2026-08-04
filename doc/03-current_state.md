@@ -1,6 +1,6 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-07-31
+> 最后更新: 2026-08-04
 > 内容: 截至今日已完成的所有工作的详细记录
 
 ---
@@ -82,7 +82,7 @@ user_vy = -formula_vx
 
 | Phase | 目标 | 前置 | 状态 |
 |:------|:-----|:------|:------|
-| **1** | G354 IMU + 轮速 → EKF 融合 | Phase 0 | ⏳ IMU 驱动完成，EKF 联调中 |
+| **1** | G354 IMU + 轮速 → EKF 融合 | Phase 0 | ⏳ 驱动+轴映射修复完成（8-03），**实车验证待做** |
 | **2** | 3D LiDAR SLAM (VLP16 + KISS-ICP) | Phase 0 | ✅ 驱动+里程计+键盘建图全跑通 |
 | **3** | VLP16 + Nav2 导航 | Phase 1+2 | ⏳ |
 | **4** | D435 + Jetson YOLO 视觉 | Phase 0 | ⏳ |
@@ -105,8 +105,9 @@ VLP-16 上尝试了四种 SLAM 方案（详见 `retrospect/vlp16_slam_exploratio
 - [x] TF 标定（`base_footprint → velodyne`, z=0.77m, 车顶水平安装）
 - [x] KISS-ICP 3D 里程计（topic `/velodyne_points` → odom + 注册点云）
 - [x] 键盘控制 + 点云采集建图（2026-08-02 实车跑通，RViz 中 `odom_lidar` 系点云地图随车累积）
-- [ ] IMU 融合（G354 EKF，实车验证挂起中，见 [phase1/ekf-verification.md](phase1/ekf-verification.md)）
-- [ ] 雷达闭环运动（基于 `/kiss_icp/odometry` 的 waypoint 节点，待做）
+- [x] IMU 轴映射修复（8-03：mount_axes + init/Mahony 符号修正，见 [sensor-mount.md](phase0/sensor-mount.md)）
+- [ ] IMU 融合实车验证（G354 EKF，挂起中，清单见 [phase1/ekf-verification.md](phase1/ekf-verification.md)）
+- [ ] 雷达闭环运动（基于 `/kiss/odometry` 的 waypoint 节点，待做）
 
 ---
 
@@ -115,5 +116,6 @@ VLP-16 上尝试了四种 SLAM 方案（详见 `retrospect/vlp16_slam_exploratio
 完整项目结构见 `README.md`。本阶段文件：
 
 - `phase0/chassis_definition.md` — 底盘定义（映射/参数/公式）
+- `phase0/sensor-mount.md` — 传感器安装定义（IMU/雷达位置朝向）
 - `phase0/completion_report.md` — Phase 0 完成记录
 - `phase0/debug_log.md` — 踩坑日志

@@ -80,7 +80,7 @@ ros2 launch r2_bringup chassis.launch.py publish_tf:=false
 
 # 终端 2: IMU
 source ~/Lin_workspace/r2_integration/install/setup.bash
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
 
 # 终端 3: EKF（修复后含 static TF）
 source ~/Lin_workspace/r2_integration/install/setup.bash

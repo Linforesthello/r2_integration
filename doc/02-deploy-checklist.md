@@ -109,7 +109,7 @@ ls -la /dev/ttyACM*
 # 接上 JLink OB Mini，确认设备路径:
 ls -la /dev/ttyACM*
 # G354（JLink）固定为 /dev/ttyACM1（/dev/ttyACM0 是 CANable2），用 launch 启动:
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
 ```
 
 ---
@@ -140,7 +140,7 @@ ros2 launch r2_bringup chassis.launch.py
 
 # ③ IMU
 source ~/Lin_workspace/r2_integration/install/setup.bash
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
 
 # ④ EKF 融合
 source ~/Lin_workspace/r2_integration/install/setup.bash

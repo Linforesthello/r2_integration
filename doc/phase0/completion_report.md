@@ -94,7 +94,7 @@
 
 ## 四、下一步 (Phase 1 待启动) — 2026-07-29 快照
 
-> 当前进度见 `../03-current_state.md`（Phase 1 IMU 驱动已完成，EKF 联调中）
+> 当前进度见 `../03-current_state.md`（Phase 1 IMU 驱动+轴映射修复完成（8-03），实车验证待做）
 
 - [ ] `robot_localization` EKF 融合 IMU + 轮速里程计
 - [ ] G354 IMU 驱动接入

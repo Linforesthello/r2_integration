@@ -51,7 +51,7 @@ python3 scripts/test_g354.py
 
 # 2. ROS2 节点
 source ~/Lin_workspace/r2_integration/install/setup.bash
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
 # 应看到: ✓ 串口已打开 + ✓ IMU 配置完成
 
 # 3. 查看话题

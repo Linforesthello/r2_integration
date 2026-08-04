@@ -15,7 +15,7 @@
 | Phase | 目标 | 状态 | 说明 |
 |:------|:-----|:----:|:-----|
 | 0 | 底盘 ROS2 + CAN 控制 | ✅ 100% | 四全向轮，全命令可用 |
-| 1 | G354 IMU + 轮速 EKF 融合 | ◆ 30% | 配置/修复全部完成，**实车验证挂起** |
+| 1 | G354 IMU + 轮速 EKF 融合 | ◆ 40% | 驱动/配置/轴映射修复全绿（8-03），**实车验证挂起** |
 | 2 | VLP16 + KISS-ICP SLAM | ✅ 100% | 驱动+里程计+键盘建图全跑通（8-02） |
 | 3 | VLP16 + Nav2 导航 | ⏳ 0% | — |
 | 4 | D435 + Jetson 视觉 | ⏳ 0% | — |
@@ -76,8 +76,9 @@ source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch r2_bringup chassis.launch.py publish_tf:=false
 
 # 终端 4: IMU（启动后静止 3s 等校准，校准期不可动）
+#   mount_axes:=y_front_x_left_z_down 是 R2 的 G354 出厂轴定义（x左/y前/z下），见 doc/phase0/sensor-mount.md
 source ~/Lin_workspace/r2_integration/install/setup.bash
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
 
 # 终端 5: EKF（必须在 IMU 校准完成后启动；重启 IMU 必须同时重启 EKF）
 source ~/Lin_workspace/r2_integration/install/setup.bash

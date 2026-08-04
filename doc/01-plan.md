@@ -486,10 +486,10 @@ CAN 验证：
 ### 6.2 当前状态 → 目标
 
 ```
-当前（联调中）：
-  - G354 驱动独立运行，发 /imu/data（已完成）
+当前（8-04）：
+  - G354 驱动 + 轴映射修复完成（mount_axes，8-03 实车验证），发 /imu/data
   - 里程计独立运行，发 /odom_wheels（Phase 0 产物）
-  - EKF 联调中（ekf.launch.py 已实现，r2_eKF_test.bag 已采集）
+  - EKF 已跑通（/odometry/filtered 正常，IMU 姿态正确跟随车体）；**实车对比验证待做**
 
 目标：
   /odom_wheels + /imu/data → robot_localization EKF → /odometry/filtered
@@ -516,7 +516,7 @@ ros2 topic echo /imu/data
 ```bash
 ls -l /dev/ttyACM*
 # 如果设备名变了，用 launch 参数覆盖，无需改代码：
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
 ```
 
 #### 1.2 安装 robot_localization（0.5 天）

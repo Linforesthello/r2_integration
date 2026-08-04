@@ -1,6 +1,6 @@
 # R2 外设集成 · 全局进度总览
 
-> 最后更新: 2026-07-31
+> 最后更新: 2026-08-04
 > 内容: 全项目进度一览，每个 Phase 的完成度、依赖关系、下一步
 
 ---
@@ -9,13 +9,13 @@
 
 ```
 Phase 0 底盘CAN控制 ━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
-Phase 1 IMU+EKF融合 ━━━━━○○○○○○○  30%  ◆ 进行中
+Phase 1 IMU+EKF融合 ━━━━━━━━━━○○○○○  40%  ◆ 驱动/配置全绿，待实车验证
 Phase 2 VLP16+KISS-ICP ━━━━━━━━━━━━━━━━━━━━ 100% ✅
 Phase 3 Nav2导航     ━○○○○○○○○○  0%  ⏳
 Phase 4 视觉AI       ━○○○○○○○○○  0%  ⏳
 Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
                     ─────────────
- 总计:              38%
+ 总计:              48%
 ```
 
 ---
@@ -37,18 +37,20 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 | 参数配置 (yaml) | ✅ | 全实车标定值 |
 | 文档 | ✅ | 4 份 .md 同步到 Obsidian |
 
-### Phase 1：IMU + 里程计 EKF 融合 ◆ 30%
+### Phase 1：IMU + 里程计 EKF 融合 ◆ 40%
 
 | 模块 | 状态 | 备注 |
 |:-----|:----:|:------|
 | G354 驱动 | ✅ 已完成 | 38 字节 polling + Mahony(Kp=1.0, Ki=0.005) + ZUPT |
+| **IMU 轴映射修复** | ✅ 已完成（8-03） | mount_axes 参数 + init/Mahony 两处符号修正；安装定义见 [sensor-mount.md](phase0/sensor-mount.md) |
 | G354 静置测试 | ✅ 通过 | yaw 漂移 0.002°/min，132s 仅漂 0.005° |
 | 驱动移入工作区 | ✅ 已完成 | `g354_driver/` 在 `r2_integration/` 下 |
 | 轮速里程计 | ✅ Phase 0 已就绪 | `/odom_wheels` |
 | robot_localization EKF | ✅ **已配置** | `config/ekf.yaml` + `launch/ekf.launch.py` |
-| 对比测试: 纯轮速 vs EKF | ◇ **待实车验证** | 需底盘 + IMU + EKF 同时运行 |
+| EKF 联调 | ✅ 已跑通（8-03） | IMU 姿态正确跟随车体（左/右转、左/右倾），RViz odom 正常 |
+| 对比测试: 纯轮速 vs EKF | ◇ **待实车验证** | 清单见 [ekf-verification.md](phase1/ekf-verification.md) |
 
-**下一步：实车验证 EKF 融合效果**
+**下一步：按 [ekf-verification.md](phase1/ekf-verification.md) 做实车验证（静态 3min / 直线 5m / 旋转 / 矩形闭环）**
 
 ### Phase 2：VLP-16 + KISS-ICP SLAM ✅ 已完成
 
@@ -58,7 +60,7 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 |:-----|:----:|:------|
 | VLP-16 驱动 | ✅ 已安装 | velodyne_driver，设备 IP 10.18.18.6 |
 | G354 IMU | ✅ 已就绪 | 已接入 EKF（见 Phase 1） |
-| TF 标定 | ✅ 已完成 | base_footprint→velodyne，z=0.77m |
+| TF 标定 | ✅ 已完成 | base_footprint→velodyne，z=0.77m（⚠️ 与实述 65cm 冲突，基准待确认，见 [sensor-mount.md](phase0/sensor-mount.md)） |
 | KISS-ICP 建图 | ✅ 已跑通 | /velodyne_points → odom |
 
 ### Phase 3：VLP16 + Nav2 导航 ⏳
