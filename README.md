@@ -36,6 +36,7 @@ r2_integration/
 │   │   └── ekf-verification.md       EKF 实车验证清单（测试方法+判合格标准）
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
+│       ├── 2026-08-05_n97_remote_desktop.md       N97 远程桌面三方案排障（NoMachine/RealVNC/TigerVNC）
 │       ├── 2026-08-03_r2_repo_repair.md           r2_integration 仓库修复全记录
 │       ├── 2026-08-02_ekf_tf_fusion_fix.md        EKF/TF 融合排障全记录（7 问题）
 │       ├── 2026-07-31_chassis_launch_fix.md       chassis.launch.py 路径修复
