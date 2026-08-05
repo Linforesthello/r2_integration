@@ -460,20 +460,27 @@ class G354IMUNode(Node):
         # Covariance (confidence from ZUPT's acc_norm_g)
         confidence = max(0.0, 1.0 - abs(acc_norm_g - 1.0) / 0.15)
         base = 0.001 + (1.0 - confidence) * 0.05
-        msg.orientation_covariance = [base] * 9
-        msg.orientation_covariance[8] = base * 10
+        # 协方差必须是对角阵：非对角项填 0（传感器各轴独立），
+        # 否则矩阵奇异导致 EKF 求逆发散 NaN（2026-08-05 排障）
+        msg.orientation_covariance = [base, 0.0, 0.0,
+                                      0.0, base, 0.0,
+                                      0.0, 0.0, base * 10]
 
         # Angular velocity in rad/s (with bias removed)
         msg.angular_velocity.x = gx_cal * DEG2RAD
         msg.angular_velocity.y = gy_cal * DEG2RAD
         msg.angular_velocity.z = gz_cal * DEG2RAD
-        msg.angular_velocity_covariance = [0.0001] * 9
+        msg.angular_velocity_covariance = [0.0001, 0.0, 0.0,
+                                           0.0, 0.0001, 0.0,
+                                           0.0, 0.0, 0.0001]
 
         # Linear acceleration (mg to m/s²)
         msg.linear_acceleration.x = ax / 1000.0 * G_TO_MS2
         msg.linear_acceleration.y = ay / 1000.0 * G_TO_MS2
         msg.linear_acceleration.z = az / 1000.0 * G_TO_MS2
-        msg.linear_acceleration_covariance = [0.0001] * 9
+        msg.linear_acceleration_covariance = [0.0001, 0.0, 0.0,
+                                              0.0, 0.0001, 0.0,
+                                              0.0, 0.0, 0.0001]
 
         self.imu_pub_.publish(msg)
 
