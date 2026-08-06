@@ -1,0 +1,259 @@
+# W1 操作手册：TF 工程 + 建图落地
+
+> 关联计划: [plan-minimal-loop.md](plan-minimal-loop.md) W1（08-06 ~ 08-12）
+> 执行机器: N97（192.168.1.210，需开机）+ VM（调试/分析）
+> 前置: 全栈节点可启动（r2_startup.sh 或手动 launch）
+
+---
+
+## D1：TF 树工程（先于建图，避免 W2 卡）
+
+### 1.1 启动全栈
+
+```bash
+# N97，每个终端 source 后启动
+export FASTRTPS_DEFAULT_PROFILES_FILE=/home/lin/fastdds_wellknown.xml
+source /opt/ros/humble/setup.bash && source ~/Lin_workspace/r2_integration/install/setup.bash
+
+# 雷达（三节点合一）
+ros2 launch velodyne_driver velodyne_n97.launch.py   # 或 bash ~/.ros/velodyne_n97.launch.py
+# KISS-ICP
+ros2 launch kiss_icp odometry.launch.py topic:=/velodyne_points base_frame:=velodyne use_sim_time:=false visualize:=false
+# 底盘（EKF 场景 publish_tf:=false）
+ros2 launch r2_bringup chassis.launch.py publish_tf:=false
+# IMU（等 3s 校准）
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
+# EKF（IMU 校准完成后）
+ros2 launch r2_bringup ekf.launch.py
+```
+
+### 1.2 生成当前 TF 树（现状盘点）
+
+```bash
+# 装工具（如缺）
+sudo apt install -y ros-humble-tf2-tools
+
+# 生成 frames 图（pdf）
+ros2 run tf2_ros view_frames
+ls frames_*.pdf   # 转图片查看: pdftoppm frames.pdf frames -png
+
+# 逐条链路验证（应全部有输出）
+ros2 run tf2_ros tf2_echo odom base_link        # EKF 发布 ✅（已有）
+ros2 run tf2_ros tf2_echo base_link imu_link    # 静态 ✅（已有）
+ros2 run tf2_ros tf2_echo base_link velodyne    # 需确认是否存在
+ros2 run tf2_ros tf2_echo odom_lidar velodyne   # KISS-ICP 自带
+```
+
+### 1.3 目标 TF 树（W1 验收标准）
+
+```
+map ←[桥，W1 可为单位静态]→ odom ←[EKF]→ base_link
+                                    ├──→ imu_link（静态，已确认）
+                                    └──→ velodyne（静态，⚠️ 待确认数值）
+odom_lidar（KISS 自身系）──→ velodyne
+```
+
+**⚠️ 待确认项（实机量测）**：`base_link → velodyne` 平移 z 值
+（sensor-mount.md 记录 0.77m vs 实测 65cm 冲突）——**W1 必须量出真实值**，
+写入静态 TF。量测方法：卷尺量 velodyne 光学中心到 base_link 原点高度。
+
+### 1.4 D1 验收
+
+- [ ] view_frames 生成完整 TF 树图并存档（doc 留档）
+- [ ] 四条 tf2_echo 链路全部有输出
+- [ ] base_link→velodyne 实际高度量测并写入静态 TF
+
+---
+
+## D1b：KISS-ICP 点云累积流程固化（零依赖脚本）
+
+### 2.1 录制（现场数据源）
+
+```bash
+# N97，开车前开始录（绕场 1-2 圈用）
+mkdir -p ~/Lin_workspace/r2_integration/bags
+ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M) \
+  /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered /tf /tf_static
+# Ctrl-C 停止
+```
+
+### 2.2 离线累积脚本（VM 或 N97，纯 numpy + ply，零依赖）
+
+```bash
+# 脚本位置: ~/Lin_workspace/bags/analysis/build_map.py（新建）
+```
+
+```python
+#!/usr/bin/env python3
+"""KISS-ICP 点云累积 → PCD/PLY（从 bag 读取 /kiss/frame，零依赖）"""
+import sys
+sys.path.insert(0, '/home/lin/.local/lib/python3.10/site-packages')
+import numpy as np
+from rosbag2_py import SequentialReader, StorageOptions, ConverterOptions
+from rclpy.serialization import deserialize_message
+from sensor_msgs.msg import PointCloud2
+
+def read_clouds(bag_dir, topic='/kiss/frame', every_n=10):
+    r = SequentialReader()
+    r.open(StorageOptions(uri=bag_dir, storage_id='sqlite3'),
+           ConverterOptions(input_serialization_format='cdr', output_serialization_format='cdr'))
+    pts = []
+    i = 0
+    while r.has_next():
+        t, data, _ = r.read_next()
+        if t != topic:
+            continue
+        m = deserialize_message(data, PointCloud2)
+        if m.height * m.width == 0:
+            continue
+        i += 1
+        if i % every_n != 0:   # 抽稀：每 10 帧取 1（控制体量）
+            continue
+        # 解析 xyz（PointCloud2 标准布局，偏移 0/4/8，float32）
+        n = m.width * m.height
+        arr = np.frombuffer(bytes(m.data), dtype=np.uint8)
+        xyz = arr.reshape(n, -1)[:, :12].copy().view(np.float32).reshape(n, 3)
+        pts.append(xyz)
+    r.close()
+    return np.vstack(pts) if pts else np.empty((0, 3))
+
+def save_ply(path, xyz):
+    with open(path, 'wb') as f:
+        f.write(f"ply\nformat binary_little_endian 1.0\nelement vertex {len(xyz)}\n"
+                "property float x\nproperty float y\nproperty float z\nend_header\n".encode())
+        f.write(xyz.astype('<f4').tobytes())
+
+if __name__ == '__main__':
+    bag = sys.argv[1]
+    out = sys.argv[2] if len(sys.argv) > 2 else 'map.ply'
+    pts = read_clouds(bag)
+    print(f'累积 {len(pts)} 点')
+    save_ply(out, pts)
+    print(f'已保存 {out}')
+```
+
+### 2.3 高度滤波 + 2D 占用网格（D2 也用到，一起固化）
+
+```bash
+# 脚本位置: ~/Lin_workspace/bags/analysis/pcd_to_map.py
+```
+
+```python
+#!/usr/bin/env python3
+"""PCD/PLY → 2D 占用网格（PGM+YAML，Nav2 map_server 格式）
+流程: 读点云 → z 高度滤波(0.1<z<1.5) → xy 栅格化 → 占用阈值 → 输出 map.pgm/map.yaml
+"""
+import sys, struct
+import numpy as np
+
+def read_ply_bin(path):
+    with open(path, 'rb') as f:
+        header = b''
+        while True:
+            line = f.readline()
+            header += line
+            if line.startswith(b'end_header'):
+                break
+        n = int([l for l in header.decode().splitlines() if l.startswith('element vertex')][0].split()[-1])
+        data = f.read(n * 12)
+    return np.frombuffer(data, dtype='<f4').reshape(n, 3)
+
+def to_map(xyz, res=0.05, z_min=0.1, z_max=1.5, occ_thresh=3):
+    mask = (xyz[:, 2] > z_min) & (xyz[:, 2] < z_max)
+    pts = xyz[mask][:, :2]
+    if len(pts) == 0:
+        raise SystemExit('滤波后无点')
+    x_min, y_min = pts.min(axis=0) - 1.0
+    x_max, y_max = pts.max(axis=0) + 1.0
+    w = int((x_max - x_min) / res); h = int((y_max - y_min) / res)
+    grid = np.zeros((h, w), dtype=np.int32)
+    ix = ((pts[:, 0] - x_min) / res).astype(int)
+    iy = ((pts[:, 1] - y_min) / res).astype(int)
+    np.add.at(grid, (iy, ix), 1)
+    occ = np.where(grid >= occ_thresh, 100, 0).astype(np.uint8)
+    return occ, x_min, y_min, res
+
+def save_pgm(path, occ):
+    with open(path, 'wb') as f:
+        f.write(b'P5\n%d %d\n255\n' % (occ.shape[1], occ.shape[0]))
+        f.write(occ.tobytes())
+
+if __name__ == '__main__':
+    ply = sys.argv[1]
+    occ, ox, oy, res = to_map(read_ply_bin(ply))
+    save_pgm(sys.argv[2] if len(sys.argv) > 2 else 'map.pgm', occ)
+    yaml = f"""image: {sys.argv[2] if len(sys.argv) > 2 else 'map.pgm'}
+resolution: {res}
+origin: [{ox}, {oy}, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25
+"""
+    open('map.yaml', 'w').write(yaml)
+    print(f'地图 {occ.shape[1]}x{occ.shape[0]} 格，原点 ({ox:.2f},{oy:.2f})，分辨率 {res}')
+```
+
+---
+
+## D2：地图生成验证（离线）
+
+```bash
+# 1. bag → 累积点云
+python3 ~/Lin_workspace/bags/analysis/build_map.py ~/bags/xxx.map_run_*.bag ~/bags/map_raw.ply
+
+# 2. 滤波 + 投影 → 占用网格
+python3 ~/Lin_workspace/bags/analysis/pcd_to_map.py ~/bags/map_raw.ply ~/bags/map.pgm
+
+# 3. 可视化验证（rviz 加载 /map）
+ros2 run nav2_map_server map_server map.yaml   # 需要先跑 lifecycle 或
+# 简单验证: 直接看图（图片查看器打开 map.pgm）
+```
+
+---
+
+## D3：场地实测建图
+
+```bash
+# 1. 全栈启动（D1 步骤）
+# 2. 静态 5s 让 KISS-ICP 初始化（车不动）
+# 3. 开始录 bag
+ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M) \
+  /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered /tf /tf_static
+# 4. 键盘遥控绕场 1-2 圈（缓慢、匀速、覆盖全视野），回到起点
+# 5. Ctrl-C 停止 → 离线生成地图（D2 脚本）
+```
+
+**场地要求**：5-10m 室内开阔区，墙面/立柱/箱子等可识别特征；绕行时避免遮挡雷达正上方。
+
+---
+
+## D4：地图复用验证
+
+```bash
+# 1. 重启全栈（验证地图独立性）
+# 2. 加载地图
+ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=~/bags/map.yaml
+# 或后续 Nav2 bringup 直接引用 map.yaml
+
+# 3. rviz 添加 /map 话题 → 应显示占用网格且与场地一致
+# 4. 对比 PCD 与 PGM 轮廓
+```
+
+---
+
+## D5：W1 验收清单
+
+- [ ] TF 树图存档（view_frames pdf/png → doc 留档）
+- [ ] base_link→velodyne 实际高度已量测并写入静态 TF（解决 65/77cm 冲突）
+- [ ] 一张可复用场地地图（map.pgm + map.yaml + 源 PCD）
+- [ ] 地图重启后加载正确（rviz 回显）
+- [ ] 全程 bag 已录制归档（N97 bags/ 目录）
+- [ ] 流程文档化（本手册 + 脚本入 bags/analysis/）
+
+---
+
+## 相关
+
+- 计划: [plan-minimal-loop.md](plan-minimal-loop.md)
+- 传感器安装定义: [phase0/sensor-mount.md](phase0/sensor-mount.md)（velodyne 高度待确认项）
+- 雷达网络: retrospect/vlp16_slam_exploration.md
