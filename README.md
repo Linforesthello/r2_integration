@@ -30,6 +30,7 @@ r2_integration/
 │   │
 │   ├── phase0/                       ← Phase 0 专题
 │   │   ├── chassis_definition.md     底盘完整定义（映射/参数/公式）
+│   │   ├── sensor-mount.md            传感器安装定义（IMU/雷达位置朝向）
 │   │   ├── completion_report.md      Phase 0 完成记录
 │   │   └── debug_log.md              踩坑调试日志
 │   │
@@ -113,7 +114,7 @@ Phase 5 气动 + 异常处理 + Robocon 编排   ⏳
 部署时（N97 Mini PC / 192.168.1.210）
 ├──  CAN 总线: slcan 转串口 (USB-CAN 适配器) → CanCmd 工具配置
 ├──  IMU/G354: ttyACM1（JLink OB Mini 串口直连）
-├──  LiDAR:    VLP-16 以太网直连（设备 IP 10.18.18.6）
+├──  LiDAR:    VLP-16 经交换机转接（设备 IP 10.18.18.6）
 ├──  视觉:     D435 USB 直连（可选 Jetson 协同）
 └──  OS:       Ubuntu 22.04 + ROS2 Humble
 ```
