@@ -45,26 +45,36 @@
 
 ## 三、技术方案决策（先端到端的取舍）
 
+**架构分离原则（外部评价采纳）**：KISS-ICP 定义为**高质量局部里程计**（odom 源），
+Nav2 标准结构 `map ← map→odom 桥 → odom ← EKF → base_link` 保持不变——
+map→odom 桥是一个**可替换组件**（临时用 KISS 映射，正式换 AMCL），只动这一环，不推倒重来。
+
+```
+map ←[桥: 临时KISS映射 / 正式:AMCL]→ odom ←[EKF]→ base_link ←[静态TF]→ velodyne / imu_link
+```
+
 | 决策点 | 快速方案（先用） | 正式方案（后补） |
 |:---|:---|:---|
-| 建图 | KISS-ICP PCD 累积 → 2D 投影（pointcloud_to_laserscan 或直接投影） | 回环/局部优化（后置） |
-| 定位 | **KISS-ICP odom 顶替**（map 系 ≈ odom_lidar 系，跳过 AMCL） | AMCL（正式化） |
-| 全局规划 | Nav2 SmacPlanner Hybrid-A* | 同 |
-| 局部规划/避障 | Nav2 DWB（全向轮适配） | MPPI 对比 |
+| 建图 | KISS-ICP PCD 累积 → **z 高度滤波（0.1<z<1.5m）** → 2D 投影（pointcloud_to_laserscan） | 回环/局部优化（后置） |
+| 定位 | map→odom 桥 = KISS 映射（可替换组件，快速） | AMCL（换桥，架构不变） |
+| 全局规划 | **NavFn / Smac 2D**（全向轮 vx/vy/ω 全自由，不用 Hybrid-A* 汽车模型） | 同 |
+| 局部规划/避障 | Nav2 DWB（支持 holonomic） | MPPI（采样优化，契合控制+RL 背景） |
 | 动态避障 | 激光阈值停车 demo（半天先出）→ local costmap 正式 | 同 |
 | 底盘接口 | ros2_control 或直接 /cmd_vel 桥（最快） | ros2_control 正式化 |
 
-> 原则: 先用最简单能跑的方案打通链路，正式化方案在闭环验证后再替换。
+> 原则: 先用最简单能跑的方案打通链路，正式化方案在闭环验证后再替换；
+> **快速方案与正式架构兼容**（桥接式替换，不推倒重来）。
 
 ---
 
 ## 四、三周里程碑与每日事项
 
-### W1（08-06 ~ 08-12）：建图落地
+### W1（08-06 ~ 08-12）：TF 工程 + 建图落地
 | 日 | 事项 | 产出 |
 |:--|:---|:---|
+| D1 | **TF 树工程**：map→odom→base_link→velodyne/imu_link 全链理清 + 验证（frame/QoS/静态 TF） | TF 树文档 + 验证 |
 | D1 | KISS-ICP 点云累积流程固化（launch + 保存命令） | 保存脚本 |
-| D2 | 点云 → 2D 占用网格投影（脚本/工具选型） | 转换流程 |
+| D2 | 点云 **z 高度滤波（0.1<z<1.5m）** → 2D 占用网格投影 | 转换流程 |
 | D3 | 场地实测建图（绕场一圈，录 bag） | 首张地图 |
 | D4 | 地图复用验证（重启后加载）+ rviz 回显 | 地图文件 |
 | D5 | W1 验收 + 排障缓冲 | 达标 |
@@ -114,7 +124,22 @@
 
 ---
 
-## 七、相关文档
+## 七、外部评价对照（2026-08-06 采纳）
+
+外部 AI 对本报的评价（8.5/10），核心判断"端到端收敛正确"；采纳 4 点：
+
+| 外部建议 | 采纳动作 |
+|:---|:---|
+| KISS-ICP 定位角色 = 高质量局部里程计，map→odom 桥可替换 | 已写入第三节架构分离原则 |
+| TF 工程提前（W1 开始，别等 W2 卡） | W1 D1 已加入 TF 树工程 |
+| 地图生成加高度滤波（0.1<z<1.5m） | W1 D2 已明确 |
+| 全向轮全局规划用 NavFn/2D（非 Hybrid-A*）；local 用 DWB→MPPI | 已更新决策表 |
+
+**权衡项**：外部建议"三周 100% 不碰 RL 部署"——采纳（项目冲刺期 RL 线挂起，W4 后恢复）。
+
+---
+
+## 八、相关文档
 
 - 长期路线: [01-plan.md](01-plan.md)（第八章 Phase 3）
 - 进度: [02-progress.md](02-progress.md) ｜ 现状: [project_status.md](project_status.md)
