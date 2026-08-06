@@ -190,6 +190,29 @@ vy    = (FL - FR + RL - RR) / (4 * INV_SQRT2)
 omega = -(FL + FR + RL + RR) / (4 * R)
 ```
 
+### 里程计积分（/odom_wheels，2026-08-05 修复）
+
+> 以 N97 实际部署代码为准（`install/r2_bringup/lib/python3.10/site-packages/r2_bringup/chassis_node.py` L434-443）。
+
+车体系速度经 yaw 旋转到 odom 系后积分（**全向轮标准式**，替代原差速车圆弧模型 + 无旋转直线分支）：
+
+```python
+# 全向轮里程计积分：车体系速度经 yaw 旋转到 odom 系
+dtheta = omega * dt
+new_yaw = self._odom_yaw + dtheta
+self._odom_x += (vx * math.cos(self._odom_yaw) - vy * math.sin(self._odom_yaw)) * dt
+self._odom_y += (vx * math.sin(self._odom_yaw) + vy * math.cos(self._odom_yaw)) * dt
+self._odom_yaw = new_yaw
+
+# 规范化 yaw（回绕到 [-π, π]）
+self._odom_yaw = math.atan2(math.sin(self._odom_yaw), math.cos(self._odom_yaw))
+```
+
+**omega 单位换算（易错点）**：正解输出的 omega 单位是 `逻辑速度/R`，
+换算 rad/s 只需 `omega / speed_scale`，**不能再除轮半径**——
+原实现多除 `(wheel_diameter/2)` 导致 omega 放大 13.2 倍（轮速 yaw 虚高、
+圆弧半径缩小），2026-08-05 修复并经实车验证（yaw 偏差 179°→4-14°）。
+
 ---
 
 ## 六、物理参数

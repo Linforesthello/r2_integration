@@ -391,7 +391,9 @@ class R2ChassisNode(Node):
         # 物理量换算
         vx_f = vx_f / self._speed_scale
         vy_f = vy_f / self._speed_scale
-        omega_f = omega_f / self._speed_scale / (self._wheel_diameter / 2.0)
+        # 2026-08-05 修复: omega 正解单位是 [逻辑速度/R]，换 rad/s 只需除 speed_scale，
+        # 原多除轮半径导致 omega 放大 13.2 倍（轮速 yaw 虚高、圆弧半径缩小）
+        omega_f = omega_f / self._speed_scale
 
         # 公式坐标系 → 用户坐标系（与 _cmd_callback 的变换互逆）
         # _cmd_callback: kin_vx = -user_vy,  kin_vy = user_vx
@@ -429,18 +431,13 @@ class R2ChassisNode(Node):
         self._odom_last_time = now
         dt = max(0.001, min(dt, 0.1))  # 限幅 [1ms, 100ms]
 
-        # 积分
-        if abs(omega) > 0.001:
-            # 圆弧运动
-            radius = math.hypot(vx, vy) / omega
-            dtheta = omega * dt
-            self._odom_x += radius * (math.sin(self._odom_yaw + dtheta) - math.sin(self._odom_yaw))
-            self._odom_y += radius * (math.cos(self._odom_yaw) - math.cos(self._odom_yaw + dtheta))
-            self._odom_yaw += dtheta
-        else:
-            # 直线运动
-            self._odom_x += vx * dt
-            self._odom_y += vy * dt
+        # 全向轮里程计积分：车体系速度经 yaw 旋转到 odom 系
+        # （2026-08-05 修复: 原直线分支不旋转、圆弧分支为差速车模型，均不适用全向轮）
+        dtheta = omega * dt
+        new_yaw = self._odom_yaw + dtheta
+        self._odom_x += (vx * math.cos(self._odom_yaw) - vy * math.sin(self._odom_yaw)) * dt
+        self._odom_y += (vx * math.sin(self._odom_yaw) + vy * math.cos(self._odom_yaw)) * dt
+        self._odom_yaw = new_yaw
 
         # 规范化 yaw
         self._odom_yaw = math.atan2(math.sin(self._odom_yaw), math.cos(self._odom_yaw))
