@@ -23,6 +23,7 @@ r2_integration/
 │   ├── 01-plan.md                    五阶段集成方案总纲
 │   ├── 02-deploy-checklist.md        N97 部署清单
 │   ├── 02-progress.md                全局进度一览（各Phase完成度）
+│   ├── project_status.md              全项目现状总结（08-06）
 │   ├── 03-current_state.md           当前完成状态
 │   ├── 07-handover.md                状态交接（新会话用）
 │   │
