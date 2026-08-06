@@ -1,7 +1,21 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-08-04
+> 最后更新: 2026-08-06
 > 内容: 截至今日已完成的所有工作的详细记录
+
+---
+
+## 〇、2026-08-05~06 近期完成
+
+| 事项 | 详情 |
+|:-----|:-----|
+| N97 远程桌面 | TigerVNC 定型（:2 / 5902），NoMachine/RealVNC 弃用，见 [retrospect](retrospect/2026-08-05_n97_remote_desktop.md) |
+| VM↔N97 跨机 DDS | FastDDS 固定端口 7410 + 单播 Peer（VMware NAT 不通组播）；VM 可远程跑 rviz2 |
+| IMU 协方差修复 | `[base]*9` 填满非对角项致矩阵奇异 → EKF NaN；对角化后实机验证通过，见 [retrospect](retrospect/2026-08-05_imu_covariance_ekf_nan.md) |
+| 底盘里程计修复 | omega 单位多除轮半径（放大 13.2×）+ 全向轮积分；bag 对比：yaw 偏差 179°→4-14°，方形闭环 1.8m→0.27m（KISS 交叉验证），见 [retrospect](retrospect/2026-08-05_chassis_ekf_debug.md) |
+| EKF 过程噪声 | robot_localization 3.5.4 需 225 值完整矩阵（15 值对角格式加载 bug 致启动 NaN）；z 漂移 85m→亚米级 |
+| 数据管理 | bag 仓库统一至 `~/Lin_workspace/bags/`（raw 修复前/后 + csv 全帧导出 + 分析脚本） |
+| 规范更新 | standards.md：Co-Authored-By 默认不加（仅显式要求） |
 
 ---
 

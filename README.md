@@ -33,9 +33,13 @@ r2_integration/
 │   │
 │   ├── phase1/                       ← Phase 1 专题
 │   │   ├── g354-wiring.md            G354 IMU 接线/配置
-│   │   └── ekf-verification.md       EKF 实车验证清单（测试方法+判合格标准）
+│   │   ├── ekf-verification.md       EKF 实车验证清单（测试方法+判合格标准）
+│   │   └── 2026-08-04_ekf-verification-result.md  EKF 验证结果记录
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
+│       ├── 2026-08-06_git_ops_lessons.md          Git 操作教训（reset 误伤/Co-Authored-By 规则）
+│       ├── 2026-08-05_chassis_ekf_debug.md        底盘里程计修复+EKF过程噪声225值矩阵排障
+│       ├── 2026-08-05_imu_covariance_ekf_nan.md   IMU 协方差病态→EKF NaN 排障
 │       ├── 2026-08-05_n97_remote_desktop.md       N97 远程桌面三方案排障（NoMachine/RealVNC/TigerVNC）
 │       ├── 2026-08-03_r2_repo_repair.md           r2_integration 仓库修复全记录
 │       ├── 2026-08-02_ekf_tf_fusion_fix.md        EKF/TF 融合排障全记录（7 问题）

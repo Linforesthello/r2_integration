@@ -1,8 +1,8 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-08-03
-> 当前进度: Phase 0 ✅ 100%｜Phase 1 EKF 配置 + IMU 轴映射修复完成（8-03），实车验证待做｜Phase 2 ✅ 驱动+里程计+键盘建图全跑通
-> 下一阶段: Phase 1 EKF 实车验证（清单见 [ekf-verification.md](phase1/ekf-verification.md)）→ Phase 3 Nav2；另评估 FAST-LIO2 替代 KISS-ICP
+> 最后更新: 2026-08-06
+> 当前进度: Phase 0 ✅ 100%｜Phase 1 85%（实车对比验证完成 08-06，底盘/EKF 修复完毕）｜Phase 2 ✅ 全跑通
+> 下一阶段: z 漂移 slip 场景跟进 → Phase 3 Nav2
 >
 > **部署环境**：N97 Mini PC（192.168.1.210，Ubuntu 22.04 + Humble），enp1s0: 10.18.18.20/24
 > 开发环境：VM（lin-virtual-machine，192.168.1.204）；VM→N97 SSH 免密可用

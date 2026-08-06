@@ -1,6 +1,6 @@
 # R2 外设集成 · 全局进度总览
 
-> 最后更新: 2026-08-04
+> 最后更新: 2026-08-06
 > 内容: 全项目进度一览，每个 Phase 的完成度、依赖关系、下一步
 
 ---
@@ -9,13 +9,13 @@
 
 ```
 Phase 0 底盘CAN控制 ━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
-Phase 1 IMU+EKF融合 ━━━━━━━━━━○○○○○  40%  ◆ 驱动/配置全绿，待实车验证
+Phase 1 IMU+EKF融合 ━━━━━━━━━━━━━━━━○○  85%  ◆ 实车对比验证完成（08-06）
 Phase 2 VLP16+KISS-ICP ━━━━━━━━━━━━━━━━━━━━ 100% ✅
 Phase 3 Nav2导航     ━○○○○○○○○○  0%  ⏳
 Phase 4 视觉AI       ━○○○○○○○○○  0%  ⏳
 Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
                     ─────────────
- 总计:              48%
+ 总计:              57%
 ```
 
 ---
@@ -35,9 +35,10 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 | 里程计 /odom_wheels | ✅ | + TF (odom → base_link) |
 | 超时保护 + 诊断 | ✅ | 0.5s 无指令自动停止 |
 | 参数配置 (yaml) | ✅ | 全实车标定值 |
+| 里程计积分修复（08-06） | ✅ | omega 单位 13.2× + 全向轮积分，见 [chassis_ekf_debug](retrospect/2026-08-05_chassis_ekf_debug.md) |
 | 文档 | ✅ | 4 份 .md 同步到 Obsidian |
 
-### Phase 1：IMU + 里程计 EKF 融合 ◆ 40%
+### Phase 1：IMU + 里程计 EKF 融合 ◆ 85%
 
 | 模块 | 状态 | 备注 |
 |:-----|:----:|:------|
@@ -48,9 +49,10 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 | 轮速里程计 | ✅ Phase 0 已就绪 | `/odom_wheels` |
 | robot_localization EKF | ✅ **已配置** | `config/ekf.yaml` + `launch/ekf.launch.py` |
 | EKF 联调 | ✅ 已跑通（8-03） | IMU 姿态正确跟随车体（左/右转、左/右倾），RViz odom 正常 |
-| 对比测试: 纯轮速 vs EKF | ◇ **待实车验证** | 清单见 [ekf-verification.md](phase1/ekf-verification.md) |
+| 对比测试: 纯轮速 vs EKF | ✅ **完成（08-06）** | bag 对比: yaw 偏差 179°→4-14°，方形闭环 1.8m→0.27m（KISS 交叉验证一致） |
+| EKF 过程噪声修复（08-06） | ✅ | 225 值矩阵（3.5.4 的 15 值格式加载 bug 致启动 NaN），见 [chassis_ekf_debug](retrospect/2026-08-05_chassis_ekf_debug.md) |
 
-**下一步：按 [ekf-verification.md](phase1/ekf-verification.md) 做实车验证（静态 3min / 直线 5m / 旋转 / 矩形闭环）**
+**下一步：z 漂移 slip 场景 +2.5m 跟进（剧烈加减速时数值积累）→ Phase 3 Nav2**
 
 ### Phase 2：VLP-16 + KISS-ICP SLAM ✅ 已完成
 
