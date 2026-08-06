@@ -98,6 +98,28 @@ exec xfce4-session
 
 ---
 
+## 四点五、跨机 DDS（VM rviz2）适用边界修正（2026-08-06 实测）
+
+**背景**：曾计划把 rviz2 从 N97 挪到 VM（理由：N97 CPU 被 rviz2 吃满导致
+`Message Filter dropping ... queue is full`），并完成了 FastDDS 固定端口 7410 +
+单播 Peer 的跨机配置（VM 可列出 N97 全部话题、echo 实时数据）。
+
+**实测结论（推翻原方案）**：
+
+| 场景 | 结果 |
+|:-----|:-----|
+| VM 命令行查看（topic list / echo / bag 录制控制） | ✅ 正常，低带宽无压力 |
+| **VM rviz2 实时可视化（含点云）** | ❌ **掉帧严重 + queue-is-full 刷屏**；且反向拖慢 N97（EKF `Failed to meet update rate`，WiFi 发送阻塞） |
+
+**根因修正**：queue-is-full 不是 N97 CPU（当时 6.35 负载含 N97 本地 rviz2+建图），
+而是 **WiFi 跨机链路带宽/延迟抖动**——VM 的 rviz2 经 WiFi 收点云/TF 时，
+消息过滤器等 TF 超时 → 丢消息；N97 往 WiFi 发数据 → DDS 发送队列阻塞 → EKF 掉频率。
+
+**最终方案**：**rviz2 留在 N97 本地**（回环，不占 WiFi）。跨机 DDS 保留用于
+低带宽调试（命令行、bag 回放控制、数据导出）。
+
+---
+
 ## 五、遗留问题
 
 - [ ] VNC 开机自启未配置（重启后需手动 `tigervncserver`）
