@@ -174,7 +174,9 @@ R2|G354轴映射与两处符号修正，传感器安装定义留档
 2. **排障/修复类提交**：body 必须关联排障文档（`retrospect/YYYY-MM-DD_*.md`）
 3. **build/install/log/*.bag 不入库**（`.gitignore` 已配置，提交前 `git status` 确认无意外文件）
 4. **多机器同步**：VM 提交推送 → N97 `git pull`（不再 scp 拷贝代码）
-5. **Co-Authored-By**：AI 辅助的提交，末尾加 `Co-Authored-By: Claude <noreply@anthropic.com>`
+5. **Co-Authored-By**：AI 辅助的提交**默认不加** `Co-Authored-By` 标记，
+   仅在显式要求时添加（如"本次提交带 Co-Authored-By"）。原因：该标记会把
+   AI 计入 GitHub 贡献者列表，署名与否应由提交者本人决定
 
 ---
 
