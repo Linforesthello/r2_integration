@@ -26,19 +26,24 @@ R2 全向轮底盘从"串口键盘遥控"升级为"ROS2 自主导航 + 感知 + 
 ## 二、系统架构现状
 
 ```
-VLP-16 雷达 ──10.18.18.6──→ N97 (机器人电脑) ──WiFi 192.168.1.210──→ VM (开发机)
-                                    │                                  │
-                              CAN 1M (can0)                        FastDDS 7410+Peer
-                                    │                                  │
-                              G354 IMU ←── MCLM 电机 ×4 ── 四全向轮底盘
+VLP-16 雷达 (10.18.18.6, PoE)
+   │ 以太网
+   ▼
+交换机 ──→ N97 enp1s0 (10.18.18.20)      ← 雷达经交换机转接 N97
+     └──→ VMware 宿主 → VM ens37 (10.18.18.30)
+
+N97 (机器人电脑):
+  ├── CANable2 (USB-CAN 适配器, ttyACM0, slcan) → can0 (1M) → MCLM 电机 ×4
+  ├── G354 IMU → JLink OB Mini (VCP 串口 ttyACM1, 460800, 独立 5V 供电)
+  └── WiFi wlp2s0 (192.168.1.210) ──→ VM (FastDDS 7410+Peer)
 ```
 
 | 层 | 组件 | 状态 |
 |:---|:-----|:-----|
-| 感知 | VLP-16（10.18.18.6，PoE）、G354 IMU（USB 串口 /dev/ttyACM1） | ✅ |
+| 感知 | VLP-16（10.18.18.6，PoE，经交换机转接 N97）、G354 IMU（经 JLink OB Mini 直连 N97，ttyACM1@460800，独立 5V 供电） | ✅ |
 | 定位 | KISS-ICP（/velodyne_points → odom_lidar） | ✅ |
 | 融合 | robot_localization EKF（/odometry/filtered，50Hz） | ✅ |
-| 执行 | r2_chassis_node（/cmd_vel → CAN → MCLM ×4） | ✅ |
+| 执行 | r2_chassis_node（/cmd_vel → CANable2 → can0 → MCLM ×4） | ✅ |
 | 远程 | TigerVNC（:2/5902）+ 跨机 DDS（低带宽） | ✅ 见五 |
 
 ---
@@ -75,9 +80,14 @@ VLP-16 雷达 ──10.18.18.6──→ N97 (机器人电脑) ──WiFi 192.168
 
 | 机器 | 角色 | 网络 | 说明 |
 |:-----|:-----|:-----|:-----|
-| N97 | 实车工控机（Ubuntu 22.04 + Humble） | WiFi 192.168.1.210；有线 enp1s0 10.18.18.20 | 采集/控制/本地 rviz2 |
-| VM (lin-virtual-machine) | 开发机（VMware NAT） | ens33 192.168.1.204；ens37 10.18.18.30 | 代码/文档/bag 分析 |
+| N97 | 实车工控机（Ubuntu 22.04 + Humble） | WiFi 192.168.1.210；有线 enp1s0 10.18.18.20（接交换机，雷达同网段） | 采集/控制/本地 rviz2 |
+| VM (lin-virtual-machine) | 开发机（VMware NAT） | ens33 192.168.1.204；ens37 10.18.18.30（经 VMware 宿主接交换机） | 代码/文档/bag 分析 |
 | Windows | VMware 宿主 | — | VNC 客户端等 |
+
+**硬件接线（文档事实）**：
+- CAN 总线：**CANable2 USB-CAN 适配器**（ttyACM0，slcan 协议）→ can0（1M），非主板集成 CAN
+- G354 IMU：经 **JLink OB Mini**（VCP 串口，ttyACM1，460800 8N1）直连 N97，**JLink 不供电，需独立 5V**（接线见 [g354-wiring.md](phase1/g354-wiring.md)）
+- VLP-16：PoE 供电，以太网**经交换机**转接 N97（enp1s0），同网段还有 VMware 宿主（VM ens37）
 
 - **跨机 DDS**：FastDDS 固定端口 7410（N97 需带 `FASTRTPS_DEFAULT_PROFILES_FILE=~/fastdds_wellknown.xml` 启动）
   + VM 单播 Peer（`~/Lin_workspace/fastdds_peer_n97.xml`）
