@@ -8,23 +8,37 @@
 
 ## D1：TF 树工程（先于建图，避免 W2 卡）
 
-### 1.1 启动全栈
+### 1.1 启动全栈（顺序与 07-handover 一致）
 
 ```bash
 # N97，每个终端 source 后启动
 export FASTRTPS_DEFAULT_PROFILES_FILE=/home/lin/fastdds_wellknown.xml
 source /opt/ros/humble/setup.bash && source ~/Lin_workspace/r2_integration/install/setup.bash
 
-# 雷达（三节点合一）
-ros2 launch velodyne_driver velodyne_n97.launch.py   # 或 bash ~/.ros/velodyne_n97.launch.py
-# KISS-ICP
-ros2 launch kiss_icp odometry.launch.py topic:=/velodyne_points base_frame:=velodyne use_sim_time:=false visualize:=false
-# 底盘（EKF 场景 publish_tf:=false）
+# 终端 0: CAN 总线
+python3 ~/Lin_workspace/command/can_command.py
+
+# 终端 1: 雷达（~/.ros/velodyne_n97.launch.py 为三节点合一，device_ip 10.18.18.6）
+ros2 launch ~/.ros/velodyne_n97.launch.py
+
+# 终端 2: KISS-ICP（⚠️ 必须先 source kiss_icp_ws；visualize:=true 才发布点云话题）
+source ~/kiss_icp_ws/install/setup.bash
+ros2 launch kiss_icp odometry.launch.py \
+  topic:=/velodyne_points base_frame:=velodyne \
+  use_sim_time:=false visualize:=true
+# ⚠️ 建图前需实机确认: /kiss/frame 是否依赖 visualize（false 时无点云话题则累积脚本无数据）
+
+# 终端 3: 底盘（EKF 场景 publish_tf:=false）
 ros2 launch r2_bringup chassis.launch.py publish_tf:=false
-# IMU（等 3s 校准）
+
+# 终端 4: IMU（启动后静止 3s 等校准，校准期不可动）
 ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
-# EKF（IMU 校准完成后）
+
+# 终端 5: EKF（⚠️ 必须在 IMU 校准完成后启动，否则输出 NaN；重启 IMU 必须同时重启 EKF）
 ros2 launch r2_bringup ekf.launch.py
+
+# 终端 6: 键盘遥控（python3 直启，绕开 libexec 布局）
+python3 ~/Lin_workspace/r2_integration/r2_bringup/r2_bringup/teleop_keyboard.py
 ```
 
 ### 1.2 生成当前 TF 树（现状盘点）
@@ -48,14 +62,16 @@ ros2 run tf2_ros tf2_echo odom_lidar velodyne   # KISS-ICP 自带
 
 ```
 map ←[桥，W1 可为单位静态]→ odom ←[EKF]→ base_link
-                                    ├──→ imu_link（静态，已确认）
-                                    └──→ velodyne（静态，⚠️ 待确认数值）
-odom_lidar（KISS 自身系）──→ velodyne
+                                    ├──→ imu_link（静态，ekf.launch.py 已含 ✅）
+                                    └──→ velodyne（静态，✅ 已定案 z=0.56）
+odom_lidar（KISS 自身系）──→ velodyne（KISS 发布）
 ```
 
-**⚠️ 待确认项（实机量测）**：`base_link → velodyne` 平移 z 值
-（sensor-mount.md 记录 0.77m vs 实测 65cm 冲突）——**W1 必须量出真实值**，
-写入静态 TF。量测方法：卷尺量 velodyne 光学中心到 base_link 原点高度。
+**✅ 定案（2026-08-06 D0 审计）**：
+- `base_link → velodyne` 静态 TF 由 robot_state_publisher 发布（URDF velodyne_joint）
+- 实测定案: 雷达离地 **69cm**、base_link 离地 **13cm** → base_link→velodyne = **0.56m**
+- URDF 已更新（base_joint 0.13 / velodyne_joint 0.56 / 删除 base_footprint，备份 .bak_20260806）
+- 验证: `tf2_echo base_footprint velodyne` 报 frame 不存在（已删干净）；frame 快照存档 minimal_loop/
 
 ### 1.4 D1 验收
 
@@ -77,61 +93,16 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M
 # Ctrl-C 停止
 ```
 
-### 2.2 离线累积脚本（VM 或 N97，纯 numpy + ply，零依赖）
+### 2.2 离线累积脚本（方案B：逐帧位姿变换累积，标准 LiDAR 建图法）
+
+> 脚本: `~/Lin_workspace/bags/analysis/build_map.py`（官方 rosbag2_py，零依赖）
+> 原理: 每帧 `/kiss/frame`（velodyne 系全分辨率）× `/kiss/odometry` 位姿（时间对齐）
+>       → 变换到 odom_lidar 世界系 → 逐帧累积
+> 注意: 不用 `/kiss/local_map`（KISS 局部滑动窗口 + voxel 0.2m 过稀）
 
 ```bash
-# 脚本位置: ~/Lin_workspace/bags/analysis/build_map.py（新建）
+python3 ~/Lin_workspace/bags/analysis/build_map.py <bag_dir> <输出.ply> [抽稀间隔=5]
 ```
-
-```python
-#!/usr/bin/env python3
-"""KISS-ICP 点云累积 → PCD/PLY（从 bag 读取 /kiss/frame，零依赖）"""
-import sys
-sys.path.insert(0, '/home/lin/.local/lib/python3.10/site-packages')
-import numpy as np
-from rosbag2_py import SequentialReader, StorageOptions, ConverterOptions
-from rclpy.serialization import deserialize_message
-from sensor_msgs.msg import PointCloud2
-
-def read_clouds(bag_dir, topic='/kiss/frame', every_n=10):
-    r = SequentialReader()
-    r.open(StorageOptions(uri=bag_dir, storage_id='sqlite3'),
-           ConverterOptions(input_serialization_format='cdr', output_serialization_format='cdr'))
-    pts = []
-    i = 0
-    while r.has_next():
-        t, data, _ = r.read_next()
-        if t != topic:
-            continue
-        m = deserialize_message(data, PointCloud2)
-        if m.height * m.width == 0:
-            continue
-        i += 1
-        if i % every_n != 0:   # 抽稀：每 10 帧取 1（控制体量）
-            continue
-        # 解析 xyz（PointCloud2 标准布局，偏移 0/4/8，float32）
-        n = m.width * m.height
-        arr = np.frombuffer(bytes(m.data), dtype=np.uint8)
-        xyz = arr.reshape(n, -1)[:, :12].copy().view(np.float32).reshape(n, 3)
-        pts.append(xyz)
-    r.close()
-    return np.vstack(pts) if pts else np.empty((0, 3))
-
-def save_ply(path, xyz):
-    with open(path, 'wb') as f:
-        f.write(f"ply\nformat binary_little_endian 1.0\nelement vertex {len(xyz)}\n"
-                "property float x\nproperty float y\nproperty float z\nend_header\n".encode())
-        f.write(xyz.astype('<f4').tobytes())
-
-if __name__ == '__main__':
-    bag = sys.argv[1]
-    out = sys.argv[2] if len(sys.argv) > 2 else 'map.ply'
-    pts = read_clouds(bag)
-    print(f'累积 {len(pts)} 点')
-    save_ply(out, pts)
-    print(f'已保存 {out}')
-```
-
 ### 2.3 高度滤波 + 2D 占用网格（D2 也用到，一起固化）
 
 ```bash
@@ -214,13 +185,15 @@ ros2 run nav2_map_server map_server map.yaml   # 需要先跑 lifecycle 或
 ## D3：场地实测建图
 
 ```bash
-# 1. 全栈启动（D1 步骤）
-# 2. 静态 5s 让 KISS-ICP 初始化（车不动）
-# 3. 开始录 bag
+# 1. 全栈启动（1.1 步骤，含 CAN/键盘）
+# 2. 静态 5s 让 KISS-ICP 初始化（车不动；IMU 校准纪律同样适用）
+# 3. 开始录 bag（⚠️ 必须先确认 KISS 以 visualize:=true 启动，否则 /kiss/frame 无数据）
 ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M) \
   /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered /tf /tf_static
 # 4. 键盘遥控绕场 1-2 圈（缓慢、匀速、覆盖全视野），回到起点
 # 5. Ctrl-C 停止 → 离线生成地图（D2 脚本）
+
+> 注意: 历史 bag（08-06 after 系列）未录 /kiss/frame——本步首次录制该话题，累积脚本依赖此数据。
 ```
 
 **场地要求**：5-10m 室内开阔区，墙面/立柱/箱子等可识别特征；绕行时避免遮挡雷达正上方。

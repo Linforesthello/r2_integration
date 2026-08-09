@@ -22,6 +22,7 @@ r2_integration/
 │   ├── obsidian-tags.md              Obsidian 标签体系习惯
 │   ├── 01-plan.md                    五阶段集成方案总纲
 │   ├── plan-minimal-loop.md           最小闭环打通计划（建图→导航→避障，08-06）
+│   ├── minimal-loop/                  执行目录（W1操作手册/审计数据/frame快照）
 │   ├── 02-deploy-checklist.md        N97 部署清单
 │   ├── 02-progress.md                全局进度一览（各Phase完成度）
 │   ├── project_status.md              全项目现状总结（08-06）
