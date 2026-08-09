@@ -168,6 +168,11 @@ free_thresh: 0.25
 
 ## D2：地图生成验证（离线）
 
+> **执行记录（08-09）**：链路已跑通（bag → 累积点云 → 占用网格），但产出**严重重影**不可用。
+> 轨迹 523 帧 / 5.5×8.3m 绕场；地图 971×931 格@0.05m / 47×49m（大场地+雷达视距 23-29m，范围正常）；
+> 根因 = **KISS 帧率 3.6Hz（应 10Hz）**，帧间 0.5~0.7s 空窗位姿漂移累积 → 远点错位重影。
+> 详见 [retrospect/2026-08-09_map_double_ghost.md](../retrospect/2026-08-09_map_double_ghost.md)。**D2 状态：⏳ 重影未解决，验收延后。**
+
 ```bash
 # 1. bag → 累积点云
 python3 ~/Lin_workspace/bags/analysis/build_map.py ~/bags/xxx.map_run_*.bag ~/bags/map_raw.ply

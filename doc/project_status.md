@@ -16,7 +16,7 @@ R2 全向轮底盘从"串口键盘遥控"升级为"ROS2 自主导航 + 感知 + 
 | 0 | 底盘 CAN 控制 | 100% | ✅ |
 | 1 | IMU + EKF 融合 | 85% | ✅ 实车验证完成（08-06） |
 | 2 | VLP16 + KISS-ICP SLAM | 100% | ✅ |
-| 3 | Nav2 导航 | 0% | ⏳ 建图方案缺口待定 |
+| 3 | Nav2 导航 | 0% | ⏳ D2 离线建图已跑通但重影（KISS 帧率 3.6Hz），见 retrospect 08-09 |
 | 4 | D435 + Jetson 视觉 AI | 0% | ⏳ |
 | 5 | 系统集成与硬化 | 0% | ⏳ |
 | | **总计** | **57%** | |
@@ -72,7 +72,8 @@ N97 (机器人电脑):
 
 - VLP-16 驱动 ✅，KISS-ICP 建图/里程计 ✅
 - slam_toolbox 已否决（不适合 VLP-16，见 [vlp16_slam_exploration](retrospect/vlp16_slam_exploration.md)）
-- **缺口**：Phase 3 建图方案未落地（候选：KISS-ICP PCD 累积 → 2D 投影）
+- **缺口**：Phase 3 建图方案落地中——D2 离线流程（KISS PCD 累积 → 2D 占用网格）已跑通（08-09），
+  但地图严重重影（KISS 帧率 3.6Hz 帧间漂移），待解决；详见 [retrospect/2026-08-09_map_double_ghost.md](retrospect/2026-08-09_map_double_ghost.md)
 
 ---
 
