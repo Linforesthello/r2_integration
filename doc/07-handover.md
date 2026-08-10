@@ -1,8 +1,8 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-08-06
-> 当前进度: Phase 0 ✅ 100%｜Phase 1 85%（实车对比验证完成 08-06，底盘/EKF 修复完毕）｜Phase 2 ✅ 全跑通
-> 下一阶段: z 漂移 slip 场景跟进 → Phase 3 Nav2
+> 最后更新: 2026-08-10
+> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 85%（08-09 z 漂移修复；yaw 偏差预案未实施）｜Phase 2 ✅ 100%｜Phase 3 ⏳ D2 建图跑通但重影
+> 下一阶段: KISS 帧率调参 → 重录建图 → Nav2
 >
 > **部署环境**：N97 Mini PC（192.168.1.210，Ubuntu 22.04 + Humble），enp1s0: 10.18.18.20/24
 > 开发环境：VM（lin-virtual-machine，192.168.1.204）；VM→N97 SSH 免密可用
@@ -15,15 +15,16 @@
 | Phase | 目标 | 状态 | 说明 |
 |:------|:-----|:----:|:-----|
 | 0 | 底盘 ROS2 + CAN 控制 | ✅ 100% | 四全向轮，全命令可用 |
-| 1 | G354 IMU + 轮速 EKF 融合 | ◆ 40% | 驱动/配置/轴映射修复全绿（8-03），**实车验证挂起** |
+| 1 | G354 IMU + 轮速 EKF 融合 | ✅ 85% | 实车验证完成（08-06）；z 漂移修复（08-09）；yaw 偏差预案未实施 |
 | 2 | VLP16 + KISS-ICP SLAM | ✅ 100% | 驱动+里程计+键盘建图全跑通（8-02） |
-| 3 | VLP16 + Nav2 导航 | ⏳ 0% | — |
+| 3 | VLP16 + Nav2 导航 | ⏳ 0% | D2 离线建图已跑通但重影（KISS 帧率 3.6Hz），见 [retrospect/2026-08-09_map_double_ghost.md](retrospect/2026-08-09_map_double_ghost.md) |
 | 4 | D435 + Jetson 视觉 | ⏳ 0% | — |
 | 5 | 气动+异常+编排 | ⏳ 0% | — |
 
 **8-02 核心成果**：EKF/TF 融合链路 7 个问题全部解决（详见
-[retrospect/2026-08-02_ekf_tf_fusion_fix.md](retrospect/2026-08-02_ekf_tf_fusion_fix.md)），
-当前全套系统稳定运行；KISS-ICP 参数已调优（抖动/旋转性能为纯激光算法本底）。
+[retrospect/2026-08-02_ekf_tf_fusion_fix.md](retrospect/2026-08-02_ekf_tf_fusion_fix.md)）。
+**8-09 新增**：EKF z 漂移已修复（two_d_mode）；yaw 偏差确认（未解决）；D2 离线建图跑通但重影
+（KISS 帧率 3.6Hz，性能瓶颈）——详见 §五 与 §六。
 
 ---
 
@@ -42,16 +43,16 @@ velodyne_driver_node / velodyne_transform_node / velodyne_laserscan_node / rviz 
 | 话题 | 频率 | 备注 |
 |:-----|:-----|:-----|
 | /imu/data | ~100Hz（std 0.0025）✅ | G354，稳定 |
-| /odometry/filtered | ~50Hz（std 0.002）✅ | EKF 融合输出，稳定 |
+| /odometry/filtered | ~30Hz ✅ | EKF 融合输出（08-09 降频 50→30 缓解 CPU） |
 | /odom_wheels | ~50Hz（std 0.002）✅ | 轮速里程计 |
-| /velodyne_points | ~10Hz（std 0.089）⚠️ | 600rpm，**掉帧明显**（0.094~0.409s） |
-| /kiss/odometry | ~10Hz（std 0.050）⚠️ | 跟随雷达帧率，配准耗时波动 |
+| /velodyne_points | ~9.9Hz ✅（08-09 bag 实测，max 间隔 0.121s） | 08-02 的掉帧现象**未复现**，此项关闭 |
+| /kiss/odometry | ~3.6Hz ⚠️（08-09 bag 实测） | **雷达 10Hz 输入吞掉 64%**：p50 0.19s / p90 0.6s / max 1.95s，纯处理瓶颈（详见 §六） |
 | /kiss/points 等 | visualize:=true 时发布 | 前缀 **/kiss/**（非 /kiss_icp/） |
 
 ### 2.3 数据表现（静止实测）
 
 - EKF 姿态与 IMU 姿态几乎一致（四元数 0.0226/0.0283/0.0172/0.9992）→ 融合正确
-- EKF position.z = -0.185m（process noise 漂移，无观测，2D 导航无影响）
+- EKF position.z = 0.000000（08-09 two_d_mode 修复后）
 - odom→base_link 单一发布者（chassis publish_tf=false）✅
 
 ---
@@ -99,7 +100,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 
 | 配置 | 位置 | 当前值 |
 |:-----|:-----|:-------|
-| EKF 融合 | `r2_bringup/config/ekf.yaml` | 15 值完整配置；轮速给 x/y/vx/vy，IMU 给 yaw/角速度 |
+| EKF 融合 | `r2_bringup/config/ekf.yaml` | frequency 30、two_d_mode: true、az noise 1e-6；odom0_config **yaw=false**（yaw 偏差根因，预案 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)）⚠️ launch 加载 **install 副本**，改后须 build 或手动同步 |
 | 底盘 TF | `chassis.launch.py` | `publish_tf:=false`（EKF 场景），默认 true |
 | 静态 TF | `ekf.launch.py` | `base_link→imu_link` 单位变换 |
 | KISS-ICP | `~/kiss_icp_ws/src/kiss_icp/config/config.yaml` | max_range 30 / min_range 0.5 / voxel_size 0.2（8-02 调优，备份 .bak_20260802） |
@@ -135,6 +136,17 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 安装定义见 [phase0/sensor-mount.md](phase0/sensor-mount.md)。
 **启动纪律**：IMU 校准完成（Init quat）后才可启动 EKF；EKF 在 IMU 校准前启动会输出 NaN。
 
+### 8-09 新增：z 漂移修复 ✅ / yaw 偏差 ⚠️ / 地图重影 ⚠️
+
+- **z 漂移修复 ✅**：15 维 EKF 中无测量约束的 z/vz/az 受姿态-速度耦合 + 积压放大 → 漂 55.7m；
+  `two_d_mode: true` + az noise 1e-6 修复，TF z 恒 0、30Hz 正常。详见
+  [retrospect/2026-08-09_ekf_z_drift_fix.md](retrospect/2026-08-09_ekf_z_drift_fix.md)
+- **yaw 偏差 ⚠️（未解决）**：filtered yaw = IMU 纯积分（f-i 恒 0.1°），起点偏置随机 6~10°、运动峰值 ±14°；
+  预案（方案①轮速开放 yaw）已写好未实施，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
+- **地图重影 ⚠️（未解决）**：D2 离线建图链路跑通但产出严重重影；根因 KISS 帧率 3.6Hz（§二）
+  帧间 0.5~0.7s 空窗漂移 + 20-29m 远点放大。详见
+  [retrospect/2026-08-09_map_double_ghost.md](retrospect/2026-08-09_map_double_ghost.md)
+
 ### 遗留现象（算法本底，非故障）
 
 - **KISS-ICP 静止/运动均有毫米~厘米级抖动**：纯激光配准本底（无 IMU 融合）
@@ -145,16 +157,25 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 
 ## 六、遗留与待办
 
-- [ ] **Phase 1 EKF 实车验证**（静态 3min/直线 5m/旋转/矩形闭环）— 清单与判合格标准见 [ekf-verification.md](phase1/ekf-verification.md)
-- [ ] **FAST-LIO2 评估**（Ericsiii ROS2 fork，VLP-16 原生支持，接 G354 解决旋转痛点）— VM 先编译验证
-- [ ] **git 提交**：VM 工作区积压大量未提交改动（代码修复+文档），分支 master
-- [ ] 雷达掉帧调查（/velodyne_points std 0.089s，600rpm 下帧间隔不稳）
-- [ ] 可选：VLP-16 rpm 600→1200（20Hz）试验（帧内畸变减半，需重启雷达驱动）
+✅ 已关闭（历史项）：
+- Phase 1 EKF 实车验证（08-06 完成）
+- z 轴 process noise 漂移（08-09 two_d_mode 修复；回归项见下）
+- IMU/雷达坐标基准与雷达高度冲突（08-06 定案 base_joint 0.13 / velodyne_joint 0.56）
+- 雷达掉帧调查（08-09 bag 实测 9.9Hz 稳定，未复现）
+
+待办（按优先级）：
+- [ ] **KISS 帧率 3.6Hz**（08-09 暴露，主线）：CPU 瓶颈（N97 4 核低功耗 + 全套节点），
+      KISS 本地图越积越稠密配准变慢（[社区佐证 issue #152](https://github.com/PRBonn/kiss-icp/issues/152)）。
+      作者推荐调参：**max_range 30→15~20m**（主要参数，代价=丢远墙特征）、**voxel_size 0.2→0.25/0.3**；
+      采集时 N97 不开 rviz2。改后重录复测
+- [ ] **D2 重影消除**：帧率解决后重录重验；验收指标待定量化（轮廓清晰度 + 闭环误差）
+- [ ] **yaw 偏差**：实施预案方案①（odom0_config yaw=false→true），验证标准见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
+- [ ] **z 回归项**：slip 场景剧烈加减速 z 漂 +2.5m（08-05 遗留）在 two_d_mode 下复测
+- [ ] 同步收尾：最新提交 857d57a，**N97 待 `git pull`**（08-10 网络不通，恢复后补）
+- [ ] VNC 开机自启（N97 重启后远程桌面不丢）
+- [ ] FAST-LIO2 评估（长期，VLP-16 原生支持，接 G354 解决旋转痛点）— VM 先编译验证
+- [ ] 可选：VLP-16 rpm 600→1200（20Hz）试验（帧内畸变减半）
 - [ ] waypoint 雷达闭环（基于 /kiss/odometry 自主行走）
-- [ ] **8-03 新增**：IMU/雷达坐标基准待确认（base_footprint vs base_link）→ 补静态 TF 平移，见 [sensor-mount.md](phase0/sensor-mount.md)
-- [ ] **8-03 新增**：雷达高度 65cm vs 旧记录 77cm 冲突待确认
-- [ ] **8-03 新增**：N97 已恢复纯拷贝（git 操作撤销）；GitHub `Lin_workspace` 仓库内容=整个 workspace 快照，仓库管理方案待重新决策
-- [ ] z 轴 process noise 漂移（3D 场景再处理）
 
 ---
 
@@ -167,17 +188,19 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 
 **关键结论**：
 1. KISS-ICP 适合建图/演示，旋转性能和精度受纯激光本质限制——后续自主导航建议换 LIO
-2. EKF 融合是底盘导航的基础（yaw 来自 IMU，位置来自轮速），实车验证是收尾前必须项
+2. EKF 融合是底盘导航的基础（yaw 来自 IMU，位置来自轮速）
 3. 本阶段 7 个问题的共性教训：跨机器同步必须全覆盖（含配置）、第三方 launch 默认值必须实测、配置不合法可能不报错
+4. **N97 单机跑全套是性能瓶颈**：EKF 降频 + KISS 吞帧同源，CPU 余量优先于功能扩展
 
-**资源状态**：VM 与 N97 代码已同步（r2_bringup 全套 + ekf.yaml + kiss config），
-文档 9 份已同步 Obsidian 镜像。N97 磁盘 25%，负载 4.2（全套运行中正常）。
+**资源状态**：VM 与 N97 代码同步基线 = 提交 857d57a（N97 待 pull）；
+bag 分析副本在 VM `~/Lin_workspace/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 / map_run_0809_2133）。
 
 ---
 
 ## 八、相关文档索引
 
-- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题：现象/命令/根因/解决/验证）
+- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影）
 - 进度看板：`02-progress.md` ｜ 状态快照：`03-current_state.md`
-- EKF 验证清单：`phase1/ekf-verification.md` ｜ SLAM 方案探索：`retrospect/vlp16_slam_exploration.md`
+- EKF yaw 预案：`phase1/ekf-yaw-plan.md` ｜ SLAM 方案探索：`retrospect/vlp16_slam_exploration.md`
+- W1 建图手册：`minimal-loop/w1-operation.md`（D1~D5，含 D2 执行记录）
 - 底盘定义：`phase0/chassis_definition.md` ｜ 键盘控制修复：`retrospect/2026-07-31_teleop_keyboard_fix.md`
