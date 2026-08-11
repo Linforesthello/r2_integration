@@ -142,6 +142,7 @@ def decode_status_frame(data: bytes) -> dict:
         'accum_ticks':   accum_ticks,
         'pwm_output':    pwm_output,
         'target_speed':  target_speed,
+        'flags':         flags,   # 原始标志字节（--test 模式打印用）
         'stall':         bool(flags & FLAG_STALL),
         'saturated':     bool(flags & FLAG_SATURATED),
     }
@@ -209,10 +210,10 @@ class R2ChassisNode(Node):
         self._motor_status: dict[int, dict] = {}
         self._status_lock = threading.Lock()
 
-        # 上次 CAN 状态帧时间（用于超时检测）
-        self._last_status_time: dict[int, float] = {}
+        # 上次 CAN 状态帧时间（用于超时检测；None = 从未收到过首帧，不判超时）
+        self._last_status_time: dict[int, float | None] = {}
         for sid in R2_STATUS_IDS:
-            self._last_status_time[sid] = 0.0
+            self._last_status_time[sid] = None
 
         # 里程计状态
         self._odom_x = 0.0
@@ -222,6 +223,7 @@ class R2ChassisNode(Node):
 
         # cmd_vel 超时
         self._last_cmd_time = 0.0
+        self._stop_sent = False    # 超时停止帧是否已发（只发一次，避免 50Hz 重复刷）
 
         # 里程计刻度: 每 tick = 多少米轮子前进距离
         self._m_per_tick = math.pi * self._wheel_diameter / self._ticks_per_rev
@@ -329,6 +331,7 @@ class R2ChassisNode(Node):
 
         # 发送 CAN 命令
         self._send_speeds(speeds_logic)
+        self._stop_sent = False    # 新命令到达，复位超时停止标志
         self._last_cmd_time = self.get_clock().now().nanoseconds * 1e-9
 
     def _send_speeds(self, speeds: list):
@@ -367,7 +370,7 @@ class R2ChassisNode(Node):
         with self._status_lock:
             statuses = dict(self._motor_status)
 
-        if len(statuses) < 4:
+        if not statuses:
             return None
 
         # 提取逻辑速度（正解只关心速度比例，不关心量纲）
@@ -376,14 +379,12 @@ class R2ChassisNode(Node):
         for can_id, s in statuses.items():
             speed_map[can_id] = s['current_speed']
 
-        # 确保 4 个 ID 都有数据
-        try:
-            fl_logic = speed_map[R2_STATUS_IDS[0]]   # 0x323 → FL
-            fr_logic = speed_map[R2_STATUS_IDS[1]]   # 0x326 → FR
-            rl_logic = speed_map[R2_STATUS_IDS[2]]   # 0x324 → RL
-            rr_logic = speed_map[R2_STATUS_IDS[3]]   # 0x325 → RR
-        except KeyError:
-            return None
+        # 缺轮按 0 参与正解（降级模式：odom/TF 保持 50Hz 发布，
+        # 断线告警由 _check_motor_health 的 MOTOR_LOST 负责）
+        fl_logic = speed_map.get(R2_STATUS_IDS[0], 0.0)   # 0x323 → FL
+        fr_logic = speed_map.get(R2_STATUS_IDS[1], 0.0)   # 0x326 → FR
+        rl_logic = speed_map.get(R2_STATUS_IDS[2], 0.0)   # 0x324 → RL
+        rr_logic = speed_map.get(R2_STATUS_IDS[3], 0.0)   # 0x325 → RR
 
         # 用逻辑速度做正解，得到"逻辑车体速度"（公式坐标系）
         vx_f, vy_f, omega_f = omni_forward(fl_logic, fr_logic, rl_logic, rr_logic, self._R)
@@ -411,9 +412,10 @@ class R2ChassisNode(Node):
         # cmd_vel 超时检测
         if self._last_cmd_time > 0:
             dt_cmd = (now.nanoseconds * 1e-9) - self._last_cmd_time
-            if dt_cmd > self._cmd_timeout:
-                # 发停止命令
+            if dt_cmd > self._cmd_timeout and not self._stop_sent:
+                # 发停止命令（只发一次，_stop_sent 防止 50Hz 重复刷停止帧）
                 self._send_speeds([0, 0, 0, 0])
+                self._stop_sent = True
 
         # 计算车体速度
         chassis_speed = self._compute_chassis_speed()
@@ -429,7 +431,8 @@ class R2ChassisNode(Node):
             dt = 0.02  # 首次默认 50Hz
 
         self._odom_last_time = now
-        dt = max(0.001, min(dt, 0.1))  # 限幅 [1ms, 100ms]
+        # 只保下限防除零，不截断真实时间（原 0.1s 上限在定时器阻塞时丢弃时间 → 低估路程）
+        dt = max(0.001, dt)
 
         # 全向轮里程计积分：车体系速度经 yaw 旋转到 odom 系
         # （2026-08-05 修复: 原直线分支不旋转、圆弧分支为差速车模型，均不适用全向轮）
@@ -504,7 +507,9 @@ class R2ChassisNode(Node):
         """检查所有电机状态帧是否超时（1Hz）"""
         now = self.get_clock().now().nanoseconds * 1e-9
         for i, can_id in enumerate(R2_STATUS_IDS):
-            last = self._last_status_time.get(can_id, 0.0)
+            last = self._last_status_time.get(can_id)
+            if last is None:
+                continue   # 从未收到过首帧，不算超时（避免启动误报）
             dt = now - last
             if dt > 0.3:  # 超过 300ms 没收状态帧
                 self.get_logger().warn(
@@ -534,11 +539,16 @@ class R2ChassisNode(Node):
     # ────────────────────────────────────────────────
 
     def destroy_node(self):
-        self._rx_running = False
-        if self._rx_thread and self._rx_thread.is_alive():
-            self._rx_thread.join(timeout=1.0)
-        if self._can_bus:
-            self._can_bus.shutdown()
+        # 全部 getattr 保护：_init_can 失败（CAN 未初始化）时这些属性都不存在，
+        # 否则 destroy 路径会二次抛 AttributeError
+        if getattr(self, '_rx_running', False):
+            self._rx_running = False
+        rx_thread = getattr(self, '_rx_thread', None)
+        if rx_thread and rx_thread.is_alive():
+            rx_thread.join(timeout=1.0)
+        can_bus = getattr(self, '_can_bus', None)
+        if can_bus:
+            can_bus.shutdown()
         super().destroy_node()
 
 

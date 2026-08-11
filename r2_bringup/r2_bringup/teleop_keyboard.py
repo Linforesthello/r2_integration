@@ -86,8 +86,8 @@ class R2TeleopNode(Node):
         self._key_lock = threading.Lock()
         self._running = True
 
-        # 10Hz 持续发布：按住按键期间命令不中断，
-        # 松开后由 chassis_node 的 0.5s cmd 超时兜底停车
+        # 10Hz 持续发布：按住按键期间命令不中断；
+        # 松开后持续发布零命令 = 主动停车（0.5s cmd 超时仅在节点死亡时兜底）
         self._pub_timer = self.create_timer(0.1, self._publish_speed)
 
         # 终端原始设置（退出时恢复，防止 shell 残留 raw 模式）
@@ -164,8 +164,9 @@ class R2TeleopNode(Node):
                     break
                 # 多字节转义序列（方向键等）逐字节读入，各字节都会落入
                 # 未定义键分支 → 停车，行为安全
-                if key:
-                    self.handle_key(key)
+                if not key:
+                    break   # stdin EOF（终端关闭/SSH 断开）→ 退出，finally 恢复终端
+                self.handle_key(key)
         except KeyboardInterrupt:
             pass
         finally:
