@@ -15,6 +15,10 @@
 export FASTRTPS_DEFAULT_PROFILES_FILE=/home/lin/fastdds_wellknown.xml
 source /opt/ros/humble/setup.bash && source ~/Lin_workspace/r2_integration/install/setup.bash
 
+# ⚠️ 前置: CPU 性能模式（每次开机必做；重启恢复 powersave 后 KISS 掉 3.6Hz 重影复现，见 retrospect 08-11）
+echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor   # 检查 → performance
+
 # 终端 0: CAN 总线
 python3 ~/Lin_workspace/command/can_command.py
 

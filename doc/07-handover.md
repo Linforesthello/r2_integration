@@ -61,7 +61,15 @@ velodyne_driver_node / velodyne_transform_node / velodyne_laserscan_node / rviz 
 
 ## 三、启动命令（N97，按顺序，分终端）
 
+> **前置（每次开机必做）**：切 CPU 性能模式。N97 重启后治理器恢复 `powersave`，
+> KISS 会掉回 3.6Hz 重影复现（见 §六）。
+
 ```bash
+# 前置 0: CPU 性能模式
+echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+# 检查（应输出 performance）:
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
 # 终端 0: CAN 总线
 python3 ~/Lin_workspace/command/can_command.py
 
@@ -171,7 +179,7 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 - **D2 重影消除**（08-11 验证通过）：重录重跑地图结构清晰，对比图 `bags/raw/compare_0809_vs_0811_final.png`
 
 待办（按优先级）：
-- [ ] **performance 持久化**（08-11 暴露）：重启后恢复 powersave，需 systemd 服务或 udev 规则固化
+- [x] **performance 持久化**（08-11）：已入启动流程（§三 前置 0 步骤），每次开机手动执行；systemd 固化暂缓
 - [ ] **D4 地图复用验证**：重启全栈加载 map_run_0811_1925.pgm/yaml，rviz 回显与场地一致
 - [ ] **yaw 偏差**：实施预案方案①（odom0_config yaw=false→true），验证标准见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
 - [ ] **z 回归项**：slip 场景剧烈加减速 z 漂 +2.5m（08-05 遗留）在 two_d_mode 下复测
