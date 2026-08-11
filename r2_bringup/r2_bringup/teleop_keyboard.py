@@ -87,7 +87,9 @@ class R2TeleopNode(Node):
         self._running = True
 
         # 10Hz 持续发布：按住按键期间命令不中断；
-        # 松开后持续发布零命令 = 主动停车（0.5s cmd 超时仅在节点死亡时兜底）
+        # raw 模式检测不到松开事件：松开后 key_state 保持，继续发最后的速度命令
+        # （停车必须按 k/空格/其他未定义键 → key_state 归零 → 持续发零命令 = 主动停车）
+        # 0.5s cmd 超时仅在 teleop 进程死亡时兜底
         self._pub_timer = self.create_timer(0.1, self._publish_speed)
 
         # 终端原始设置（退出时恢复，防止 shell 残留 raw 模式）

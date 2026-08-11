@@ -565,7 +565,10 @@ def main(args=None):
         node.get_logger().info('用户中断')
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        # Humble 的 SIGINT handler 已 shutdown context，重复调用会报
+        # RCLError + 非零退出码；rclpy.ok() 为 False 时跳过
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 # ═══════════════════════════════════════════════════════════

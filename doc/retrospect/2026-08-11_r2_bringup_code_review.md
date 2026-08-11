@@ -2,7 +2,7 @@
 
 > 日期: 2026-08-11
 > 范围: `r2_bringup/` 全部代码（chassis_node.py、teleop_keyboard.py、launch ×2、config ×2、setup.py、package.xml）
-> 状态: ✅ P1~P9 已实施（逐项验证通过，详见第三节）；P10 待验证；实车冒烟待做
+> 状态: ✅ P1~P10 全部实施并验证（mock + 实车）；P4 实车拔线验证待做
 > 关联: [2026-07-31_teleop_keyboard_fix.md](2026-07-31_teleop_keyboard_fix.md)（同包历史排障）
 > 事实来源: 仅依据包内源码本身（本机 `~/Lin_workspace/r2_integration/r2_bringup/`），行号以 2026-08-11 当日为准
 
@@ -78,11 +78,11 @@
 - **修改方案**：`destroy_node` 全量 `getattr` 保护——**首行 `self._rx_running = False`（537）也须保护**（`_init_can` 失败时该属性同样不存在），`_rx_thread`、`_can_bus` 同理
 - **预期**：CAN 初始化失败场景下进程干净退出（traceback 只有原始错误，无二次异常）
 
-### P10 🟢 `<depend>python-can</depend>` rosdep 键待验证
+### P10 🟢 `<depend>python-can</depend>` rosdep 键修正（2026-08-11 实机验证）
 
-- **现象**：[package.xml:16](../r2_bringup/package.xml#L16) 依赖键 `python-can`；Ubuntu apt 包名是 `python3-can`，rosdep 是否收录该键需实测
-- **修改方案**：`rosdep resolve python-can` 验证；不可解析则改 `python3-can`（或标注手动安装）
-- **预期**：`rosdep install --from-paths r2_bringup -i` 可解析并装出 `python3-can`
+- **现象**：[package.xml:16](../r2_bringup/package.xml#L16) 依赖键 `python-can`；实测 `rosdep resolve python-can` 在 ubuntu jammy **不可解析**（rosdep 数据仅覆盖到 bionic）；`python3-can` 可解析（`#apt python3-can`）
+- **修改方案**：`<depend>python-can</depend>` → `<depend>python3-can</depend>`（已改）
+- **验证**：`rosdep install --from-paths r2_bringup -i -s` dry-run 通过（仅剩 `ament_python` 报错 = ROS 自带 buildtool，rosdep 数据不含该键属正常，不影响真机）
 
 ---
 
@@ -91,13 +91,13 @@
 | 步骤 | 内容 | 验收（量化） | 实施结果（2026-08-11） |
 |:--:|:--|:--|:--|
 | 1 | P1 补 `flags` 键 | `--test` 跑完 4 电机循环不崩 | ✅ 假帧单测通过，打印路径无 KeyError |
-| 2 | P2 超时停发只发一次 | candump 统计超时后 ≤4 帧 | ✅ mock 三场景通过（发 1 次/不复发/复位可再发） |
+| 2 | P2 超时停发只发一次 | candump 统计超时后 ≤4 帧 | ✅ mock + 实车：杀 teleop 后 0.5s 仅一组 4 帧停止帧（123/126/124/125 各 1），之后总线静默（旧代码会 50Hz 无限刷） |
 | 3 | P3 新增 setup.cfg | `ros2 run r2_bringup chassis_node` 可启动 | ✅ colcon build 后 3 入口落位 `lib/r2_bringup/`，`bin/` 消失；launch 标准写法解析正常 |
 | 4 | P4 缺轮降级 | 拔 1 轮后 odom 仍 50Hz | ✅ mock 三场景通过（4 轮正常/缺 1 轮降级/全无冻结） |
 | 5 | P5 EOF break | 断开 stdin 进程退出 | ✅ mock 通过（EOF 只读 1 次即退出） |
 | 6 | P6 去 dt 上限 | 阻塞 0.3s 后里程计不低估 | ✅ mock 通过（0.15s 阻塞 dt 保留，路程不低估） |
-| 7 | P7~P9 小改 | 各自预期项（见上表） | ✅ P7 纯注释；P8 mock 通过（启动不误报/断线才报）；P9 空壳节点 3 属性安全降级 |
-| 8 | P10 rosdep 验证 | `rosdep install` 通过 | ⏳ 待办（未改代码，先 `rosdep resolve python-can`） |
+| 7 | P7~P9 小改 | 各自预期项（见上表） | ✅ P7 注释按实测修正（raw 模式检测不到松开，停车靠显式按键）；P8 mock + 实车（今天启动日志 0 条 MOTOR_LOST，旧代码刷 4 条）；P9 空壳节点 3 属性安全降级 |
+| 8 | P10 rosdep 验证 | `rosdep install` 通过 | ✅ `python-can` jammy 不可解析 → 改 `python3-can`，dry-run 通过 |
 
 实施方式：按项目惯例，**改代码前询问用户**——由 AI 直接改，还是给指令用户亲手改（学习性操作优先用户动手）。
 全部改完在 N97 实车冒烟（速度 20% 降额）后，按 git 规范提交（body 关联本文档）。
