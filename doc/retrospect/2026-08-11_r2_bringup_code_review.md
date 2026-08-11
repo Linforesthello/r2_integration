@@ -2,7 +2,7 @@
 
 > 日期: 2026-08-11
 > 范围: `r2_bringup/` 全部代码（chassis_node.py、teleop_keyboard.py、launch ×2、config ×2、setup.py、package.xml）
-> 状态: ✅ P1~P10 全部实施并验证（mock + 实车）；P4 实车拔线验证待做
+> 状态: ✅ P1~P10 全部实施并验证（mock + N97 实车，含 P4 缺轮与 Ctrl-C 干净退出）
 > 关联: [2026-07-31_teleop_keyboard_fix.md](2026-07-31_teleop_keyboard_fix.md)（同包历史排障）
 > 事实来源: 仅依据包内源码本身（本机 `~/Lin_workspace/r2_integration/r2_bringup/`），行号以 2026-08-11 当日为准
 
@@ -47,6 +47,7 @@
 - **现象**：[chassis_node.py:370-371](../r2_bringup/r2_bringup/chassis_node.py#L370-L371) `len(statuses) < 4` 直接 `return None`，[420-421](../r2_bringup/r2_bringup/chassis_node.py#L420-L421) 随之停止发布 → 一轮 CAN 掉线，独立场景 TF 僵死、EKF 场景位置只剩 IMU 航向
 - **修改方案**：缺轮时降级——缺哪轮就把哪轮速度按 0 参与正解（或直接丢弃正解输出、odom 置零速发布），同时 `MOTOR_LOST` 日志保持；保证 odom/TF 持续 50Hz
 - **预期**：拔掉一轮 CAN（或屏蔽其状态 ID）后 `ros2 topic hz /odom_wheels` 仍稳定 50Hz；日志持续报 MOTOR_LOST；接回后自动恢复
+- **实车验证（2026-08-11）**：N97 拔 FR/RR 两根电机 CAN（断 2 轮，比 1 轮更严苛）→ odom 仍 50.0Hz，日志仅报 `MOTOR_LOST [FR] ID=0x326` / `[RR] ID=0x325`，接回自动恢复
 
 ### P5 🟡 teleop 终端 EOF 时 CPU 空转
 
@@ -93,10 +94,10 @@
 | 1 | P1 补 `flags` 键 | `--test` 跑完 4 电机循环不崩 | ✅ 假帧单测通过，打印路径无 KeyError |
 | 2 | P2 超时停发只发一次 | candump 统计超时后 ≤4 帧 | ✅ mock + 实车：杀 teleop 后 0.5s 仅一组 4 帧停止帧（123/126/124/125 各 1），之后总线静默（旧代码会 50Hz 无限刷） |
 | 3 | P3 新增 setup.cfg | `ros2 run r2_bringup chassis_node` 可启动 | ✅ colcon build 后 3 入口落位 `lib/r2_bringup/`，`bin/` 消失；launch 标准写法解析正常 |
-| 4 | P4 缺轮降级 | 拔 1 轮后 odom 仍 50Hz | ✅ mock 三场景通过（4 轮正常/缺 1 轮降级/全无冻结） |
+| 4 | P4 缺轮降级 | 拔 1 轮后 odom 仍 50Hz | ✅ mock + 实车：N97 断 FR/RR 两根线 odom 仍 50.0Hz，MOTOR_LOST 精确报 2 轮，接回自动恢复 |
 | 5 | P5 EOF break | 断开 stdin 进程退出 | ✅ mock 通过（EOF 只读 1 次即退出） |
 | 6 | P6 去 dt 上限 | 阻塞 0.3s 后里程计不低估 | ✅ mock 通过（0.15s 阻塞 dt 保留，路程不低估） |
-| 7 | P7~P9 小改 | 各自预期项（见上表） | ✅ P7 注释按实测修正（raw 模式检测不到松开，停车靠显式按键）；P8 mock + 实车（今天启动日志 0 条 MOTOR_LOST，旧代码刷 4 条）；P9 空壳节点 3 属性安全降级 |
+| 7 | P7~P9 小改 | 各自预期项（见上表） | ✅ P7 注释按实测修正（raw 模式检测不到松开，停车靠显式按键）；P8 mock + 实车（启动日志 0 条 MOTOR_LOST，旧代码刷 4 条）；P9 空壳节点 3 属性安全降级 + main() finally 加 `rclpy.ok()` 防重（N97 实车 Ctrl-C 干净退出，无 traceback/exit code 1） |
 | 8 | P10 rosdep 验证 | `rosdep install` 通过 | ✅ `python-can` jammy 不可解析 → 改 `python3-can`，dry-run 通过 |
 
 实施方式：按项目惯例，**改代码前询问用户**——由 AI 直接改，还是给指令用户亲手改（学习性操作优先用户动手）。
