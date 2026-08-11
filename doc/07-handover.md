@@ -1,8 +1,8 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-08-10
-> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 85%（08-09 z 漂移修复；yaw 偏差预案未实施）｜Phase 2 ✅ 100%｜Phase 3 ⏳ D2 建图跑通但重影
-> 下一阶段: KISS 帧率调参 → 重录建图 → Nav2
+> 最后更新: 2026-08-11
+> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 85%（08-09 z 漂移修复；yaw 偏差预案未实施）｜Phase 2 ✅ 100%｜Phase 3 ⏳ D2 建图重影已消除（08-11）
+> 下一阶段: performance 持久化 → D4 地图复用验证 → Nav2
 >
 > **部署环境**：N97 Mini PC（192.168.1.210，Ubuntu 22.04 + Humble），enp1s0: 10.18.18.20/24
 > 开发环境：VM（lin-virtual-machine，192.168.1.204）；VM→N97 SSH 免密可用
@@ -17,14 +17,16 @@
 | 0 | 底盘 ROS2 + CAN 控制 | ✅ 100% | 四全向轮，全命令可用 |
 | 1 | G354 IMU + 轮速 EKF 融合 | ✅ 85% | 实车验证完成（08-06）；z 漂移修复（08-09）；yaw 偏差预案未实施 |
 | 2 | VLP16 + KISS-ICP SLAM | ✅ 100% | 驱动+里程计+键盘建图全跑通（8-02） |
-| 3 | VLP16 + Nav2 导航 | ⏳ 0% | D2 离线建图已跑通但重影（KISS 帧率 3.6Hz），见 [retrospect/2026-08-09_map_double_ghost.md](retrospect/2026-08-09_map_double_ghost.md) |
+| 3 | VLP16 + Nav2 导航 | ⏳ 0% | D2 离线建图已跑通且**重影已消除**（08-11 KISS 帧率修复），见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)；待 D4 复用验证 + Nav2 |
 | 4 | D435 + Jetson 视觉 | ⏳ 0% | — |
 | 5 | 气动+异常+编排 | ⏳ 0% | — |
 
 **8-02 核心成果**：EKF/TF 融合链路 7 个问题全部解决（详见
 [retrospect/2026-08-02_ekf_tf_fusion_fix.md](retrospect/2026-08-02_ekf_tf_fusion_fix.md)）。
 **8-09 新增**：EKF z 漂移已修复（two_d_mode）；yaw 偏差确认（未解决）；D2 离线建图跑通但重影
-（KISS 帧率 3.6Hz，性能瓶颈）——详见 §五 与 §六。
+（KISS 帧率 3.6Hz，性能瓶颈）。
+**8-11 新增**：KISS 帧率根因实锤 = N97 CPU `powersave` 治理器低频；切 `performance` 后帧率恢复
+9.5Hz，重录重跑**重影消除**——详见 §五 与 §六。
 
 ---
 
@@ -46,7 +48,7 @@ velodyne_driver_node / velodyne_transform_node / velodyne_laserscan_node / rviz 
 | /odometry/filtered | ~30Hz ✅ | EKF 融合输出（08-09 降频 50→30 缓解 CPU） |
 | /odom_wheels | ~50Hz（std 0.002）✅ | 轮速里程计 |
 | /velodyne_points | ~9.9Hz ✅（08-09 bag 实测，max 间隔 0.121s） | 08-02 的掉帧现象**未复现**，此项关闭 |
-| /kiss/odometry | ~3.6Hz ⚠️（08-09 bag 实测） | **雷达 10Hz 输入吞掉 64%**：p50 0.19s / p90 0.6s / max 1.95s，纯处理瓶颈（详见 §六） |
+| /kiss/odometry | ~9.5Hz ✅（08-11 实测，切 performance 治理器后） | **修复**：08-09 时 3.6Hz（CPU powersave 低频，隔帧处理），详见 §六 |
 | /kiss/points 等 | visualize:=true 时发布 | 前缀 **/kiss/**（非 /kiss_icp/） |
 
 ### 2.3 数据表现（静止实测）
@@ -143,9 +145,11 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
   [retrospect/2026-08-09_ekf_z_drift_fix.md](retrospect/2026-08-09_ekf_z_drift_fix.md)
 - **yaw 偏差 ⚠️（未解决）**：filtered yaw = IMU 纯积分（f-i 恒 0.1°），起点偏置随机 6~10°、运动峰值 ±14°；
   预案（方案①轮速开放 yaw）已写好未实施，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
-- **地图重影 ⚠️（未解决）**：D2 离线建图链路跑通但产出严重重影；根因 KISS 帧率 3.6Hz（§二）
-  帧间 0.5~0.7s 空窗漂移 + 20-29m 远点放大。详见
-  [retrospect/2026-08-09_map_double_ghost.md](retrospect/2026-08-09_map_double_ghost.md)
+- **地图重影 ✅（已解决，08-11）**：D2 离线建图链路跑通但产出严重重影；根因 KISS 帧率 3.6Hz =
+  N97 CPU `powersave` 治理器低频（单帧处理 ~200ms，10Hz 输入隔帧处理）。切 `performance`
+  （`echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor`）→ 9.5Hz，
+  重录重跑重影消除、地图结构清晰。详见
+  [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)
 
 ### 遗留现象（算法本底，非故障）
 
@@ -162,16 +166,15 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 - z 轴 process noise 漂移（08-09 two_d_mode 修复；回归项见下）
 - IMU/雷达坐标基准与雷达高度冲突（08-06 定案 base_joint 0.13 / velodyne_joint 0.56）
 - 雷达掉帧调查（08-09 bag 实测 9.9Hz 稳定，未复现）
+- **KISS 帧率 3.6Hz**（08-11 修复）：CPU `powersave` 低频 → `performance` 后 9.5Hz，
+      详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)
+- **D2 重影消除**（08-11 验证通过）：重录重跑地图结构清晰，对比图 `bags/raw/compare_0809_vs_0811_final.png`
 
 待办（按优先级）：
-- [ ] **KISS 帧率 3.6Hz**（08-09 暴露，主线）：CPU 瓶颈（N97 4 核低功耗 + 全套节点），
-      KISS 本地图越积越稠密配准变慢（[社区佐证 issue #152](https://github.com/PRBonn/kiss-icp/issues/152)）。
-      作者推荐调参：**max_range 30→15~20m**（主要参数，代价=丢远墙特征）、**voxel_size 0.2→0.25/0.3**；
-      采集时 N97 不开 rviz2。改后重录复测
-- [ ] **D2 重影消除**：帧率解决后重录重验；验收指标待定量化（轮廓清晰度 + 闭环误差）
+- [ ] **performance 持久化**（08-11 暴露）：重启后恢复 powersave，需 systemd 服务或 udev 规则固化
+- [ ] **D4 地图复用验证**：重启全栈加载 map_run_0811_1925.pgm/yaml，rviz 回显与场地一致
 - [ ] **yaw 偏差**：实施预案方案①（odom0_config yaw=false→true），验证标准见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
 - [ ] **z 回归项**：slip 场景剧烈加减速 z 漂 +2.5m（08-05 遗留）在 two_d_mode 下复测
-- [ ] 同步收尾：最新提交 857d57a，**N97 待 `git pull`**（08-10 网络不通，恢复后补）
 - [ ] VNC 开机自启（N97 重启后远程桌面不丢）
 - [ ] FAST-LIO2 评估（长期，VLP-16 原生支持，接 G354 解决旋转痛点）— VM 先编译验证
 - [ ] 可选：VLP-16 rpm 600→1200（20Hz）试验（帧内畸变减半）
@@ -192,14 +195,15 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 3. 本阶段 7 个问题的共性教训：跨机器同步必须全覆盖（含配置）、第三方 launch 默认值必须实测、配置不合法可能不报错
 4. **N97 单机跑全套是性能瓶颈**：EKF 降频 + KISS 吞帧同源，CPU 余量优先于功能扩展
 
-**资源状态**：VM 与 N97 代码同步基线 = 提交 857d57a（N97 待 pull）；
-bag 分析副本在 VM `~/Lin_workspace/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 / map_run_0809_2133）。
+**资源状态**：VM 与 N97 代码同步基线 = 提交 93e004d（三端已同步，08-11）；
+bag 分析副本在 VM `~/Lin_workspace/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 /
+map_run_0809_2133 / **map_run_0811_1925**）；地图产物 map_run_0811_1925.pgm/.ply/map.yaml。
 
 ---
 
 ## 八、相关文档索引
 
-- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影）
+- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）
 - 进度看板：`02-progress.md` ｜ 状态快照：`03-current_state.md`
 - EKF yaw 预案：`phase1/ekf-yaw-plan.md` ｜ SLAM 方案探索：`retrospect/vlp16_slam_exploration.md`
 - W1 建图手册：`minimal-loop/w1-operation.md`（D1~D5，含 D2 执行记录）

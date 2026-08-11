@@ -1,5 +1,10 @@
 # 2026-08-09 地图严重重影留档（D2 阶段性总结 + 未解决问题清单）
 
+> **更新（2026-08-11）**：根因已实锤并修复——KISS 帧率 3.6Hz 因 N97 CPU `powersave` 治理器低频；
+> 切 `performance` 后帧率恢复 9.5Hz，重录重跑重影消除、地图结构清晰。
+> 详见 [2026-08-11_kiss_frame_rate_fix.md](2026-08-11_kiss_frame_rate_fix.md)。
+> 本文保留为阶段性总结与根因链留档。
+
 ## 现象
 
 D2 离线建图（build_map.py → pcd_to_map.py）产出地图**严重重影**，不可用；
@@ -26,8 +31,8 @@ D2 离线建图（build_map.py → pcd_to_map.py）产出地图**严重重影**�
 ## 未解决问题清单
 
 ### 新问题（本次暴露）
-- [ ] **KISS 帧率 3.6Hz 根因**：CPU 瓶颈 vs KISS 参数（deskew/体素/匹配策略）？未排查
-- [ ] **重影消除**：帧率解决后重录重验；验收指标 = 轮廓清晰度 + 闭环误差（待定量化）
+- [x] **KISS 帧率 3.6Hz 根因**（08-11 实锤）：CPU `powersave` 治理器低频，非参数问题
+- [x] **重影消除**（08-11 验证）：performance 后重录重跑，结构清晰；对比图 `bags/raw/compare_0809_vs_0811_final.png`
 - [ ] KISS-ICP `visualize:=true` 才发布 /kiss/frame 的依赖（手册 D1b 已标注，仍未实机确认）
 
 ### 老问题（遗留，与本次无关）

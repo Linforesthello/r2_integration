@@ -168,10 +168,12 @@ free_thresh: 0.25
 
 ## D2：地图生成验证（离线）
 
-> **执行记录（08-09）**：链路已跑通（bag → 累积点云 → 占用网格），但产出**严重重影**不可用。
-> 轨迹 523 帧 / 5.5×8.3m 绕场；地图 971×931 格@0.05m / 47×49m（大场地+雷达视距 23-29m，范围正常）；
-> 根因 = **KISS 帧率 3.6Hz（应 10Hz）**，帧间 0.5~0.7s 空窗位姿漂移累积 → 远点错位重影。
-> 详见 [retrospect/2026-08-09_map_double_ghost.md](../retrospect/2026-08-09_map_double_ghost.md)。**D2 状态：⏳ 重影未解决，验收延后。**
+> **执行记录（08-09）**：链路首次跑通（bag → 累积点云 → 占用网格），但产出**严重重影**不可用。
+> **执行记录（08-11）**：重影根因实锤并修复——N97 CPU `powersave` 治理器低频导致 KISS 隔帧处理
+> （3.6Hz，应 10Hz）；切 `performance` 后 KISS 恢复 9.5Hz，重录 bag（map_run_0811_1925，1634 帧）
+> 重跑建图，地图结构清晰、重影消除。对比图 `bags/raw/compare_0809_vs_0811_final.png`。
+> 详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](../retrospect/2026-08-11_kiss_frame_rate_fix.md)。
+> **D2 状态：✅ 已通过（08-11）**，遗留 D4 地图复用验证 + performance 持久化。
 
 ```bash
 # 1. bag → 累积点云
@@ -221,12 +223,12 @@ ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=~/bags/map.yaml
 
 ## D5：W1 验收清单
 
-- [ ] TF 树图存档（view_frames pdf/png → doc 留档）
-- [ ] base_link→velodyne 实际高度已量测并写入静态 TF（解决 65/77cm 冲突）
-- [ ] 一张可复用场地地图（map.pgm + map.yaml + 源 PCD）
-- [ ] 地图重启后加载正确（rviz 回显）
-- [ ] 全程 bag 已录制归档（N97 bags/ 目录）
-- [ ] 流程文档化（本手册 + 脚本入 bags/analysis/）
+- [x] TF 树图存档（view_frames pdf/png → doc 留档）
+- [x] base_link→velodyne 实际高度已量测并写入静态 TF（解决 65/77cm 冲突）
+- [x] 一张可复用场地地图（**map_run_0811_1925.pgm + map.yaml + 源 PCD**，08-11 重影消除后 ✅）
+- [ ] 地图重启后加载正确（rviz 回显）← D4 未做
+- [x] 全程 bag 已录制归档（N97 bags/ 目录）
+- [x] 流程文档化（本手册 + 脚本入 bags/analysis/）
 
 ---
 
