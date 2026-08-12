@@ -187,7 +187,7 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 - 雷达掉帧调查（08-09 bag 实测 9.9Hz 稳定，未复现）
 - **KISS 帧率 3.6Hz**（08-11 修复）：CPU `powersave` 低频 → `performance` 后 9.5Hz，
       详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)
-- **D2 重影消除**（08-11 验证通过）：重录重跑地图结构清晰，对比图 `bags/raw/compare_0809_vs_0811_final.png`
+- **D2 重影消除**（08-11 验证通过）：重录重跑地图结构清晰，对比图 `bags/maps/compare_0809_vs_0811_final.png`
 - **r2_bringup 代码审查 P1~P10**（08-11 全部实施 + 实车验证，见 §五）
 
 待办（按优先级）：
@@ -217,8 +217,8 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 
 **资源状态**：VM 与 N97 代码同步基线 = 提交 63543b3（main，三端已同步，08-12）；
 bag 分析副本在 VM `~/Lin_workspace/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 /
-map_run_0809_2133 / **map_run_0811_1925**）；地图产物 map_run_0811_1925.pgm/.ply/map.yaml
-（D4 用副本：VM `bags/d4_map/` → N97 `~/maps/`）。
+map_run_0809_2133 / **map_run_0811_1925**）；地图产物 `bags/maps/map_run_0811_1925/`（ply/map.yaml）与
+`bags/maps/d4/`（pgm/map.yaml，D4 部署副本 → N97 `~/maps/`）。
 
 ---
 

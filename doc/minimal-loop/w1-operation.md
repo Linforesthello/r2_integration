@@ -175,7 +175,7 @@ free_thresh: 0.25
 > **执行记录（08-09）**：链路首次跑通（bag → 累积点云 → 占用网格），但产出**严重重影**不可用。
 > **执行记录（08-11）**：重影根因实锤并修复——N97 CPU `powersave` 治理器低频导致 KISS 隔帧处理
 > （3.6Hz，应 10Hz）；切 `performance` 后 KISS 恢复 9.5Hz，重录 bag（map_run_0811_1925，1634 帧）
-> 重跑建图，地图结构清晰、重影消除。对比图 `bags/raw/compare_0809_vs_0811_final.png`。
+> 重跑建图，地图结构清晰、重影消除。对比图 `bags/maps/compare_0809_vs_0811_final.png`。
 > 详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](../retrospect/2026-08-11_kiss_frame_rate_fix.md)。
 > **D2 状态：✅ 已通过（08-11）**，遗留 D4 地图复用验证 + performance 持久化。
 

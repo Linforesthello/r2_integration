@@ -66,7 +66,7 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor   # → performance
 
 - 08-09：48.6×46.6m，中心区域墙线糊成一团**无结构**（多帧错位重叠）
 - 08-11：32.5×49.9m，**规则结构清晰**（长直墙/直角/走廊），重影消除
-- 对比图：`bags/raw/compare_0809_vs_0811_final.png`（四格：新旧全景 + 中心放大）
+- 对比图：`bags/maps/compare_0809_vs_0811_final.png`（四格：新旧全景 + 中心放大）
 - ASCII 放大对比确认：0809 混沌厚块 vs 0811 可辨结构
 
 ## 遗留问题
@@ -81,4 +81,4 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor   # → performance
 - 分析脚本（新增）：`bags/analysis/stats_map_run.py`（点数/车速/帧间隔/帧间位移统计）
 - 重影留档（承接）：[2026-08-09_map_double_ghost.md](2026-08-09_map_double_ghost.md)
 - bag 存档：`bags/raw/map_run_0809_2133`（修复前）/ `map_run_0811_1925`（修复后，2.5GB）
-- 地图：`bags/raw/map_run_0811_1925.pgm/.ply/map.yaml`
+- 地图：`bags/maps/map_run_0811_1925/`（ply/map.yaml）；pgm 在 `bags/maps/d4/`（D4 部署副本）
