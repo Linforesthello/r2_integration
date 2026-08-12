@@ -159,6 +159,17 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
   重录重跑重影消除、地图结构清晰。详见
   [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)
 
+### 8-11 新增：r2_bringup 全包代码审查修复（✅ P1~P10 全部实施并实车验证）
+
+- **审查结论**：🔴 确定 bug 3 项 + 🟡 设计缺陷 3 项 + 🟢 轻微 4 项；运动学正逆解、
+  四轮 ID 映射、90° 变换、ekf.yaml 225 值矩阵等核对无需修改
+- **关键修复**：P1 `--test` 模式 KeyError 崩溃；P2 超时后 50Hz 无限重发停止帧（→只发一次，
+  标志位防重）；P3 缺 setup.cfg 入口脚本落错位置（→补 setup.cfg + launch 恢复标准布局）；
+  P4 缺轮 odom/TF 冻结（→缺轮按 0 参与正解，odom 保 50Hz，**实车断 2 轮验证通过**）；
+  P5 teleop EOF 空转；P6 dt 钳位丢时间；P8 启动 MOTOR_LOST 误报
+- **验证**：mock + N97 实车（含缺轮、Ctrl-C 干净退出）。详见
+  [retrospect/2026-08-11_r2_bringup_code_review.md](retrospect/2026-08-11_r2_bringup_code_review.md)
+
 ### 遗留现象（算法本底，非故障）
 
 - **KISS-ICP 静止/运动均有毫米~厘米级抖动**：纯激光配准本底（无 IMU 融合）
@@ -177,6 +188,7 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 - **KISS 帧率 3.6Hz**（08-11 修复）：CPU `powersave` 低频 → `performance` 后 9.5Hz，
       详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)
 - **D2 重影消除**（08-11 验证通过）：重录重跑地图结构清晰，对比图 `bags/raw/compare_0809_vs_0811_final.png`
+- **r2_bringup 代码审查 P1~P10**（08-11 全部实施 + 实车验证，见 §五）
 
 待办（按优先级）：
 - [x] **performance 持久化**（08-11）：已入启动流程（§三 前置 0 步骤），每次开机手动执行；systemd 固化暂缓
@@ -203,15 +215,16 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 3. 本阶段 7 个问题的共性教训：跨机器同步必须全覆盖（含配置）、第三方 launch 默认值必须实测、配置不合法可能不报错
 4. **N97 单机跑全套是性能瓶颈**：EKF 降频 + KISS 吞帧同源，CPU 余量优先于功能扩展
 
-**资源状态**：VM 与 N97 代码同步基线 = 提交 93e004d（三端已同步，08-11）；
+**资源状态**：VM 与 N97 代码同步基线 = 提交 63543b3（main，三端已同步，08-12）；
 bag 分析副本在 VM `~/Lin_workspace/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 /
-map_run_0809_2133 / **map_run_0811_1925**）；地图产物 map_run_0811_1925.pgm/.ply/map.yaml。
+map_run_0809_2133 / **map_run_0811_1925**）；地图产物 map_run_0811_1925.pgm/.ply/map.yaml
+（D4 用副本：VM `bags/d4_map/` → N97 `~/maps/`）。
 
 ---
 
 ## 八、相关文档索引
 
-- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）
+- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）｜`retrospect/2026-08-11_r2_bringup_code_review.md`（代码审查 P1~P10）
 - 进度看板：`02-progress.md` ｜ 状态快照：`03-current_state.md`
 - EKF yaw 预案：`phase1/ekf-yaw-plan.md` ｜ SLAM 方案探索：`retrospect/vlp16_slam_exploration.md`
 - W1 建图手册：`minimal-loop/w1-operation.md`（D1~D5，含 D2 执行记录）
