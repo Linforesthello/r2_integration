@@ -18,11 +18,12 @@ ekf_filter_node:
     two_d_mode: true
 
     # ── 轮速里程计输入 ──
-    # 提供: x, y 位置 + vx, vy 速度（来自轮编码器积分）
-    # 不提供: z（地面无变化）, yaw（轮速 yaw 会打滑误差大）
+    # 提供: x, y 位置 + vx, vy 速度 + yaw（来自轮编码器积分；08-12 yaw 开放，
+    #   以轮速为绝对基准消除 IMU 纯积分的起点偏置/运动偏差，见 doc/phase1/ekf-yaw-plan.md 方案①）
+    # 不提供: z（地面无变化）
     odom0: /odom_wheels
     odom0_config: [true, true, false,      # x, y, z
-                   false, false, false,    # roll, pitch, yaw（轮速不给 yaw）
+                   false, false, true,     # roll, pitch, yaw（08-12: 轮速开放 yaw）
                    true, true, false,      # vx, vy, vz
                    false, false, false,    # vroll, vpitch, vyaw
                    false, false, false]    # ax, ay, az
