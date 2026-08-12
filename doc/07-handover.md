@@ -95,8 +95,8 @@ ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/tt
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch r2_bringup ekf.launch.py
 
-# 终端 6: WASD 键盘遥控（python3 直启，绕开本环境 libexec 布局问题）
-python3 ~/Lin_workspace/r2_integration/r2_bringup/r2_bringup/teleop_keyboard.py
+# 终端 6: WASD 键盘遥控（08-11 P3 setup.cfg 修复后 ros2 run 可直接启动，无需 python3 直启）
+ros2 run r2_bringup teleop_keyboard
 # 或一键（GNOME 终端环境）:
 # bash ~/Lin_workspace/r2_integration/scripts/r2_startup.sh
 ```

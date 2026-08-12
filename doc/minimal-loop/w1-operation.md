@@ -41,8 +41,8 @@ ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/tt
 # 终端 5: EKF（⚠️ 必须在 IMU 校准完成后启动，否则输出 NaN；重启 IMU 必须同时重启 EKF）
 ros2 launch r2_bringup ekf.launch.py
 
-# 终端 6: 键盘遥控（python3 直启，绕开 libexec 布局）
-python3 ~/Lin_workspace/r2_integration/r2_bringup/r2_bringup/teleop_keyboard.py
+# 终端 6: 键盘遥控（08-11 P3 setup.cfg 修复后 ros2 run 可直接启动，无需 python3 直启）
+ros2 run r2_bringup teleop_keyboard
 ```
 
 ### 1.2 生成当前 TF 树（现状盘点）
