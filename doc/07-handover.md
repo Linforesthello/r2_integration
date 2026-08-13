@@ -1,8 +1,8 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-08-11
-> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 85%（08-09 z 漂移修复；yaw 偏差预案未实施）｜Phase 2 ✅ 100%｜Phase 3 ⏳ D2 建图重影已消除（08-11）
-> 下一阶段: performance 持久化 → D4 地图复用验证 → Nav2
+> 最后更新: 2026-08-12
+> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-09 z 漂移修复；08-12 yaw 偏差方案①实施并验证通过）｜Phase 2 ✅ 100%｜Phase 3 ⏳ D2 建图重影已消除（08-11）
+> 下一阶段: D4 地图复用验证 → Nav2（yaw 遗留已清零）
 >
 > **部署环境**：N97 Mini PC（192.168.1.210，Ubuntu 22.04 + Humble），enp1s0: 10.18.18.20/24
 > 开发环境：VM（lin-virtual-machine，192.168.1.204）；VM→N97 SSH 免密可用
@@ -15,7 +15,7 @@
 | Phase | 目标 | 状态 | 说明 |
 |:------|:-----|:----:|:-----|
 | 0 | 底盘 ROS2 + CAN 控制 | ✅ 100% | 四全向轮，全命令可用 |
-| 1 | G354 IMU + 轮速 EKF 融合 | ✅ 85% | 实车验证完成（08-06）；z 漂移修复（08-09）；yaw 偏差预案未实施 |
+| 1 | G354 IMU + 轮速 EKF 融合 | ✅ 95% | 实车验证完成（08-06）；z 漂移修复（08-09）；yaw 偏差方案①实施并验证通过（08-12）；仅剩 slip 剧烈加减速严格复测 |
 | 2 | VLP16 + KISS-ICP SLAM | ✅ 100% | 驱动+里程计+键盘建图全跑通（8-02） |
 | 3 | VLP16 + Nav2 导航 | ⏳ 0% | D2 离线建图已跑通且**重影已消除**（08-11 KISS 帧率修复），见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)；待 D4 复用验证 + Nav2 |
 | 4 | D435 + Jetson 视觉 | ⏳ 0% | — |
@@ -27,6 +27,9 @@
 （KISS 帧率 3.6Hz，性能瓶颈）。
 **8-11 新增**：KISS 帧率根因实锤 = N97 CPU `powersave` 治理器低频；切 `performance` 后帧率恢复
 9.5Hz，重录重跑**重影消除**——详见 §五 与 §六。
+**8-12 新增**：yaw 偏差方案①（轮速开放 yaw）实施并验证通过（起点 0.00°/峰值 0.07°，含 90°/190°
+转弯），见 [ekf-yaw-plan.md](phase1/ekf-yaw-plan.md) 验证结果段；stage_0812_2111 保守留档 bag 地图
+对照生成（`bags/stage_0812_map/`）。
 
 ---
 
@@ -110,7 +113,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 
 | 配置 | 位置 | 当前值 |
 |:-----|:-----|:-------|
-| EKF 融合 | `r2_bringup/config/ekf.yaml` | frequency 30、two_d_mode: true、az noise 1e-6；odom0_config **yaw=false**（yaw 偏差根因，预案 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)）⚠️ launch 加载 **install 副本**，改后须 build 或手动同步 |
+| EKF 融合 | `r2_bringup/config/ekf.yaml` | frequency 30、two_d_mode: true、az noise 1e-6；odom0_config **yaw=true**（08-12 方案①开放，验证通过，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)）⚠️ launch 加载 **install 副本**，改后须 build 或手动同步 |
 | 底盘 TF | `chassis.launch.py` | `publish_tf:=false`（EKF 场景），默认 true |
 | 静态 TF | `ekf.launch.py` | `base_link→imu_link` 单位变换 |
 | KISS-ICP | `~/kiss_icp_ws/src/kiss_icp/config/config.yaml` | max_range 30 / min_range 0.5 / voxel_size 0.2（8-02 调优，备份 .bak_20260802） |
@@ -151,8 +154,9 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 - **z 漂移修复 ✅**：15 维 EKF 中无测量约束的 z/vz/az 受姿态-速度耦合 + 积压放大 → 漂 55.7m；
   `two_d_mode: true` + az noise 1e-6 修复，TF z 恒 0、30Hz 正常。详见
   [retrospect/2026-08-09_ekf_z_drift_fix.md](retrospect/2026-08-09_ekf_z_drift_fix.md)
-- **yaw 偏差 ⚠️（未解决）**：filtered yaw = IMU 纯积分（f-i 恒 0.1°），起点偏置随机 6~10°、运动峰值 ±14°；
-  预案（方案①轮速开放 yaw）已写好未实施，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
+- **yaw 偏差 ✅（已解决，08-12）**：filtered yaw 原为 IMU 纯积分（f-i 恒 0.1°），起点偏置随机 6~10°、
+  运动峰值 ±14°；方案①（轮速开放 yaw，`odom0_config` yaw=true）08-12 实施并验证通过：
+  起点 0.00°、全程峰值 0.07°（含 90°/190° 转弯段）、z 恒 0，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
 - **地图重影 ✅（已解决，08-11）**：D2 离线建图链路跑通但产出严重重影；根因 KISS 帧率 3.6Hz =
   N97 CPU `powersave` 治理器低频（单帧处理 ~200ms，10Hz 输入隔帧处理）。切 `performance`
   （`echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor`）→ 9.5Hz，
@@ -193,8 +197,8 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 待办（按优先级）：
 - [x] **performance 持久化**（08-11）：已入启动流程（§三 前置 0 步骤），每次开机手动执行；systemd 固化暂缓
 - [ ] **D4 地图复用验证**：重启全栈加载 map_run_0811_1925.pgm/yaml，rviz 回显与场地一致
-- [ ] **yaw 偏差**：实施预案方案①（odom0_config yaw=false→true），验证标准见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
-- [ ] **z 回归项**：slip 场景剧烈加减速 z 漂 +2.5m（08-05 遗留）在 two_d_mode 下复测
+- [x] **yaw 偏差**（08-12 完成）：方案①（odom0_config yaw=true）实施并验证通过，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
+- [ ] **z 回归项**：slip 场景剧烈加减速 z 漂 +2.5m（08-05 遗留）复测——08-12 转弯/直行全程 z 恒 0（two_d_mode 结构性钳位），仅"剧烈加减速"动作未严格复测
 - [ ] VNC 开机自启（N97 重启后远程桌面不丢）
 - [ ] FAST-LIO2 评估（长期，VLP-16 原生支持，接 G354 解决旋转痛点）— VM 先编译验证
 - [ ] 可选：VLP-16 rpm 600→1200（20Hz）试验（帧内畸变减半）
@@ -215,10 +219,12 @@ EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修�
 3. 本阶段 7 个问题的共性教训：跨机器同步必须全覆盖（含配置）、第三方 launch 默认值必须实测、配置不合法可能不报错
 4. **N97 单机跑全套是性能瓶颈**：EKF 降频 + KISS 吞帧同源，CPU 余量优先于功能扩展
 
-**资源状态**：VM 与 N97 代码同步基线 = 提交 63543b3（main，三端已同步，08-12）；
+**资源状态**：VM 与 N97 代码同步基线 = 提交 5c46c58（main，08-12，yaw 开放）；
 bag 分析副本在 VM `~/Lin_workspace/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 /
-map_run_0809_2133 / **map_run_0811_1925**）；地图产物 `bags/maps/map_run_0811_1925/`（ply/map.yaml）与
-`bags/maps/d4/`（pgm/map.yaml，D4 部署副本 → N97 `~/maps/`）。
+map_run_0809_2133 / **map_run_0811_1925** / **ekf_yaw_v2_0812** / **stage_0812_2111**）；地图产物
+`bags/maps/map_run_0811_1925/`（ply/map.yaml）与 `bags/maps/d4/`（pgm/map.yaml，D4 部署副本 → N97 `~/maps/`）；
+stage_0812 保守录制对照地图 `bags/stage_0812_map/`（pgm/yaml + raw.ply，对比图
+`bags/raw/compare_0811_vs_0812.png`，留档未传 N97）。
 
 ---
 
