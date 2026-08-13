@@ -23,7 +23,7 @@ r2_integration/
 │   ├── ros2-ops.md                   ROS/ROS2 操作规范（构建/启动/录包/分析）
 │   ├── obsidian-sync.md              Obsidian 镜像同步规范（全局适用）
 │   ├── 01-plan.md                    五阶段集成方案总纲
-│   ├── minimal-loop/                  最小闭环计划（plan.md）+ 执行目录（W1操作手册/审计数据）
+│   ├── minimal-loop/                  最小闭环计划（plan.md）+ W1操作手册 + 建图验证流程（map-verify-flow.md）+ 审计数据
 │   ├── 02-deploy-checklist.md        N97 部署清单
 │   ├── 02-progress.md                全局进度一览（各Phase完成度）
 │   ├── project_status.md              全项目现状总结（08-06）
