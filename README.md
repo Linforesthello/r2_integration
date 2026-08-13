@@ -20,9 +20,9 @@ r2_integration/
 ├── doc/                               ← 文档（按阶段组织）
 │   ├── standards.md                  文档标准 ← 先看这个
 │   ├── obsidian-tags.md              Obsidian 标签体系习惯
+│   ├── ros2-ops.md                   ROS/ROS2 操作规范（构建/启动/录包/分析）
 │   ├── 01-plan.md                    五阶段集成方案总纲
-│   ├── plan-minimal-loop.md           最小闭环打通计划（建图→导航→避障，08-06）
-│   ├── minimal-loop/                  执行目录（W1操作手册/审计数据/frame快照）
+│   ├── minimal-loop/                  最小闭环计划（plan.md）+ 执行目录（W1操作手册/审计数据）
 │   ├── 02-deploy-checklist.md        N97 部署清单
 │   ├── 02-progress.md                全局进度一览（各Phase完成度）
 │   ├── project_status.md              全项目现状总结（08-06）
@@ -42,6 +42,7 @@ r2_integration/
 │   │   └── 2026-08-04_ekf-verification-result.md  EKF 验证结果记录
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
+│       ├── 2026-08-10_vocalinux语音输入.md          Vocalinux 本地语音输入调试总结
 │       ├── 2026-08-06_git_ops_lessons.md          Git 操作教训（reset 误伤/Co-Authored-By 规则）
 │       ├── 2026-08-05_chassis_ekf_debug.md        底盘里程计修复+EKF过程噪声225值矩阵排障
 │       ├── 2026-08-05_imu_covariance_ekf_nan.md   IMU 协方差病态→EKF NaN 排障

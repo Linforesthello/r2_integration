@@ -1,6 +1,6 @@
 # minimal-loop 执行目录
 
-> 最小闭环打通计划（[plan-minimal-loop.md](../plan-minimal-loop.md)）的执行文档目录
+> 最小闭环打通计划（[plan.md](plan.md)）的执行文档目录
 > 按 D0 审计 → W1 建图 → W2 导航 → W3 避障 的顺序推进
 
 ## 文件索引

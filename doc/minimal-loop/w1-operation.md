@@ -1,6 +1,6 @@
 # W1 操作手册：TF 工程 + 建图落地
 
-> 关联计划: [plan-minimal-loop.md](plan-minimal-loop.md) W1（08-06 ~ 08-12）
+> 关联计划: [plan.md](plan.md) W1（08-06 ~ 08-12）
 > 执行机器: N97（192.168.1.210，需开机）+ VM（调试/分析）
 > 前置: 全栈节点可启动（r2_startup.sh 或手动 launch）
 
@@ -177,7 +177,10 @@ free_thresh: 0.25
 > （3.6Hz，应 10Hz）；切 `performance` 后 KISS 恢复 9.5Hz，重录 bag（map_run_0811_1925，1634 帧）
 > 重跑建图，地图结构清晰、重影消除。对比图 `bags/maps/compare_0809_vs_0811_final.png`。
 > 详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](../retrospect/2026-08-11_kiss_frame_rate_fix.md)。
-> **D2 状态：✅ 已通过（08-11）**，遗留 D4 地图复用验证 + performance 持久化。
+> **执行记录（08-12）**：保守留档 bag（stage_0812_2111，1449 帧/229.5s，速度 max 0.21m/s）重跑建图，
+> 对照地图 `bags/stage_0812_map/`（716 万点，最长连续墙段 7.95m，无重影双线，主体结构清晰）。
+> 对比图 `bags/raw/compare_0811_vs_0812.png`。主地图仍用 map_run_0811_1925。
+> **D2 状态：✅ 已通过（08-11/08-12 双验证）**，遗留 D4 地图复用验证 + performance 持久化。
 
 ```bash
 # 1. bag → 累积点云
@@ -238,6 +241,6 @@ ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=~/bags/map.yaml
 
 ## 相关
 
-- 计划: [plan-minimal-loop.md](plan-minimal-loop.md)
+- 计划: [plan.md](plan.md)
 - 传感器安装定义: [phase0/sensor-mount.md](phase0/sensor-mount.md)（velodyne 高度待确认项）
 - 雷达网络: retrospect/vlp16_slam_exploration.md

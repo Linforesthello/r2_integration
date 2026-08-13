@@ -2,7 +2,7 @@
 
 > 原始输出: [0status_list.md](0status_list.md)（节点/话题/TF）+ [0status_hz.md](0status_hz.md)（频率）
 > TF 树快照: [frames_2026-08-06_21.40.43.pdf](frames_2026-08-06_21.40.43.pdf) / [.gv](frames_2026-08-06_21.40.43.gv) / [.png](frames_2026-08-06-1.png)
-> 关联计划: [plan-minimal-loop.md](../plan-minimal-loop.md) W1 D0
+> 关联计划: [plan.md](plan.md) W1 D0
 
 ---
 
