@@ -21,6 +21,7 @@ r2_integration/
 │   ├── standards.md                  文档标准 ← 先看这个
 │   ├── obsidian-tags.md              Obsidian 标签体系习惯
 │   ├── ros2-ops.md                   ROS/ROS2 操作规范（构建/启动/录包/分析）
+│   ├── obsidian-sync.md              Obsidian 镜像同步规范（全局适用）
 │   ├── 01-plan.md                    五阶段集成方案总纲
 │   ├── minimal-loop/                  最小闭环计划（plan.md）+ 执行目录（W1操作手册/审计数据）
 │   ├── 02-deploy-checklist.md        N97 部署清单
@@ -39,15 +40,21 @@ r2_integration/
 │   ├── phase1/                       ← Phase 1 专题
 │   │   ├── g354-wiring.md            G354 IMU 接线/配置
 │   │   ├── ekf-verification.md       EKF 实车验证清单（测试方法+判合格标准）
+│   │   ├── ekf-yaw-plan.md           EKF yaw 融合预案（08-12 方案①已实施验证）
 │   │   └── 2026-08-04_ekf-verification-result.md  EKF 验证结果记录
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
-│       ├── 2026-08-10_vocalinux语音输入.md          Vocalinux 本地语音输入调试总结
+│       ├── 2026-08-11_kiss_frame_rate_fix.md      KISS 帧率修复（3.6→9.5Hz，重影根因）
+│       ├── 2026-08-11_r2_bringup_code_review.md   r2_bringup 代码审查
+│       ├── 2026-08-10_vocalinux语音输入.md        Vocalinux 本地语音输入调试总结
+│       ├── 2026-08-09_ekf_z_drift_fix.md          EKF z 漂移修复（two_d_mode 钳位）
+│       ├── 2026-08-09_map_double_ghost.md         地图重影排查
 │       ├── 2026-08-06_git_ops_lessons.md          Git 操作教训（reset 误伤/Co-Authored-By 规则）
 │       ├── 2026-08-05_chassis_ekf_debug.md        底盘里程计修复+EKF过程噪声225值矩阵排障
 │       ├── 2026-08-05_imu_covariance_ekf_nan.md   IMU 协方差病态→EKF NaN 排障
 │       ├── 2026-08-05_n97_remote_desktop.md       N97 远程桌面三方案排障（NoMachine/RealVNC/TigerVNC）
 │       ├── 2026-08-03_r2_repo_repair.md           r2_integration 仓库修复全记录
+│       ├── 2026-08-02_vlp16_switch_network.md     VLP-16 交换机接入方案（+vlp16-switch-network-topology.png）
 │       ├── 2026-08-02_ekf_tf_fusion_fix.md        EKF/TF 融合排障全记录（7 问题）
 │       ├── 2026-07-31_chassis_launch_fix.md       chassis.launch.py 路径修复
 │       ├── 2026-07-31_claude_md_import_setup.md   流程模式：Claude 优先读到文档
@@ -66,7 +73,7 @@ r2_integration/
 │   ├── g354_imu_driver/imu_node.py   核心节点（Mahony + ZUPT）
 │   ├── launch/g354_rviz.launch.py    启动文件（rviz:=false 可只开节点）
 │   ├── config/g354_imu.rviz          RViz2 配置
-│   ├── doc/                           G354 专题文档
+│   ├── doc/                           G354 专题文档（completion-report/debug-log/observation-methods/test-flow）
 │   └── scripts/                       测试脚本
 │
 └── scripts/                           ← 标定工具
@@ -95,9 +102,9 @@ r2_integration/
 
 ```
 Phase 0 底盘 ROS2 + CAN 控制            ✅ 100% 完成（含 08-06 里程计修复）
-Phase 1 G354 IMU + EKF 融合             ✅ 85% 实车对比验证完成（08-06 bag 验证）
+Phase 1 G354 IMU + EKF 融合             ✅ 95% 实车验证完成（08-06）；yaw 方案①验证通过（08-12）
 Phase 2 3D LiDAR SLAM (VLP16+KISS-ICP)  ✅ 驱动 + 3D 里程计已跑通
-Phase 3 VLP16 + Nav2 导航              ⏳ 建图方案缺口待定
+Phase 3 VLP16 + Nav2 导航              ⏳ D2 离线建图已跑通（08-11 重影修复），待 D4 复用验证 → Nav2
 Phase 4 D435 + Jetson 视觉             ⏳
 Phase 5 气动 + 异常处理 + Robocon 编排   ⏳
 ```
@@ -145,9 +152,13 @@ ros2 launch r2_bringup chassis.launch.py publish_tf:=false
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
 
-# 4. 启动 EKF 融合（在终端 3 运行；⚠️ 必须在 IMU 校准完成后启动）
+# 4. 启动 EKF 融合（在终端 3 运行；⚠️ 必须在 IMU 校准完成后启动，重启 IMU 须同时重启 EKF）
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch r2_bringup ekf.launch.py
+
+# 5. 键盘遥控（终端 4；08-11 P3 setup.cfg 修复后 ros2 run 可直启）
+source ~/Lin_workspace/r2_integration/install/setup.bash
+ros2 run r2_bringup teleop_keyboard
 
 # 观看融合里程计
 ros2 topic echo /odometry/filtered
@@ -156,6 +167,8 @@ ros2 topic echo /odometry/filtered
 > 一键启动（需图形界面 + gnome-terminal）:
 > `bash ~/Lin_workspace/r2_integration/scripts/r2_startup.sh`
 >
-> 注意: 本机 colcon 会把 console_script 装在 `bin/`（而非标准 `lib/<pkg>/`），
-> `ros2 run` 无法找到入口脚本，请一律使用 `ros2 launch` 启动。
+> ⚠️ **建图/导航完整启动**（performance governor → CAN → 雷达 → KISS-ICP → 底盘 → IMU → EKF → 遥控，
+> 含 N97 跨机 DDS 的 FASTRTPS 环境变量）见 [w1-operation.md §1.1](doc/minimal-loop/w1-operation.md)。
+>
+> 注: console_script 入口经 08-11 setup.cfg 修复后已可 `ros2 run` 直启（teleop_keyboard 等）。
 
