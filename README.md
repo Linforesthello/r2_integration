@@ -44,6 +44,7 @@ r2_integration/
 │   │   └── 2026-08-04_ekf-verification-result.md  EKF 验证结果记录
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
+│       ├── 2026-08-13_map_chain_investigation.md 建图链路排查（重影根因+z_min修正+time字段之谜）
 │       ├── 2026-08-11_kiss_frame_rate_fix.md      KISS 帧率修复（3.6→9.5Hz，重影根因）
 │       ├── 2026-08-11_r2_bringup_code_review.md   r2_bringup 代码审查
 │       ├── 2026-08-10_vocalinux语音输入.md        Vocalinux 本地语音输入调试总结

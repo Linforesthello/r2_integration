@@ -116,7 +116,9 @@ python3 ~/Lin_workspace/bags/analysis/build_map.py <bag_dir> <输出.ply> [抽�
 ```python
 #!/usr/bin/env python3
 """PCD/PLY → 2D 占用网格（PGM+YAML，Nav2 map_server 格式）
-流程: 读点云 → z 高度滤波(0.1<z<1.5) → xy 栅格化 → 占用阈值 → 输出 map.pgm/map.yaml
+流程: 读点云 → z 高度滤波(0.3<z<1.5) → xy 栅格化 → 占用阈值 → 输出 map.pgm/map.yaml
+注: z_min 默认 0.3（2026-08-13 修正）：雷达装高 0.56m，z<0.3 为下射环地面点，
+    投影产生"地面雾"（0811 地图 28% 占用格来自地面）；脚本权威版 ~/Lin_workspace/bags/analysis/pcd_to_map.py
 """
 import sys, struct
 import numpy as np
@@ -133,7 +135,7 @@ def read_ply_bin(path):
         data = f.read(n * 12)
     return np.frombuffer(data, dtype='<f4').reshape(n, 3)
 
-def to_map(xyz, res=0.05, z_min=0.1, z_max=1.5, occ_thresh=3):
+def to_map(xyz, res=0.05, z_min=0.3, z_max=1.5, occ_thresh=3):
     mask = (xyz[:, 2] > z_min) & (xyz[:, 2] < z_max)
     pts = xyz[mask][:, :2]
     if len(pts) == 0:
@@ -211,6 +213,40 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M
 ```
 
 **场地要求**：5-10m 室内开阔区，墙面/立柱/箱子等可识别特征；绕行时避免遮挡雷达正上方。
+
+---
+
+## D3b：正式长录（验证 take3 结论 + 产出正式地图）
+
+> **背景（08-13）**：0811 重影根因 = 录制期 CPU 争抢 → KISS 掉帧（5.24Hz、102 处 >0.5s 空窗、
+> 帧间位移 p90 6.4cm/max 65.7cm）→ 位姿质量差 → 地图重影。take3 短段录制（65.9s、只录 3 点云话题）
+> 干净无重影。**正式长录目的：用改善后的录制条件验证 take3 结论在长录制/多地形下成立**。
+> 另：velodyne time 字段为无条件默认填充（`timing_offsets` 不是参数），KISS deskew 一直生效，
+> 与重影无关（详见 retrospect/2026-08-13 建图链路排查）。
+
+### 录制纪律（每段执行）
+
+1. **前置检查**：`performance` governor 已切（KISS 需 ~9.5Hz）；静止下 `ros2 topic hz /kiss/odometry`
+   稳定 ≥8Hz 才开始；**关 rviz/其他 GUI**（减 CPU 争抢）
+2. **启动全栈**（见 1.1；KISS 必须 `visualize:=true` 才有 /kiss/frame；EKF 对照：底盘 publish_tf:=false）
+3. **分段录制**：每段 ≤3 分钟，段间 Ctrl-C 停录、间隔 10-30s 再开下一段；每段覆盖一个动作/区域
+   （直行段、转弯段、障碍绕行段），避免一录到底
+
+```bash
+ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_final_$(date +%m%d_%H%M)_seg1 \
+  /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered /tf /tf_static
+```
+
+4. **过程监控**：`ros2 topic hz /kiss/odometry` 全程盯；掉 <7Hz 立即停录排查（bag record 写盘争抢）
+5. **出图（修正参数）**：
+
+```bash
+python3 ~/Lin_workspace/bags/analysis/build_map.py <bag_segN> raw_segN.ply
+python3 ~/Lin_workspace/bags/analysis/pcd_to_map.py raw_segN.ply map_segN.pgm   # z_min 默认 0.3
+```
+
+6. **验收**：单段出图检查——墙段连续（目标 ≥10m）、无重影双线、**无地面雾**（z_min 0.3 已滤）、
+   与场地轮廓一致；选覆盖最好的段作主地图（多段拼接暂缓，逐段验证优先）
 
 ---
 
