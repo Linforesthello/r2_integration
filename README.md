@@ -44,6 +44,7 @@ r2_integration/
 │   │   └── 2026-08-04_ekf-verification-result.md  EKF 验证结果记录
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
+│       ├── 2026-08-13_layer_map_3d2d.md           分层3D→2D导航层生成（多层对比+选层+seg3剔除）
 │       ├── 2026-08-13_map_chain_investigation.md 建图链路排查（重影根因+z_min修正+time字段之谜）
 │       ├── 2026-08-11_kiss_frame_rate_fix.md      KISS 帧率修复（3.6→9.5Hz，重影根因）
 │       ├── 2026-08-11_r2_bringup_code_review.md   r2_bringup 代码审查
@@ -67,8 +68,11 @@ r2_integration/
 │   ├── r2_bringup/chassis_node.py    核心节点
 │   ├── launch/chassis.launch.py      底盘启动文件
 │   ├── launch/ekf.launch.py          EKF 融合启动文件
+│   ├── launch/velodyne.launch.py     VLP-16 雷达启动（driver+transform+laserscan+TF，两机通用）
 │   ├── config/r2_params.yaml         实车标定参数
-│   └── config/ekf.yaml               EKF 融合配置
+│   ├── config/ekf.yaml               EKF 融合配置
+│   ├── config/r2.urdf                base_link→velodyne TF（z=0.56m，08-06 定案）
+│   └── config/dds/                   DDS 跨机配置（fastdds_peer_n97/wellknown + README）
 │
 ├── g354_driver/                       ← ROS2 IMU 驱动包（包名 g354_imu_driver）
 │   ├── g354_imu_driver/imu_node.py   核心节点（Mahony + ZUPT）

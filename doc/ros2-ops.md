@@ -16,6 +16,10 @@
 - **源码工作区 VM 与 N97 各一份独立副本**：改代码在 VM，同步走 `git push` → N97 `git pull`，不 scp 拷贝
 - **不要用 VM 的 install/build 状态解释 N97 行为**（2026-08-11 教训：在 VM 诊断 N97 构建产物全对不上，白排查一圈）
 - 用户贴出的运行/实车反馈来自 N97——排障前先问清"当前对象是哪台机器"
+- **VM 单机 ROS 与跨机的 DDS 环境不同**：单机跑须 `unset FASTRTPS_DEFAULT_PROFILES_FILE`
+  （bashrc 已注释，2026-08-14）；跨机（VM↔N97）时手动 export
+  `FASTRTPS_DEFAULT_PROFILES_FILE=~/Lin_workspace/r2_integration/r2_bringup/config/dds/fastdds_peer_n97.xml`。详见
+  [retrospect 08-14](retrospect/2026-08-14_vm_vlp16_dds_fix.md)
 
 ## 2. 构建与部署（改了要真的生效）
 
@@ -58,6 +62,11 @@
 - **每次只加一个变量**；记录期望/实际数据，出问题回溯数据而非盯现象
 - 疑难问题先搜索核实（WebSearch/官方文档/社区），不凭猜测下结论
 - 大转弯/加速等动作段分析时，先看用户描述的实车动作再对数据（防采样盲区）
+- **话题/节点全空，先查本机持久环境，再查应用层**：`env | grep -iE "rmw|fastrtps|cyclone"`
+  （bashrc 的 DDS 跨机配置会掐死本机发现，2026-08-14 教训，见
+  [retrospect 08-14](retrospect/2026-08-14_vm_vlp16_dds_fix.md)）
+- **ros2 CLI 查询异常先怀疑 daemon 缓存**：`ros2 daemon stop` 或 `ros2 topic list --no-daemon`；
+  症状是 CLI 看不到话题但 rviz2/独立节点能看到（daemon 常驻旧环境，2026-08-14）
 
 ## 8. 实机安全
 

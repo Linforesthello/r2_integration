@@ -12,7 +12,7 @@
 
 ```bash
 # N97，每个终端 source 后启动
-export FASTRTPS_DEFAULT_PROFILES_FILE=/home/lin/fastdds_wellknown.xml
+export FASTRTPS_DEFAULT_PROFILES_FILE=~/Lin_workspace/r2_integration/r2_bringup/config/dds/fastdds_wellknown.xml
 source /opt/ros/humble/setup.bash && source ~/Lin_workspace/r2_integration/install/setup.bash
 
 # ⚠️ 前置: CPU 性能模式（每次开机必做；重启恢复 powersave 后 KISS 掉 3.6Hz 重影复现，见 retrospect 08-11）
@@ -22,8 +22,8 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor   # 检查 → perform
 # 终端 0: CAN 总线
 python3 ~/Lin_workspace/command/can_command.py
 
-# 终端 1: 雷达（~/.ros/velodyne_n97.launch.py 为三节点合一，device_ip 10.18.18.6）
-ros2 launch ~/.ros/velodyne_n97.launch.py
+# 终端 1: 雷达（r2_bringup velodyne.launch.py 为三节点合一，device_ip 10.18.18.6）
+ros2 launch r2_bringup velodyne.launch.py
 
 # 终端 2: KISS-ICP（⚠️ 必须先 source kiss_icp_ws；visualize:=true 才发布点云话题）
 source ~/kiss_icp_ws/install/setup.bash

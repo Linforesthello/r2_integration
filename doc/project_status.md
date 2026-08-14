@@ -93,8 +93,8 @@ N97 (机器人电脑):
 - G354 IMU：经 **JLink OB Mini**（VCP 串口，ttyACM1，460800 8N1）直连 N97，**JLink 不供电，需独立 5V**（接线见 [g354-wiring.md](phase1/g354-wiring.md)）
 - VLP-16：PoE 供电，以太网**经交换机**转接 N97（enp1s0），同网段还有 VMware 宿主（VM ens37）
 
-- **跨机 DDS**：FastDDS 固定端口 7410（N97 需带 `FASTRTPS_DEFAULT_PROFILES_FILE=~/fastdds_wellknown.xml` 启动）
-  + VM 单播 Peer（`~/Lin_workspace/fastdds_peer_n97.xml`）
+- **跨机 DDS**：FastDDS 固定端口 7410（N97 需带 `FASTRTPS_DEFAULT_PROFILES_FILE=~/Lin_workspace/r2_integration/r2_bringup/config/dds/fastdds_wellknown.xml` 启动）
+  + VM 单播 Peer（`~/Lin_workspace/r2_integration/r2_bringup/config/dds/fastdds_peer_n97.xml`）
 - **适用边界（08-06 实测）**：低带宽调试 ✅（命令行/echo/bag 控制）；
   **rviz2 实时可视化 ❌**（WiFi 带宽瓶颈 → 掉帧 + 反向拖慢 N97 EKF）——**rviz2 留在 N97 本地**
 - VMware NAT 不通组播 → 必须单播 Peer

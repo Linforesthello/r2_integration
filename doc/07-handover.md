@@ -77,7 +77,7 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 python3 ~/Lin_workspace/command/can_command.py
 
 # 终端 1: 雷达（device_ip 10.18.18.6，600rpm/10Hz）
-ros2 launch ~/.ros/velodyne_n97.launch.py
+ros2 launch r2_bringup velodyne.launch.py
 
 # 终端 2: KISS-ICP（visualize:=true 发 /kiss/points 并带 RViz；false 则无点云话题）
 source ~/kiss_icp_ws/install/setup.bash
@@ -117,7 +117,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 | 底盘 TF | `chassis.launch.py` | `publish_tf:=false`（EKF 场景），默认 true |
 | 静态 TF | `ekf.launch.py` | `base_link→imu_link` 单位变换 |
 | KISS-ICP | `~/kiss_icp_ws/src/kiss_icp/config/config.yaml` | max_range 30 / min_range 0.5 / voxel_size 0.2（8-02 调优，备份 .bak_20260802） |
-| 雷达驱动 | `~/.ros/velodyne_n97.launch.py` | device_ip 10.18.18.6（备份 .bak_20260802） |
+| 雷达驱动 | `r2_bringup velodyne.launch.py` | device_ip 10.18.18.6（备份 .bak_20260802） |
 | 底盘参数 | `r2_bringup/config/r2_params.yaml` | 全实车标定值（speed_scale 94.5 等） |
 
 ---

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<robot name="r2">
+
+  <!-- 车身（底盘中心，离地高度0） -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.8 0.6 0.15"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.2 0.3 0.8 0.8"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- VLP-16 雷达（车顶中心，水平安装） -->
+  <link name="velodyne"/>
+
+  <!-- base_link → velodyne（实测: 地面69cm - base_link 13cm = 56cm, 2026-08-06） -->
+  <joint name="velodyne_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="velodyne"/>
+    <origin xyz="0 0 0.56"/>  <!-- 实测定案2026-08-06: 地面69 - base_link13 = 56cm -->
+    <axis xyz="0 0 1"/>
+  </joint>
+
+</robot>

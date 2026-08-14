@@ -57,7 +57,7 @@
 |:-----|:---|:-----|
 | 安装位置 | **(0, 0, +56) cm** | ✅ 实测定案（2026-08-06）：base_link→velodyne；雷达光学中心离地 **69cm**，base_link 离地 13cm（69-13=56） |
 | 安装方式 | 车顶水平安装（z 轴朝上） | frame_id: velodyne |
-| 静态 TF | `robot_state_publisher` 发布 base_link→velodyne（z=0.56） | 由 velodyne_n97.launch.py 启动；base_footprint 已删除（双父冲突） |
+| 静态 TF | `robot_state_publisher` 发布 base_link→velodyne（z=0.56） | 由 velodyne.launch.py（包内）启动；base_footprint 已删除（双父冲突） |
 
 ---
 
@@ -78,5 +78,5 @@
 
 - 运动学定义/参数: `phase0/chassis_definition.md`、`r2_bringup/config/r2_params.yaml`
 - IMU 轴映射实现: `g354_driver/g354_imu_driver/imu_node.py`（`mount_axes` 参数）
-- 雷达驱动: `~/.ros/velodyne_n97.launch.py`（N97）
+- 雷达驱动: `r2_bringup velodyne.launch.py`（N97）
 - 排障记录: `retrospect/2026-08-02_ekf_tf_fusion_fix.md`（3.5 节 IMU 朝向修复）
