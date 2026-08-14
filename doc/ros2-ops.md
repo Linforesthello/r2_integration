@@ -16,6 +16,8 @@
 - **源码工作区 VM 与 N97 各一份独立副本**：改代码在 VM，同步走 `git push` → N97 `git pull`，不 scp 拷贝
 - **不要用 VM 的 install/build 状态解释 N97 行为**（2026-08-11 教训：在 VM 诊断 N97 构建产物全对不上，白排查一圈）
 - 用户贴出的运行/实车反馈来自 N97——排障前先问清"当前对象是哪台机器"
+- **N97 git pull 报 "Network is unreachable" 先查默认路由**：`ip route` 无 default 行 =
+  WiFi 网关丢失（2026-08-14 网络环境故障教训）；N97 是内网机，外网连通性不可想当然
 - **VM 单机 ROS 与跨机的 DDS 环境不同**：单机跑须 `unset FASTRTPS_DEFAULT_PROFILES_FILE`
   （bashrc 已注释，2026-08-14）；跨机（VM↔N97）时手动 export
   `FASTRTPS_DEFAULT_PROFILES_FILE=~/Lin_workspace/r2_integration/r2_bringup/config/dds/fastdds_peer_n97.xml`。详见

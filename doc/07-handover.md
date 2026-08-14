@@ -1,8 +1,9 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-08-12
-> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-09 z 漂移修复；08-12 yaw 偏差方案①实施并验证通过）｜Phase 2 ✅ 100%｜Phase 3 ⏳ D2 建图重影已消除（08-11）
-> 下一阶段: D4 地图复用验证 → Nav2（yaw 遗留已清零）
+> 最后更新: 2026-08-14
+> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%｜Phase 3 ⏳ D2 重影已消除（08-11）
+> 下一阶段: D4 地图复用验证 → Nav2
+> 基础设施: 08-14 VLP-16 运行物入库 r2_bringup（launch/r2.urdf/config/dds），两机 git 同步统一；VM 单机跑通 VLP-16（DDS 根因修复，见 §五 8-14）
 >
 > **部署环境**：N97 Mini PC（192.168.1.210，Ubuntu 22.04 + Humble），enp1s0: 10.18.18.20/24
 > 开发环境：VM（lin-virtual-machine，192.168.1.204）；VM→N97 SSH 免密可用
@@ -77,6 +78,7 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 python3 ~/Lin_workspace/command/can_command.py
 
 # 终端 1: 雷达（device_ip 10.18.18.6，600rpm/10Hz）
+#   ⚠️ 08-14 起改用包内 launch：先 git pull + colcon build（launch 加载 install 副本）
 ros2 launch r2_bringup velodyne.launch.py
 
 # 终端 2: KISS-ICP（visualize:=true 发 /kiss/points 并带 RViz；false 则无点云话题）
@@ -122,57 +124,20 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 
 ---
 
-## 五、本次联调结果与现象（2026-08-02）
+## 五、历史事件索引（详情见 retrospect）
 
-### 已解决（7 问题，详见 retrospect 文档）
+> 交接只看结论；完整排障/修复记录一律在 retrospect（单一事实来源，见 standards.md）。
 
-| 问题 | 根因 | 修复 |
-|:-----|:-----|:-----|
-| 网络迁移 10.10.3.x→10.18.18.x | 规划调整 | device_ip 同步更新 |
-| KISS-ICP 里程计不走 | launch 默认 use_sim_time=true | 显式 false |
-| imu_link 标红 | TF 树无 imu_link | ekf.launch.py 加 static TF |
-| /imu/data 灰色 | N97 未装 rviz_imu_plugin + QoS | 装插件 + QoS Reliable |
-| 点云/IMU 震动"打架" | odom→base_link 双发布者 | chassis 加 publish_tf 参数 |
-| chassis 启动崩溃 | 协方差 int 非 float | 0→0.0 |
-| EKF yaw 大跳 + z 漂 12m | N97 ekf.yaml 坏配置（6 值 vs 15 值） | 同步正确配置 |
-
-### 8-03 新增：IMU 轴定义修复（✅ 已完成）
-
-G354 **出厂轴定义为 x 左/y 前/z 下**（模块正放安装），与驱动假设的标准朝向不符 →
-EKF 姿态错乱（"轴指向天空"、动一下姿态大翻转）。驱动修复三处（[imu_node.py](../../g354_driver/g354_imu_driver/imu_node.py)）：
-
-1. +`mount_axes` 参数与轴映射（`y_front_x_left_z_down`）
-2. `init_from_accelerometer` w 方向符号 bug（被 z 朝下双负抵消掩盖）
-3. Mahony a/v 符号约定不一致 → 翻转伪稳定点（"过肩摔"）
-
-实车验证：左转/右转/左倾/右倾全部正确，RViz odom→base_link 姿态正常。
-安装定义见 [phase0/sensor-mount.md](phase0/sensor-mount.md)。
-**启动纪律**：IMU 校准完成（Init quat）后才可启动 EKF；EKF 在 IMU 校准前启动会输出 NaN。
-
-### 8-09 新增：z 漂移修复 ✅ / yaw 偏差 ⚠️ / 地图重影 ⚠️
-
-- **z 漂移修复 ✅**：15 维 EKF 中无测量约束的 z/vz/az 受姿态-速度耦合 + 积压放大 → 漂 55.7m；
-  `two_d_mode: true` + az noise 1e-6 修复，TF z 恒 0、30Hz 正常。详见
-  [retrospect/2026-08-09_ekf_z_drift_fix.md](retrospect/2026-08-09_ekf_z_drift_fix.md)
-- **yaw 偏差 ✅（已解决，08-12）**：filtered yaw 原为 IMU 纯积分（f-i 恒 0.1°），起点偏置随机 6~10°、
-  运动峰值 ±14°；方案①（轮速开放 yaw，`odom0_config` yaw=true）08-12 实施并验证通过：
-  起点 0.00°、全程峰值 0.07°（含 90°/190° 转弯段）、z 恒 0，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
-- **地图重影 ✅（已解决，08-11）**：D2 离线建图链路跑通但产出严重重影；根因 KISS 帧率 3.6Hz =
-  N97 CPU `powersave` 治理器低频（单帧处理 ~200ms，10Hz 输入隔帧处理）。切 `performance`
-  （`echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor`）→ 9.5Hz，
-  重录重跑重影消除、地图结构清晰。详见
-  [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)
-
-### 8-11 新增：r2_bringup 全包代码审查修复（✅ P1~P10 全部实施并实车验证）
-
-- **审查结论**：🔴 确定 bug 3 项 + 🟡 设计缺陷 3 项 + 🟢 轻微 4 项；运动学正逆解、
-  四轮 ID 映射、90° 变换、ekf.yaml 225 值矩阵等核对无需修改
-- **关键修复**：P1 `--test` 模式 KeyError 崩溃；P2 超时后 50Hz 无限重发停止帧（→只发一次，
-  标志位防重）；P3 缺 setup.cfg 入口脚本落错位置（→补 setup.cfg + launch 恢复标准布局）；
-  P4 缺轮 odom/TF 冻结（→缺轮按 0 参与正解，odom 保 50Hz，**实车断 2 轮验证通过**）；
-  P5 teleop EOF 空转；P6 dt 钳位丢时间；P8 启动 MOTOR_LOST 误报
-- **验证**：mock + N97 实车（含缺轮、Ctrl-C 干净退出）。详见
-  [retrospect/2026-08-11_r2_bringup_code_review.md](retrospect/2026-08-11_r2_bringup_code_review.md)
+| 日期 | 结论 | 详情 |
+|:---|:---|:---|
+| 08-02 | EKF/TF 融合链路 7 问题全解决（网络迁移/use_sim_time/imu_link/QoS/双发布者/协方差/ekf.yaml） | [retrospect](retrospect/2026-08-02_ekf_tf_fusion_fix.md) |
+| 08-03 | G354 IMU 轴定义修复（mount_axes=y_front_x_left_z_down）；启动纪律：IMU 校准后才可起 EKF | [sensor-mount.md](phase0/sensor-mount.md) |
+| 08-05 | 底盘里程计修复 + EKF 过程噪声 225 值矩阵排障；IMU 协方差病态→EKF NaN | [chassis_ekf](retrospect/2026-08-05_chassis_ekf_debug.md)、[cov_nan](retrospect/2026-08-05_imu_covariance_ekf_nan.md) |
+| 08-09 | EKF z 漂移修复（two_d_mode + az noise 1e-6，TF z 恒 0） | [retrospect](retrospect/2026-08-09_ekf_z_drift_fix.md) |
+| 08-11 | KISS 帧率 3.6→9.5Hz（N97 CPU performance 治理器）→ 建图重影消除；r2_bringup 审查 P1~P10 全修复 | [kiss_frame](retrospect/2026-08-11_kiss_frame_rate_fix.md)、[review](retrospect/2026-08-11_r2_bringup_code_review.md) |
+| 08-12 | EKF yaw 方案①（odom0_config yaw=true）验证通过：起点 0.00°/峰值 0.07°（含 90°/190° 转弯） | [ekf-yaw-plan.md](phase1/ekf-yaw-plan.md) |
+| 08-13 | 分层 3D→2D 导航层生成；建图链路排查（重影根因 + time 字段之谜） | [layer_map](retrospect/2026-08-13_layer_map_3d2d.md)、[map_chain](retrospect/2026-08-13_map_chain_investigation.md) |
+| 08-14 | VM 单机跑通 VLP-16（bashrc 跨机 DDS 掐死本机发现 + daemon 缓存）；velodyne 运行物入库 r2_bringup（两机统一，消灭拷贝漂移） | [retrospect](retrospect/2026-08-14_vm_vlp16_dds_fix.md) |
 
 ### 遗留现象（算法本底，非故障）
 
@@ -230,7 +195,7 @@ stage_0812 保守录制对照地图 `bags/stage_0812_map/`（pgm/yaml + raw.ply�
 
 ## 八、相关文档索引
 
-- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）｜`retrospect/2026-08-11_r2_bringup_code_review.md`（代码审查 P1~P10）
+- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）｜`retrospect/2026-08-11_r2_bringup_code_review.md`（代码审查 P1~P10）｜`retrospect/2026-08-14_vm_vlp16_dds_fix.md`（VM 单机 DDS 修复）
 - 进度看板：`02-progress.md` ｜ 状态快照：`03-current_state.md`
 - EKF yaw 预案：`phase1/ekf-yaw-plan.md` ｜ SLAM 方案探索：`retrospect/vlp16_slam_exploration.md`
 - W1 建图手册：`minimal-loop/w1-operation.md`（D1~D5，含 D2 执行记录）
