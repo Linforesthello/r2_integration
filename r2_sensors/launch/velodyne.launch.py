@@ -53,6 +53,9 @@ def generate_launch_description():
     convert_params['organize_cloud'] = False
     # 08-15 性能调优：max_range 130→40m，转换层提前裁剪，与 KISS max_range 30 两级过滤对齐
     convert_params['max_range'] = 40.0
+    # 08-15 盲区修复：min_range 0.9→0.5（VLP-16 规格最小测距）。
+    # 0.9m 裁剪导致车头前方(0.4~0.9m)障碍对 /scan 不可见，叠加 local_costmap 3×3 时有效避障窗口仅 ~0.2m
+    convert_params['min_range'] = 0.5
     velodyne_transform_node = launch_ros.actions.Node(
         package='velodyne_pointcloud',
         executable='velodyne_transform_node',

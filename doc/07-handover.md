@@ -178,7 +178,8 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 
 待办（按优先级）：
 - [x] **performance 持久化**（08-11）：已入启动流程（§三 前置 0 步骤），每次开机手动执行；systemd 固化暂缓
-- [x] **D4 地图复用验证**（08-15 完成）：`map_0815_clean` 加载回显一致 + **Nav2 首闭环跑通**（降额 0.2m/s，全程无碰撞），见 [retrospect/2026-08-15_nav2_bringup.md](retrospect/2026-08-15_nav2_bringup.md)
+- [x] **D4 地图复用验证**（08-15 完成）：`map_0815_clean` 加载回显一致 + **Nav2 首闭环跑通**（降额 0.2m/s），见 [retrospect/2026-08-15_nav2_bringup.md](retrospect/2026-08-15_nav2_bringup.md)（⚠️ 首测有擦碰，见下条）
+- [ ] **盲区/footprint 修复复测**（08-15 已改参数，待实机验证）：雷达裁剪 min_range 0.9→0.5、local_costmap 3×3→6×6、footprint 0.62→0.84×0.66 匹配 urdf（撞障碍根因，见 [retrospect 五-2](retrospect/2026-08-15_nav2_bringup.md)）
 - [ ] **Nav2 全速验证**：降额闭环通过后切 `nav2_params.yaml`（0.5/0.3/0.8）复测
 - [ ] **Nav2 避障实测**：costmap 实时刷新已见（人体移动出膨胀圈），静态/动态障碍绕行 + 恢复行为实测
 - [x] **yaw 偏差**（08-12 完成）：方案①（odom0_config yaw=true）实施并验证通过，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)

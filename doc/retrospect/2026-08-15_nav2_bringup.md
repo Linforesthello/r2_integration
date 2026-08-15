@@ -35,26 +35,53 @@
 | 速度峰值（/cmd_vel_smoothed） | vx 0.200 / vy 0.150 / wz 0.400 | **精确钳在降额限幅**，velocity_smoother 生效 ✅ |
 | 平均速度（非零指令） | ~0.109 / 0.085 / 0.199 | 限幅一半以下，低速安全 ✅ |
 | MPPI 原始指令峰值（/cmd_vel） | 0.206 / 0.153 / 0.403 | 略超限幅，被 smoother 钳制 ✅ |
-| 运动轨迹 | 累计路程 8.37 m，直线位移 0.48 m（往返型） | 多次 goal 去+回 |
+| 运动轨迹 | 累计路程 8.37 m，直线位移 0.48 m | **不到 10 次 goal**：走一段直线 → 转一小圈 → 绕圈返回 → 折线回到原点附近（用户口述） |
 | AMCL 定位帧 | 64 帧 / 221s | 运动时持续更新 ✅ |
 | 规划 | /plan 70 次 | 多 goal + 局部重规划 |
 | 粒子收敛 | 中心随车移动 (0.24,-0.13)→(0.65,0.13)；σy 0.36→0.26 收缩有限 | 走廊环境退化（沿廊道方向模糊，AMCL 已知特性），未影响导航成功 |
 | 到达判定 | 车停稳于目标点（用户目检，误差未测量） | 闭环成功 ✅ |
+| 碰撞 | **有擦碰（用户报告）** | 根因分析见下节，已修复参数待复测 |
 
 留档资产：bag `~/Lin_workspace/bags/raw/nav2_first_loop/`（32.7 MiB，10 话题）、截图 `bags/rviz_nav2_first_loop.png`/`_2.png`。
 
-## 五、经验
+## 五、实测发现的问题与修复（08-15 当晚复盘）
+
+### 问题 1：rviz 里粒子/路径看不到
+
+- **粒子**：rviz2 添加话题时 `/particle_cloud` 灰色 = 当时无发布者/无数据。运行时车一动就有数据（bag 录到 63 帧）；静止时 AMCL 不发布（见 §三-6）。**非故障**
+- **绿色路径（/plan）**：rviz 配置 "Global Planner 组 → Path" 项已 enabled；用户未展开组或路径线太细未注意；MPPI 轨迹（/trajectories）显示项默认 `Enabled: false`。下次运行时在 rviz 左侧 "Navigation 2" 组逐项勾选确认
+- **结论**：显示问题，不影响功能；运行中排查
+
+### 问题 2：近距离障碍扫不到 + 撞击擦碰（根因链实锤）
+
+**根因（三处叠加，均已定位并修复参数）**：
+
+| 根因 | 位置 | 影响 | 修复 |
+|:---|:---|:---|:---|
+| 雷达裁剪盲区 0.9m | velodyne_transform_node `min_range: 0.9`（出厂默认） | 车头前方 0.4~0.9m 障碍对 /scan **不可见** | launch 覆写 `min_range: 0.5`（VLP-16 规格最小测距） |
+| local_costmap 太小 3×3m | nav2_params `local_costmap` | 车前有效避障窗口 = 3/2 − 0.4(车长半) − 0.9(盲区) = **仅 0.2m** | width/height 3 → 6（窗口 1.1 → 2.6m） |
+| footprint 与车体不符 | 0.62×0.62 vs urdf 车体 0.8×0.6 | x 向（前后）建模短 0.18m，车头车尾超出模型 | footprint → 0.84×0.66（urdf + 0.02 buffer） |
+
+**关联**：costmap obstacle_max_range/raytrace 5.0 → 8.0（感知范围匹配新 local 尺寸）。
+**结论**：非"过度依赖全局地图"——是实时感知盲区 + 局部地图过小 + footprint 错配三叠加；参数已修（git 提交见下），**待下次实机复测**。
+
+### 遗留：到达误差未精确测量（/goal_pose 未入 bag，下次录制加入）
+
+## 六、经验
 
 - **Nav2 启动后先设 2D Pose Estimate 再谈"地图不显示/报错"**——map frame 依赖 AMCL 初始位姿，位姿是第一步不是最后一步
 - AMCL 静止不发布位姿/粒子是设计行为，判断 AMCL 是否工作看 lifecycle 状态 + 动起来后的发布
 - 杀进程用精确模式，别用宽泛 pkill；topic list 带 daemon 缓存，"查真相"用 --no-daemon
 - MPPI `model_dt` 与 `controller_frequency` 存在硬约束（model_dt ≥ 1/freq）
 - 全向底盘 + Nav2 参数链路（OmniMotionModel + Omni 运动模型 + velocity_smoother 三处限幅）一次跑通，无方向性返工
+- **撞障碍先查三件套：雷达裁剪 min_range、local_costmap 尺寸、footprint 与 urdf 一致**——实时感知盲区往往被全局地图"记忆"掩盖，出事故时先怀疑感知链路再怀疑规划
 
-## 六、后续
+## 七、后续
 
+- [ ] **盲区/footprint 修复复测**（优先级最高）：新参数实机验证——近距离障碍（<1m）能上 costmap、绕障不擦碰
 - [ ] Nav2 全速验证：切 `nav2_params.yaml`（0.5/0.3/0.8）复测
 - [ ] 避障实测：costmap 实时刷新已见（人体移动出膨胀圈），静态/动态障碍绕行 + 恢复行为实测
-- [ ] 到达误差精确测量（goal 位姿 vs 实际停位，bag /goal_pose 需补录）
+- [ ] 到达误差精确测量（goal 位姿 vs 实际停位，bag 录制加 /goal_pose）
+- [ ] rviz 显示项确认：Global Planner→Path、Controller→Trajectories（默认关）、Amcl Particle Swarm 运行中勾选
 - [ ] 长时间稳定性 / 走廊定位退化对策（换 FAST-LIO2 或 AMCL 参数调优）
 - [ ] MPPI batch_size 2000 视 N97 CPU 实测调优

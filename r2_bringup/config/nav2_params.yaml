@@ -3,7 +3,7 @@
 #   - AMCL 运动模型: OmniMotionModel（全向），base_frame_id: base_link
 #   - Controller: MPPI（nav2_mppi_controller），motion_model: Omni，速度=底盘限幅
 #   - odom 话题: /odometry/filtered（EKF），见 nav2.launch.py remap
-#   - footprint: 0.62×0.62m 方形（wheel_half_diagonal 0.33 + 轮径 0.152）
+#   - footprint: 0.84×0.66m（urdf 车体 0.8×0.6 + 0.02 buffer；08-15 修复：原 0.62×0.62 与车体不符）
 # 底盘限幅: max_vx 0.5 / max_vy 0.3 / max_omega 0.8 (r2_params.yaml)
 
 amcl:
@@ -227,10 +227,10 @@ local_costmap:
       robot_base_frame: base_link
       use_sim_time: False
       rolling_window: true
-      width: 3
-      height: 3
+      width: 6
+      height: 6
       resolution: 0.05
-      footprint: "[[-0.31, -0.31], [-0.31, 0.31], [0.31, 0.31], [0.31, -0.31]]"  # 0.62×0.62m
+      footprint: "[[-0.42, -0.33], [-0.42, 0.33], [0.42, 0.33], [0.42, -0.33]]"  # 0.84×0.66m（urdf 车体 0.8×0.6 + 0.02 buffer，08-15 修复 footprint 错配）
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
@@ -252,9 +252,9 @@ local_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 5.0
+          raytrace_max_range: 8.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 5.0
+          obstacle_max_range: 8.0
           obstacle_min_range: 0.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
@@ -269,7 +269,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: False
-      footprint: "[[-0.31, -0.31], [-0.31, 0.31], [0.31, 0.31], [0.31, -0.31]]"
+      footprint: "[[-0.42, -0.33], [-0.42, 0.33], [0.42, 0.33], [0.42, -0.33]]"
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -283,9 +283,9 @@ global_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 5.0
+          raytrace_max_range: 8.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 5.0
+          obstacle_max_range: 8.0
           obstacle_min_range: 0.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
