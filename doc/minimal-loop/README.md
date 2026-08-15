@@ -13,13 +13,16 @@
 | [frames_2026-08-06_21.40.43.gv](frames_2026-08-06_21.40.43.gv) | TF 树快照（graphviz 源） |
 | [frames_2026-08-06_21.40.43.pdf](frames_2026-08-06_21.40.43.pdf) | TF 树快照（PDF） |
 | [frames_2026-08-06-1.png](frames_2026-08-06-1.png) | TF 树快照（PNG） |
-| [w1-operation.md](w1-operation.md) | W1 操作手册（TF 工程 + 建图落地，命令级） |
+| [w1-operation.md](w1-operation.md) | W1 操作手册（TF 工程 + 建图落地，命令级，D1~D5） |
+| [nav2-bringup.md](nav2-bringup.md) | Nav2 实机导航 bringup（D4 复用验证 + 首闭环；✅ 08-15 完成） |
+| [map-verify-flow.md](map-verify-flow.md) | 建图验证流程（3D→2D 导航层生成） |
 
-## 当前状态（2026-08-08）
+## 当前状态（2026-08-15）
 
-- ✅ D0 审计完成：TF 定案（69/13/56）、定量基线健康（静止零漂移/闭环 1cm/零跳变）
-- ⏳ W1 建图准备中：KISS 点云坐标系确认（/kiss/frame frame_id=velodyne，累积方案待定）
-- 待办：build_map.py 累积逻辑修正 → L1 录 bag → L2-L4 建图
+- ✅ D0 审计完成：TF 定案（69/13/56）、定量基线健康
+- ✅ W1 建图全链路：D2 重影消除（08-11）→ 干净 bag 重录 + 人形块过滤（08-15）→ 清洗版导航图 map_0815_clean
+- ✅ Nav2 首闭环跑通（08-15，降额 0.2m/s）：D4 地图复用验证通过 + 自主导航成功
+- ⏳ 待办：盲区/footprint 修复复测 → 全速验证 → 避障实测（见 [nav2-bringup.md](nav2-bringup.md)）
 
 ## 关键结论速查
 
