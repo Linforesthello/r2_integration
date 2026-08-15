@@ -1,6 +1,6 @@
 # R2 外设集成 · 全局进度总览
 
-> 最后更新: 2026-08-06
+> 最后更新: 2026-08-15
 > 内容: 全项目进度一览，每个 Phase 的完成度、依赖关系、下一步
 
 ---
@@ -11,7 +11,7 @@
 Phase 0 底盘CAN控制 ━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
 Phase 1 IMU+EKF融合 ━━━━━━━━━━━━━━━━○○  85%  ◆ 实车对比验证完成（08-06）
 Phase 2 VLP16+KISS-ICP ━━━━━━━━━━━━━━━━━━━━ 100% ✅
-Phase 3 Nav2导航     ━○○○○○○○○○  0%  ⏳
+Phase 3 Nav2导航     ━━○○○○○○○○  10%  ◆ 首闭环跑通（08-15，降额参数）
 Phase 4 视觉AI       ━○○○○○○○○○  0%  ⏳
 Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
                     ─────────────
@@ -73,7 +73,7 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 | VLP16 ROS2 驱动 | ✅ 已跑通 | |
 | KISS-ICP | ✅ 已跑通 | 属于 Phase 2；/velodyne_points → odom |
 | slam_toolbox 建图 | ❌ 已否决 | 不适合 VLP-16，见 [vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md) |
-| Nav2 配置 | ◇ | Phase 3 核心待办 |
+| Nav2 配置 | ✅ 首闭环跑通（08-15） | AMCL 定位 + MPPI 跟踪 + velocity_smoother；降额参数（0.2/0.15/0.4）实车闭环成功，见 [retrospect 08-15](retrospect/2026-08-15_nav2_bringup.md)；待全速验证 + 避障实测 |
 
 ### Phase 4：D435 + Jetson 视觉 AI ⏳
 

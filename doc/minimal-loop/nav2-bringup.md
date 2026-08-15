@@ -1,7 +1,7 @@
 # R2 Nav2 实机导航 bringup（D4 地图复用验证 + 首次闭环）
 
 > 日期：2026-08-15
-> 状态：待执行（plan 模式审批通过后落地）
+> 状态：✅ **已执行完成（08-15）**——首闭环跑通，见 [retrospect/2026-08-15_nav2_bringup.md](../retrospect/2026-08-15_nav2_bringup.md)
 > 前置：08-15 干净 bag 重录 + 人形块过滤完成，清洗版导航图 `map_0815_clean` 就绪（见 [clean_bag_rerecord](../retrospect/2026-08-15_clean_bag_rerecord.md)）
 > 关联：[w1-operation.md](w1-operation.md)（D1~D5 建图手册）、[plan.md](plan.md)（W2 里程碑）、[07-handover](../07-handover.md)
 

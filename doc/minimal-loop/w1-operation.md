@@ -254,13 +254,17 @@ python3 ~/Lin_workspace/bags/analysis/pcd_to_map.py raw_segN.ply map_segN.pgm   
 
 ```bash
 # 1. 重启全栈（验证地图独立性）
-# 2. 加载地图
-ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=~/bags/map.yaml
-# 或后续 Nav2 bringup 直接引用 map.yaml
+# 2. 加载地图（Nav2 bringup 直接引用，08-15 已用）
+ros2 launch r2_bringup nav2.launch.py map:=/home/lin/maps/map_0815_clean.yaml ...
 
 # 3. rviz 添加 /map 话题 → 应显示占用网格且与场地一致
 # 4. 对比 PCD 与 PGM 轮廓
 ```
+
+> **D4 状态：✅ 已通过（2026-08-15）**。Nav2 bringup 加载 **map_0815_clean**（08-15 清洗版：
+> 干净 bag 165547 + filter_person_blobs 人形块过滤产物），AMCL 设初始位姿后 map frame 出现、
+> 地图回显与场地一致（走廊通路/障碍轮廓目检吻合），并完成**首个自主导航 goal（降额 0.2m/s）**。
+> 细节见 [retrospect/2026-08-15_nav2_bringup.md](../../retrospect/2026-08-15_nav2_bringup.md)。
 
 ---
 
@@ -268,8 +272,8 @@ ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=~/bags/map.yaml
 
 - [x] TF 树图存档（view_frames pdf/png → doc 留档）
 - [x] base_link→velodyne 实际高度已量测并写入静态 TF（解决 65/77cm 冲突）
-- [x] 一张可复用场地地图（**map_run_0811_1925.pgm + map.yaml + 源 PCD**，08-11 重影消除后 ✅）
-- [ ] 地图重启后加载正确（rviz 回显）← D4 未做
+- [x] 一张可复用场地地图（**map_0815_clean.pgm + map.yaml + 源 PCD**，08-15 清洗版，替代 0811 主图）
+- [x] 地图重启后加载正确（rviz 回显 + 首个 Nav2 goal 跑通）← D4 完成（08-15）
 - [x] 全程 bag 已录制归档（N97 bags/ 目录）
 - [x] 流程文档化（本手册 + 脚本入 bags/analysis/）
 
