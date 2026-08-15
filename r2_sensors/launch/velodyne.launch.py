@@ -1,4 +1,4 @@
-"""Velodyne VLP-16 启动：driver + transform + robot_state_publisher（laserscan 已注释，Nav2 接入时恢复）。
+"""Velodyne VLP-16 启动：driver + transform + robot_state_publisher + laserscan(/scan)。
 
 - 两机通用（VM/N97 同用一份，git 管理，消灭拷贝漂移；2026-08-14 入库）
 - device_ip 可通过启动参数覆盖（默认 10.18.18.6）
@@ -59,14 +59,14 @@ def generate_launch_description():
         output='both',
         parameters=[convert_params])
 
-    # --- 2D LaserScan（08-15 注释：/scan 暂无消费者，Nav2 接入时恢复；少一节点 = 少一份负载） ---
-    # laserscan_share = ament_index_python.packages.get_package_share_directory('velodyne_laserscan')
-    # laserscan_params = os.path.join(laserscan_share, 'config', 'default-velodyne_laserscan_node-params.yaml')
-    # velodyne_laserscan_node = launch_ros.actions.Node(
-    #     package='velodyne_laserscan',
-    #     executable='velodyne_laserscan_node',
-    #     output='both',
-    #     parameters=[laserscan_params])
+    # --- 2D LaserScan（08-15 恢复：Nav2 接入，AMCL 与 costmap 订阅 /scan；frame_id 显式指定与 TF 链一致） ---
+    laserscan_share = ament_index_python.packages.get_package_share_directory('velodyne_laserscan')
+    laserscan_params = os.path.join(laserscan_share, 'config', 'default-velodyne_laserscan_node-params.yaml')
+    velodyne_laserscan_node = launch_ros.actions.Node(
+        package='velodyne_laserscan',
+        executable='velodyne_laserscan_node',
+        output='both',
+        parameters=[laserscan_params, {'frame_id': 'velodyne'}])
 
     return launch.LaunchDescription([
         DeclareLaunchArgument('device_ip', default_value='10.18.18.6',
@@ -74,6 +74,7 @@ def generate_launch_description():
         robot_state_publisher,
         velodyne_driver_node,
         velodyne_transform_node,
+        velodyne_laserscan_node,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=velodyne_driver_node,
