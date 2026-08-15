@@ -1,9 +1,9 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-08-14
+> 最后更新: 2026-08-15
 > 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%｜Phase 3 ⏳ D2 重影已消除（08-11）
 > 下一阶段: D4 地图复用验证 → Nav2
-> 基础设施: 08-14 VLP-16 运行物入库 r2_bringup（launch/r2.urdf/config/dds），两机 git 同步统一；VM 单机跑通 VLP-16（DDS 根因修复，见 §五 8-14）
+> 基础设施: 08-15 VLP-16 运行物抽包 r2_sensors（launch/r2.urdf 移入，dds 留 r2_bringup，启动命令见 §三）；08-14 两机 git 同步统一；VM 单机跑通 VLP-16（DDS 根因修复，见 §五 8-14）
 >
 > **部署环境**：N97 Mini PC（192.168.1.210，Ubuntu 22.04 + Humble），enp1s0: 10.18.18.20/24
 > 开发环境：VM（lin-virtual-machine，192.168.1.204）；VM→N97 SSH 免密可用
@@ -78,8 +78,8 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 python3 ~/Lin_workspace/command/can_command.py
 
 # 终端 1: 雷达（device_ip 10.18.18.6，600rpm/10Hz）
-#   ⚠️ 08-14 起改用包内 launch：先 git pull + colcon build（launch 加载 install 副本）
-ros2 launch r2_bringup velodyne.launch.py
+#   ⚠️ 08-15 起 launch 在 r2_sensors 包：先 git pull + colcon build（launch 加载 install 副本）
+ros2 launch r2_sensors velodyne.launch.py
 
 # 终端 2: KISS-ICP（visualize:=true 发 /kiss/points 并带 RViz；false 则无点云话题）
 source ~/kiss_icp_ws/install/setup.bash
@@ -119,7 +119,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 | 底盘 TF | `chassis.launch.py` | `publish_tf:=false`（EKF 场景），默认 true |
 | 静态 TF | `ekf.launch.py` | `base_link→imu_link` 单位变换 |
 | KISS-ICP | `~/kiss_icp_ws/src/kiss_icp/config/config.yaml` | max_range 30 / min_range 0.5 / voxel_size 0.2（8-02 调优，备份 .bak_20260802） |
-| 雷达驱动 | `r2_bringup velodyne.launch.py` | device_ip 10.18.18.6（备份 .bak_20260802） |
+| 雷达驱动 | `r2_sensors velodyne.launch.py` | device_ip 10.18.18.6（备份 .bak_20260802） |
 | 底盘参数 | `r2_bringup/config/r2_params.yaml` | 全实车标定值（speed_scale 94.5 等） |
 
 ---

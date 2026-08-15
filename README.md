@@ -68,11 +68,13 @@ r2_integration/
 │   ├── r2_bringup/chassis_node.py    核心节点
 │   ├── launch/chassis.launch.py      底盘启动文件
 │   ├── launch/ekf.launch.py          EKF 融合启动文件
-│   ├── launch/velodyne.launch.py     VLP-16 雷达启动（driver+transform+laserscan+TF，两机通用）
 │   ├── config/r2_params.yaml         实车标定参数
 │   ├── config/ekf.yaml               EKF 融合配置
-│   ├── config/r2.urdf                base_link→velodyne TF（z=0.56m，08-06 定案）
 │   └── config/dds/                   DDS 跨机配置（fastdds_peer_n97/wellknown + README）
+│
+├── r2_sensors/                        ← ROS2 传感器外设包（包名 r2_sensors，08-15 从 r2_bringup 抽出）
+│   ├── launch/velodyne.launch.py     VLP-16 雷达启动（driver+transform+TF，两机通用）
+│   └── config/r2.urdf                base_link→velodyne TF（z=0.56m，08-06 定案）
 │
 ├── g354_driver/                       ← ROS2 IMU 驱动包（包名 g354_imu_driver）
 │   ├── g354_imu_driver/imu_node.py   核心节点（Mahony + ZUPT）

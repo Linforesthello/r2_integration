@@ -38,7 +38,7 @@
 | 底盘全向轮 + EKF 融合（0.27m 闭环） | ✅ | 执行层 |
 | bag 录制/分析体系（rosbag2_py） | ✅ | 数据留档 |
 | r2_startup.sh 一键启动（底盘+IMU+EKF） | ✅ 需扩展 | 全栈启动 |
-| velodyne.launch.py（r2_bringup 包内，三节点合一+TF） | ✅ | 雷达 |
+| velodyne.launch.py（r2_sensors 包内，三节点合一+TF） | ✅ | 雷达 |
 | 跨机 DDS（VM 命令行调试） | ✅ 低带宽 | 调试 |
 
 ---

@@ -5,8 +5,8 @@
 - robot_state_publisher 发布 base_link→velodyne TF（urdf 随包安装，config/r2.urdf）
 
 用法：
-    ros2 launch r2_bringup velodyne.launch.py
-    ros2 launch r2_bringup velodyne.launch.py device_ip:=10.18.18.6
+    ros2 launch r2_sensors velodyne.launch.py
+    ros2 launch r2_sensors velodyne.launch.py device_ip:=10.18.18.6
 """
 
 import os
@@ -20,7 +20,7 @@ from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
     # --- Robot State Publisher（发布 TF，读包内 urdf） ---
-    pkg_share = ament_index_python.packages.get_package_share_directory('r2_bringup')
+    pkg_share = ament_index_python.packages.get_package_share_directory('r2_sensors')
     urdf_path = os.path.join(pkg_share, 'config', 'r2.urdf')
     with open(urdf_path, 'r') as f:
         robot_desc = f.read()

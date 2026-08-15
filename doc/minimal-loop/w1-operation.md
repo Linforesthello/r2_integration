@@ -22,8 +22,8 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor   # 检查 → perform
 # 终端 0: CAN 总线
 python3 ~/Lin_workspace/command/can_command.py
 
-# 终端 1: 雷达（r2_bringup velodyne.launch.py 为三节点合一，device_ip 10.18.18.6）
-ros2 launch r2_bringup velodyne.launch.py
+# 终端 1: 雷达（r2_sensors velodyne.launch.py 为三节点合一，device_ip 10.18.18.6）
+ros2 launch r2_sensors velodyne.launch.py
 
 # 终端 2: KISS-ICP（⚠️ 必须先 source kiss_icp_ws；visualize:=true 才发布点云话题）
 source ~/kiss_icp_ws/install/setup.bash

@@ -669,7 +669,7 @@ pip3 install kiss-icp
 
 ```bash
 # 终端1: VLP-16 驱动（N97 定制 launch，含 device_ip/port 参数）
-ros2 launch r2_bringup velodyne.launch.py
+ros2 launch r2_sensors velodyne.launch.py
 
 # 终端2: KISS-ICP
 source ~/kiss_icp_ws/install/setup.bash
@@ -1107,7 +1107,7 @@ ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false  # 启动 IMU 驱动
 
 # ─── VLP16 + KISS-ICP ───
 sudo ip addr add 10.18.18.20/24 dev enp1s0          # 配置 IP（设备 10.18.18.6）
-ros2 launch r2_bringup velodyne.launch.py           # 启动 VLP16 驱动
+ros2 launch r2_sensors velodyne.launch.py           # 启动 VLP16 驱动
 source ~/kiss_icp_ws/install/setup.bash             # KISS-ICP SLAM 里程计
 ros2 launch kiss_icp odometry.launch.py topic:=/velodyne_points \
   use_sim_time:=false base_frame:=velodyne          # 必须 use_sim_time:=false（实车无 /clock）
