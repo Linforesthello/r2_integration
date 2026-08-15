@@ -130,6 +130,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 
 | 日期 | 结论 | 详情 |
 |:---|:---|:---|
+| 08-15 | velodyne 抽包 r2_sensors（launch/urdf 移出 r2_bringup，启动命令改为 `ros2 launch r2_sensors velodyne.launch.py`）；g354 补 ament index marker | [retrospect](retrospect/2026-08-15_r2_sensors_extract.md) |
 | 08-02 | EKF/TF 融合链路 7 问题全解决（网络迁移/use_sim_time/imu_link/QoS/双发布者/协方差/ekf.yaml） | [retrospect](retrospect/2026-08-02_ekf_tf_fusion_fix.md) |
 | 08-03 | G354 IMU 轴定义修复（mount_axes=y_front_x_left_z_down）；启动纪律：IMU 校准后才可起 EKF | [sensor-mount.md](phase0/sensor-mount.md) |
 | 08-05 | 底盘里程计修复 + EKF 过程噪声 225 值矩阵排障；IMU 协方差病态→EKF NaN | [chassis_ekf](retrospect/2026-08-05_chassis_ekf_debug.md)、[cov_nan](retrospect/2026-08-05_imu_covariance_ekf_nan.md) |
