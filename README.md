@@ -44,6 +44,7 @@ r2_integration/
 │   │   └── 2026-08-04_ekf-verification-result.md  EKF 验证结果记录
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
+│       ├── 2026-08-15_kiss_drift_170058.md          KISS 长录整程漂移留档（旋转+空窗→航向漂163°，双录对比）
 │       ├── 2026-08-15_r2_sensors_extract.md       velodyne 抽包 r2_sensors + g354 marker 补全（全流程/坑/决策/经验）
 │       ├── 2026-08-15_velodyne_perf_tuning.md     VLP-16 链路性能调优（供电不足根因 + organize_cloud/max_range）
 │       ├── 2026-08-13_layer_map_3d2d.md           分层3D→2D导航层生成（多层对比+选层+seg3剔除）

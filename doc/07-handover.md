@@ -132,7 +132,9 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 | 日期 | 结论 | 详情 |
 |:---|:---|:---|
 | 08-15 | velodyne 抽包 r2_sensors（launch/urdf 移出 r2_bringup，启动命令改为 `ros2 launch r2_sensors velodyne.launch.py`）；g354 补 ament index marker | [retrospect](retrospect/2026-08-15_r2_sensors_extract.md) |
+| 08-15 | **干净 bag 重录（165547：9.63Hz 零空窗）+ 人形块过滤工具 filter_person_blobs.py**（空地散点=建图在场的人），清洗版导航图就绪；同日长录 170058 KISS 漂移 163° 按失败样本归档 | [clean_bag](retrospect/2026-08-15_clean_bag_rerecord.md)、[kiss_drift](retrospect/2026-08-15_kiss_drift_170058.md) |
 | 08-15 | VLP-16 链路性能调优：points 7.7~8.5 → 9.3~9.4Hz 稳定；根因=雷达供电不足 + 转换节点 CPU（organize_cloud/max_range） | [retrospect](retrospect/2026-08-15_velodyne_perf_tuning.md) |
+| 08-15 | 双录对比：长录 170058 KISS 整程漂移（旋转+38 空窗→航向漂 163°、闭环 8.08m、地图 1627 碎片块），不可作建图底图；短录 165547 可用（map_0815_clean） | [retrospect](retrospect/2026-08-15_kiss_drift_170058.md) |
 | 08-02 | EKF/TF 融合链路 7 问题全解决（网络迁移/use_sim_time/imu_link/QoS/双发布者/协方差/ekf.yaml） | [retrospect](retrospect/2026-08-02_ekf_tf_fusion_fix.md) |
 | 08-03 | G354 IMU 轴定义修复（mount_axes=y_front_x_left_z_down）；启动纪律：IMU 校准后才可起 EKF | [sensor-mount.md](phase0/sensor-mount.md) |
 | 08-05 | 底盘里程计修复 + EKF 过程噪声 225 值矩阵排障；IMU 协方差病态→EKF NaN | [chassis_ekf](retrospect/2026-08-05_chassis_ekf_debug.md)、[cov_nan](retrospect/2026-08-05_imu_covariance_ekf_nan.md) |
@@ -165,7 +167,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 
 待办（按优先级）：
 - [x] **performance 持久化**（08-11）：已入启动流程（§三 前置 0 步骤），每次开机手动执行；systemd 固化暂缓
-- [ ] **D4 地图复用验证**：重启全栈加载 map_run_0811_1925.pgm/yaml，rviz 回显与场地一致
+- [ ] **D4 地图复用验证**：加载清洗版新图 `d4/map_0815_clean.pgm/yaml`（08-15 干净包+人形块过滤产物，见 [clean_bag_rerecord](retrospect/2026-08-15_clean_bag_rerecord.md)），rviz 回显与场地一致 → 接入 Nav2
 - [x] **yaw 偏差**（08-12 完成）：方案①（odom0_config yaw=true）实施并验证通过，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
 - [ ] **z 回归项**：slip 场景剧烈加减速 z 漂 +2.5m（08-05 遗留）复测——08-12 转弯/直行全程 z 恒 0（two_d_mode 结构性钳位），仅"剧烈加减速"动作未严格复测
 - [ ] VNC 开机自启（N97 重启后远程桌面不丢）
@@ -190,8 +192,11 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 
 **资源状态**：VM 与 N97 代码同步基线 = 提交 5c46c58（main，08-12，yaw 开放）；
 bag 分析副本在 VM `~/Lin_workspace/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 /
-map_run_0809_2133 / **map_run_0811_1925** / **ekf_yaw_v2_0812** / **stage_0812_2111**）；地图产物
-`bags/maps/map_run_0811_1925/`（ply/map.yaml）与 `bags/maps/d4/`（pgm/map.yaml，D4 部署副本 → N97 `~/maps/`）；
+map_run_0809_2133 / **map_run_0811_1925** / **ekf_yaw_v2_0812** / **stage_0812_2111** /
+**map_run_20260815_165547** 干净包 / **map_run_20260815_170058** KISS 漂移失败样本）；地图产物
+`bags/maps/map_run_0811_1925/`（ply/map.yaml）、`bags/maps/map_0815_clean/`（seg1_clean.ply +
+layers_clean + 过滤对比图）与 `bags/maps/d4/`（map.yaml/map_run_0811_1925.pgm +
+**map_0815_clean.{pgm,yaml}**，D4 部署副本 → N97 `~/maps/`）；
 stage_0812 保守录制对照地图 `bags/stage_0812_map/`（pgm/yaml + raw.ply，对比图
 `bags/raw/compare_0811_vs_0812.png`，留档未传 N97）。
 
