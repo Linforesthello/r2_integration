@@ -69,6 +69,10 @@
   [retrospect 08-14](retrospect/2026-08-14_vm_vlp16_dds_fix.md)）
 - **ros2 CLI 查询异常先怀疑 daemon 缓存**：`ros2 daemon stop` 或 `ros2 topic list --no-daemon`；
   症状是 CLI 看不到话题但 rviz2/独立节点能看到（daemon 常驻旧环境，2026-08-14）
+- **全链路低 Hz 先查供电/硬件，再查软件**：VLP-16 供电电池电压不足 → points 掉到 1Hz（2026-08-15
+  教训，实测 packets 正常但转换节点全链路低 Hz，实为雷达自身输出降速）；排查顺序 = 供电 → 上游
+  `/velodyne_packets` → 转换节点 `/velodyne_points` → 下游 KISS，逐环节 `ros2 topic hz` 定位，
+  见 [retrospect 08-15](retrospect/2026-08-15_velodyne_perf_tuning.md)
 
 ## 8. 实机安全
 

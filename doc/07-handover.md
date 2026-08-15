@@ -41,7 +41,8 @@
 ```
 ekf_filter_node / g354_imu_node / kiss_icp_node / r2_chassis_node /
 r2_teleop_keyboard / robot_state_publisher / static_transform_publisher(base_link→imu_link) /
-velodyne_driver_node / velodyne_transform_node / velodyne_laserscan_node / rviz / rqt
+velodyne_driver_node / velodyne_transform_node / rviz / rqt
+（velodyne_laserscan_node 08-15 起停用：/scan 暂无消费者，Nav2 接入时恢复，见 [retrospect 08-15](retrospect/2026-08-15_velodyne_perf_tuning.md)）
 ```
 
 ### 2.2 关键话题与数据表现（实测 hz）
@@ -51,7 +52,7 @@ velodyne_driver_node / velodyne_transform_node / velodyne_laserscan_node / rviz 
 | /imu/data | ~100Hz（std 0.0025）✅ | G354，稳定 |
 | /odometry/filtered | ~30Hz ✅ | EKF 融合输出（08-09 降频 50→30 缓解 CPU） |
 | /odom_wheels | ~50Hz（std 0.002）✅ | 轮速里程计 |
-| /velodyne_points | ~9.9Hz ✅（08-09 bag 实测，max 间隔 0.121s） | 08-02 的掉帧现象**未复现**，此项关闭 |
+| /velodyne_points | ~9.3~9.4Hz ✅（08-15 实测稳定） | 08-15 调优（organize_cloud=false + max_range 40m）后稳定，此前 7.7~8.5Hz，详见 [retrospect 08-15](retrospect/2026-08-15_velodyne_perf_tuning.md) |
 | /kiss/odometry | ~9.5Hz ✅（08-11 实测，切 performance 治理器后） | **修复**：08-09 时 3.6Hz（CPU powersave 低频，隔帧处理），详见 §六 |
 | /kiss/points 等 | visualize:=true 时发布 | 前缀 **/kiss/**（非 /kiss_icp/） |
 
@@ -119,7 +120,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 | 底盘 TF | `chassis.launch.py` | `publish_tf:=false`（EKF 场景），默认 true |
 | 静态 TF | `ekf.launch.py` | `base_link→imu_link` 单位变换 |
 | KISS-ICP | `~/kiss_icp_ws/src/kiss_icp/config/config.yaml` | max_range 30 / min_range 0.5 / voxel_size 0.2（8-02 调优，备份 .bak_20260802） |
-| 雷达驱动 | `r2_sensors velodyne.launch.py` | device_ip 10.18.18.6（备份 .bak_20260802） |
+| 雷达驱动 | `r2_sensors velodyne.launch.py` | device_ip 10.18.18.6；08-15 起 launch 覆写 organize_cloud=false、max_range=40m（见 [retrospect 08-15](retrospect/2026-08-15_velodyne_perf_tuning.md)） |
 | 底盘参数 | `r2_bringup/config/r2_params.yaml` | 全实车标定值（speed_scale 94.5 等） |
 
 ---
@@ -131,6 +132,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 | 日期 | 结论 | 详情 |
 |:---|:---|:---|
 | 08-15 | velodyne 抽包 r2_sensors（launch/urdf 移出 r2_bringup，启动命令改为 `ros2 launch r2_sensors velodyne.launch.py`）；g354 补 ament index marker | [retrospect](retrospect/2026-08-15_r2_sensors_extract.md) |
+| 08-15 | VLP-16 链路性能调优：points 7.7~8.5 → 9.3~9.4Hz 稳定；根因=雷达供电不足 + 转换节点 CPU（organize_cloud/max_range） | [retrospect](retrospect/2026-08-15_velodyne_perf_tuning.md) |
 | 08-02 | EKF/TF 融合链路 7 问题全解决（网络迁移/use_sim_time/imu_link/QoS/双发布者/协方差/ekf.yaml） | [retrospect](retrospect/2026-08-02_ekf_tf_fusion_fix.md) |
 | 08-03 | G354 IMU 轴定义修复（mount_axes=y_front_x_left_z_down）；启动纪律：IMU 校准后才可起 EKF | [sensor-mount.md](phase0/sensor-mount.md) |
 | 08-05 | 底盘里程计修复 + EKF 过程噪声 225 值矩阵排障；IMU 协方差病态→EKF NaN | [chassis_ekf](retrospect/2026-08-05_chassis_ekf_debug.md)、[cov_nan](retrospect/2026-08-05_imu_covariance_ekf_nan.md) |
@@ -159,6 +161,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
       详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)
 - **D2 重影消除**（08-11 验证通过）：重录重跑地图结构清晰，对比图 `bags/maps/compare_0809_vs_0811_final.png`
 - **r2_bringup 代码审查 P1~P10**（08-11 全部实施 + 实车验证，见 §五）
+- **VLP-16 转换链路性能**（08-15）：供电不足根因 + organize_cloud/max_range 调优，points 7.7~8.5 → 9.3~9.4Hz 稳定，详见 [retrospect 08-15](retrospect/2026-08-15_velodyne_perf_tuning.md)
 
 待办（按优先级）：
 - [x] **performance 持久化**（08-11）：已入启动流程（§三 前置 0 步骤），每次开机手动执行；systemd 固化暂缓
@@ -196,7 +199,7 @@ stage_0812 保守录制对照地图 `bags/stage_0812_map/`（pgm/yaml + raw.ply�
 
 ## 八、相关文档索引
 
-- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）｜`retrospect/2026-08-11_r2_bringup_code_review.md`（代码审查 P1~P10）｜`retrospect/2026-08-14_vm_vlp16_dds_fix.md`（VM 单机 DDS 修复）
+- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）｜`retrospect/2026-08-11_r2_bringup_code_review.md`（代码审查 P1~P10）｜`retrospect/2026-08-14_vm_vlp16_dds_fix.md`（VM 单机 DDS 修复）｜`retrospect/2026-08-15_velodyne_perf_tuning.md`（VLP-16 性能调优+供电根因）
 - 进度看板：`02-progress.md` ｜ 状态快照：`03-current_state.md`
 - EKF yaw 预案：`phase1/ekf-yaw-plan.md` ｜ SLAM 方案探索：`retrospect/vlp16_slam_exploration.md`
 - W1 建图手册：`minimal-loop/w1-operation.md`（D1~D5，含 D2 执行记录）

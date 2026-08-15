@@ -45,6 +45,7 @@ r2_integration/
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
 │       ├── 2026-08-15_r2_sensors_extract.md       velodyne 抽包 r2_sensors + g354 marker 补全（全流程/坑/决策/经验）
+│       ├── 2026-08-15_velodyne_perf_tuning.md     VLP-16 链路性能调优（供电不足根因 + organize_cloud/max_range）
 │       ├── 2026-08-13_layer_map_3d2d.md           分层3D→2D导航层生成（多层对比+选层+seg3剔除）
 │       ├── 2026-08-13_map_chain_investigation.md 建图链路排查（重影根因+z_min修正+time字段之谜）
 │       ├── 2026-08-11_kiss_frame_rate_fix.md      KISS 帧率修复（3.6→9.5Hz，重影根因）
