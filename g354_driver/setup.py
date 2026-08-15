@@ -9,6 +9,8 @@ setup(
     version='0.1.0',
     packages=find_packages(),
     data_files=[
+        (os.path.join('share', 'ament_index', 'resource_index', 'packages'),
+         ['resource/' + package_name]),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
         (os.path.join('share', package_name, 'config'), glob('config/*.rviz')),
         (os.path.join('share', package_name), ['package.xml']),

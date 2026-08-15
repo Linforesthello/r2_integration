@@ -11,32 +11,32 @@
 ## 文件树
 
 ```
-g354_test/
+g354_driver/                          ← 本包位于 r2_integration 仓库内
 │
 ├── README.md                           ← 本文件，入口导航
 │
 ├── doc/                                ← 文档
 │   ├── completion-report.md           Phase 完成报告
 │   ├── debug-log.md                   调试日志
+│   ├── observation-methods.md         观测方法
 │   └── test-flow.md                   测试流程（分步指南）
 │
-├── g354_imu_driver/                    ← ROS2 包
+├── g354_imu_driver/                    ← Python 模块
 │   ├── __init__.py
-│   ├── imu_node.py                    核心节点（Mahony 滤波）
-│   └── ...
+│   └── imu_node.py                    核心节点（Mahony 滤波）
 │
 ├── scripts/                            ← 工具脚本
 │   ├── test_g354.py                   原始串口测试（不依赖 ROS2）
 │   └── g354_imu_node.py               [旧] 独立脚本版（备用）
+│
+├── resource/
+│   └── g354_imu_driver                ament index marker（包索引，勿删）
 │
 ├── config/
 │   └── g354_imu.rviz                  RViz2 可视化配置
 │
 ├── launch/
 │   └── g354_rviz.launch.py            一键启动（节点 + RViz2）
-│
-├── reference/                          ← 参考仓库
-│   └── G354_Attitude-algorithm/        https://github.com/MTFTau-5/G354_Attitude-algorithm
 │
 ├── package.xml                         ROS2 包定义
 ├── setup.py
@@ -68,7 +68,7 @@ ls -la /dev/ttyACM*
 ### 2. 原始串口测试（不依赖 ROS2）
 
 ```bash
-cd ~/Lin_workspace/g354_test
+cd ~/Lin_workspace/r2_integration/g354_driver
 python3 scripts/test_g354.py
 ```
 
