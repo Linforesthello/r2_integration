@@ -137,7 +137,7 @@ controller_server:
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
       time_steps: 48
-      model_dt: 0.033                  # ≈1/30Hz
+      model_dt: 0.04                   # MPPI 模型步长；必须 ≥1/controller_frequency(30Hz)，0.033 会触发 configure 报错
       batch_size: 2000
       vx_std: 0.2
       vy_std: 0.2                      # ← 全向
