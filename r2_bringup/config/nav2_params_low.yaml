@@ -2,7 +2,10 @@
 # 基于 nav2_params.yaml 复制，限幅降到底盘上限的 40~50%（0.5/0.3/0.8 → 0.2/0.15/0.4）：
 #   - 首次实机 Nav2 测试用（安全前置纪律：降额参数）
 #   - 验证通过后切回全速版 nav2_params.yaml
-# 与 nav2_params.yaml 的差异仅限幅值：MPPI vx/vy/wz、velocity_smoother max/min、spin 转速
+# 与 nav2_params.yaml 的差异：
+#   - 限幅值：MPPI vx/vy/wz、velocity_smoother max/min、spin 转速
+#   - 膨胀参数（08-17 窄缝过不去修复）：inflation_radius 0.55→0.30（local/global 两处，csf 仍 3.0）；
+#     MPPI CostCritic consider_footprint 已做足迹级碰撞检查，膨胀只留路径余量
 # 用法：ros2 launch r2_bringup nav2.launch.py params_file:=.../config/nav2_params_low.yaml
 
 amcl:
@@ -234,7 +237,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.55
+        inflation_radius: 0.30
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -292,7 +295,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.55
+        inflation_radius: 0.30
       always_send_full_costmap: True
 
 map_server:
