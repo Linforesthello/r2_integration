@@ -102,30 +102,41 @@ Cartographer 的 `.lua` 配置格式复杂，与 humble 版本的默认配置存
 
 ---
 
-## 方案三：FAST-LIO2（3D LiDAR-Inertial SLAM）🔄
+## 方案三：FAST-LIO2（3D LiDAR-Inertial SLAM）✅（08-18 复核修正）
 
-**结论：编译失败**（ROS2 humble 分支代码质量不如预期）。
+**结论（08-18 修正）：编译通过 ✅**——官方路径两步即可，无需裁剪；
+08-02 的"编译失败"是裁剪路线失败，见 [2026-08-18_fast_lio2_deploy.md](2026-08-18_fast_lio2_deploy.md)（全流程/三坎/修正对照）。
 
 ### 尝试过程
 
+**2026-08-02 尝试（未走通，未运行验证即转向）**：安装 Livox-SDK2 后误判"官方 fork 缺
+package.xml"（实为双版本设计，需 `cp package_ROS2.xml package.xml`），转用 Ericsii fork，
+并在 FAST_LIO 源码上尝试裁剪 livox 依赖（卡点见下）——**Ericsii fork 本身从未编译运行过**，
+裁剪路线未走通即放弃，转向官方路径。
+
+**正确路径（2026-08-18 验证 ✅，官方路线）**：
+
 ```bash
-# 克隆
-git clone https://github.com/hku-mars/FAST_LIO.git
-git checkout ROS2  # ROS2 分支
+# 1. clone FAST_LIO（ROS2 分支，--recursive 带 ikd-Tree 子模块）
+git clone --branch ROS2 --recursive https://github.com/hku-mars/FAST_LIO.git ~/fast_lio_ws/src/FAST_LIO
 
-# 需要依赖 livox_ros_driver2
+# 2. 安装 Livox-SDK2（livox_ros_driver2 编译依赖；build 目录需先 mkdir）
+git clone --depth 1 https://github.com/Livox-SDK/Livox-SDK2.git ~/Livox-SDK2
+cd ~/Livox-SDK2 && mkdir build && cd build && cmake .. && make -j4 && sudo make install
+
+# 3. clone 官方 livox_ros_driver2 + 生成 package.xml（关键一步）
+cd ~/fast_lio_ws/src
 git clone --depth 1 https://github.com/Livox-SDK/livox_ros_driver2.git
-# 编译失败：缺少 Livox SDK
+cd livox_ros_driver2
+cp package_ROS2.xml package.xml
+cp -rf launch_ROS2/ launch/
 
-# 安装 Livox SDK2
-git clone --depth 1 https://github.com/Livox-SDK/Livox-SDK2.git
-cd build && cmake .. && make -j4 && sudo make install
-
-# livox_ros_driver2 需要 package.xml，官方 fork 缺少
-# 改用 Ericsii fork:
-git clone --depth 1 -b feature/use-standard-unit \
-  https://github.com/Ericsii/livox_ros_driver2.git
+# 4. 编译（DISTRO_ROS=humble 参数必带，见下方卡点表）
+cd ~/fast_lio_ws && source /opt/ros/humble/setup.bash
+colcon build --symlink-install --cmake-args -DROS_EDITION=ROS2 -DDISTRO_ROS=humble
 ```
+
+分步说明与三坎排障详见 [2026-08-18_fast_lio2_deploy.md](2026-08-18_fast_lio2_deploy.md)。
 
 ### 卡点
 
@@ -141,9 +152,16 @@ git clone --depth 1 -b feature/use-standard-unit \
 ### 结论
 FAST-LIO2 的 ROS2 humble 分支原生强依赖 Livox 雷达，对 VLP-16 虽然 config 目录中有 `velodyne.yaml`，但源码硬编码了 Livox 消息类型和回调。要裁剪几乎等于重写。放弃。
 
+> **2026-08-18 复核修正（重要）**：上述"放弃"结论是**误判**——08-02 卡的是"裁剪绕开 Livox"路线；官方"装依赖满足编译"路线只需两步：
+> 1. `cp package_ROS2.xml package.xml`（官方仓库**双版本设计**，非"缺 package.xml"；README 2.2 / build.sh 机制）
+> 2. `colcon build --cmake-args -DROS_EDITION=ROS2 -DDISTRO_ROS=humble`（CMakeLists 按 `DISTRO_ROS` 分流，humble 需该参数走现代 typesupport API）
+>
+> 且 velodyne 走 `~/fast_lio_ws/src/FAST_LIO/src/laserMapping.cpp` L921 标准 PointCloud2 else 分支，
+> livox 仅是编译期依赖（提供 CustomMsg 消息定义）。全流程/三坎/修正对照见 [2026-08-18_fast_lio2_deploy.md](2026-08-18_fast_lio2_deploy.md)。
+
 ---
 
-## 方案三：KISS-ICP（纯 LiDAR 里程计）✅
+## 方案四：KISS-ICP（纯 LiDAR 里程计）✅
 
 **结论：可用。** 安装简捷，VLP-16 原生支持，输出 odom 和注册点云。
 
@@ -204,12 +222,11 @@ ros2 launch kiss_icp odometry.launch.py \
 |------|------|------|------|------|
 | **slam_toolbox** | 2D SLAM | 低 | ❌ 不适合 VLP-16 | — |
 | **Cartographer** | 2D SLAM | 中 | ❌ 配置兼容性问题 | — |
-| **FAST-LIO2** | 3D LIO | 🔴 高 | ❌ 编译地狱 | — |
+| **FAST-LIO2** | 3D LIO | 🟢 中 | ✅ 编译+VM 重放验证（08-18）；实车链路待验证 | 候选池 |
 | **KISS-ICP** | 3D Odom | 🟢 低 | ✅ 马上能用 | **当前** |
-| **未来的 FAST-LIO2** | 3D LIO | ⏳ 等完善 | — | 等官方 ROS2 支持 |
 
 ## 下一步建议
 1. **键盘控制 + 点云采集** — ✅ 已完成（2026-08-02 实车跑通：雷达+KISS-ICP+WASD 键盘，RViz 中 `odom_lidar` 系点云地图随车累积）
 2. **雷达闭环运动** — 基于 `/kiss_icp/odometry` 写 waypoint 节点，车自动走距离/转角度/到目标点（P 控制，见 [ekf-verification.md](../phase1/ekf-verification.md) 同期的 r2_bringup 扩展）
 3. **IMU 融合** — 接入 G354 IMU，robot_localization EKF 提高定位（Phase 1 实车验证挂起中，清单见 [ekf-verification.md](../phase1/ekf-verification.md)）
-4. **换 FAST-LIO** — 等 ROS2 分支稳定后再试，或者用 docker 已有环境
+4. **FAST-LIO2 部署** — 编译已通 + VM bag 重放链路验证完成（08-18，含 /Laser_map 1Hz 验证，见 [2026-08-18_fast_lio2_deploy.md](2026-08-18_fast_lio2_deploy.md)）；实车链路验证待做（重放源 stage_0812_2111 含 `/imu/data` + `/velodyne_points`，无需新录）
