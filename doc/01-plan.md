@@ -322,6 +322,13 @@ Phase 0: 底盘 CAN 控制 ──────────────── 前�
 | D435 USB 带宽不足 | Phase 4 | 🟢 低 | — | D435 用 USB3 口 |
 | 全向轮里程计标定不准（R 值、ticks/rev） | Phase 0 | 🟢 低 | 半天 | 用卷尺实测，走直线验证后校准 |
 
+### 4.5 规划控制与视觉集成路线（08-18 调研定稿）
+
+后续 Phase 的规划控制选型与视觉集成时机见
+[planning-control-roadmap.md](planning-control-roadmap.md)（离线先验地图 vs 实时建图导航两大阵营
++ 视觉-雷达标定工具线 + 各 Phase 落点）；FAST-LIO2 部署细节见
+[fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)。
+
 ---
 
 ## 第五章 Phase 0：底盘 ROS2 + CAN 控制（✅ 已完成）
