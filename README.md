@@ -26,6 +26,7 @@ r2_integration/
 │   ├── 01-plan.md                    五阶段集成方案总纲
 │   ├── minimal-loop/                  最小闭环计划（plan.md）+ W1/W2/W3 操作手册（w1/w2/w3-operation.md）+ Nav2 bringup + 审计数据
 │   ├── 02-deploy-checklist.md        N97 部署清单
+│   ├── n97_remote_desktop.md         N97 远程桌面方案（TigerVNC 定型，NoMachine/RealVNC 弃用）
 │   ├── 02-progress.md                全局进度一览（各Phase完成度）
 │   ├── project_status.md              全项目现状总结（08-06）
 │   ├── project_landscape.md            项目全景（R2在更大系统中的位置）
