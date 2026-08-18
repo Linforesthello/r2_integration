@@ -11,7 +11,7 @@
 Phase 0 底盘CAN控制 ━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
 Phase 1 IMU+EKF融合 ━━━━━━━━━━━━━━━━○○  95%  ◆ 实车对比验证（08-06）+ yaw 方案①通过（08-12）
 Phase 2 VLP16+KISS-ICP ━━━━━━━━━━━━━━━━━━━━ 100% ✅
-Phase 3 Nav2导航     ━━━○○○○○○○○  25%  ◆ 首闭环（08-15）+ 降额过缝验证通过（08-17）；全速验证暂缓
+Phase 3 Nav2导航     ━━━○○○○○○○○  25%  ◆ 首闭环（08-15）+ 降额过缝验证（08-17）；W2 收尾中（到达误差测量/连续导航测试）；全速验证暂缓
 Phase 4 视觉AI       ━○○○○○○○○○  0%  ⏳
 Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
                     ─────────────
@@ -74,6 +74,7 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 | KISS-ICP | ✅ 已跑通 | 属于 Phase 2；/velodyne_points → odom |
 | slam_toolbox 建图 | ❌ 已否决 | 不适合 VLP-16，见 [vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md) |
 | Nav2 配置 | ✅ 首闭环（08-15）+ 降额过缝验证（08-17） | AMCL 定位 + MPPI 跟踪 + velocity_smoother；降额参数（0.2/0.15/0.4）实车闭环成功，见 [retrospect 08-15](retrospect/2026-08-15_nav2_bringup.md)；08-17 inflation 0.30 过缝验证通过（无碰撞），见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)；全速验证暂缓 |
+| W2 收尾（08-18 起） | 🟡 进行中 | 到达误差测量（方案+脚本见 [w2-operation.md](minimal-loop/w2-operation.md) D7）、连续导航测试（D5-6）、rviz 显示项确认；全速验证**暂缓**（切 nav2_params.yaml 前须先同步其膨胀参数仍 0.55） |
 
 ### Phase 4：D435 + Jetson 视觉 AI ⏳
 

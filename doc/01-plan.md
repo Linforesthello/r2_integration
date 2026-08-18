@@ -732,8 +732,10 @@ rviz2
   ① 短中期主线：把 2D Nav2 做扎实（全向车 3 自由度已够用）
      ☑ 盲区/footprint 修复实机复测（08-17 降额实测顺带覆盖，基本无碰撞）
      □ 全速验证：切 nav2_params.yaml（0.5/0.3/0.8）复测（⚠️ 08-17 决策暂缓，保持降额现状；切回前先同步膨胀参数 0.55→0.30）
-     □ 避障实测：静态/动态障碍绕行 + 恢复行为（spin/backup）
-     □ 稳定性：长时间连续导航、到达误差量化（bag 加 /goal_pose）
+     □ 避障实测：静态/动态障碍绕行 + 恢复行为（spin/backup）——minimal-loop W3（08-20 起）
+     □ 稳定性：长时间连续导航（30min+）、到达误差量化（bag 加 /goal_pose，脚本 `bags/analysis/analyze_nav2_goal_error.py`）
+     □ 重定位/绑架恢复：运行中手动挪车 → AMCL 全图撒粒子（`/reinitialize_global_localization`）恢复收敛 <5s
+     □ 多场地地图切换：map_server 多地图加载/切换正确
 
   ② 感知升级（中期）：定位精度升级 KISS-ICP → FAST-LIO2 评估
      - 动机：KISS 纯激光在旋转时点云漂移、走廊定位退化（AMCL 上游输入质量上限）
@@ -854,6 +856,45 @@ local_costmap:
 □ 路径上有障碍时绕行
 □ 连续导航 10 次成功率 > 80%
 ```
+
+### 8.4 后续候选方向（候选池）
+
+> 状态：候选记录（2026-08-18 建），**不承诺执行**。minimal-loop 闭环验收（W3，08-26）后
+> 从池中挑一条主线深化，其余保持"能沟通接口"即可（一超多强原则，见全局 CLAUDE.md）。
+> 精简版：minimal-loop [plan.md](minimal-loop/plan.md) 第八节（单一事实来源在本节）。
+
+#### 可介入外设
+
+| 外设 | 现状 | 接入点 |
+|:---|:---|:---|
+| D435 + Jetson 视觉 | Phase 4 规划中 | 视觉引导导航（detection → TF → goal） |
+| 气动 3_Diacifa_t1 | Phase 5 规划（CAN 0x141/0x341） | 任务执行机构 |
+| 舵机机械臂 3_SteeringArm_t1 | 2.1 提及（R2 可选） | 抓取/操作 |
+| MID70 | 曾弃用（[vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md)） | 回看/备用 |
+| 超声波/TOF 近距补盲 | STM32 侧有 VL53L0 等外设库 | 补 min_range 0.5m 内盲区 |
+| RTK/室外定位 | 未评估 | 室外比赛场景（待评估） |
+
+#### 可测试算法包
+
+| 算法 | 动机 | 验证方式 |
+|:---|:---|:---|
+| FAST-LIO2 | 8.2 ②，解决旋转漂移（纯激光配准本底） | VM 编译 → 与 KISS 两路里程计实车对比 |
+| DWB vs MPPI | plan.md 决策表原快速方案 | 控制器横向对比（到达误差/成功率数据说话） |
+| Smac 2D vs NavFn | 全向轮全局规划对比 | 路径质量/规划成功率 |
+| BehaviorTree.CPP | Phase 5 任务编排正式化 | 状态机 → 行为树迁移 |
+| ros2_control | plan.md 决策表"正式化"项 | 底盘接口正式化 |
+| voxel_layer 3D costmap | 立体感知（低悬障碍） | 悬空障碍测试 |
+
+#### 可做验证
+
+| 验证 | 方法 | 验收 |
+|:---|:---|:---|
+| 重定位/绑架恢复 | 运行中手动挪车 → `/reinitialize_global_localization` 全图撒粒子 | 恢复收敛 <5s |
+| 长时间稳定性 | 30min 连续多 goal 循环（bag 留档） | 无漂移/无崩溃/误差 <0.5m |
+| 多场地地图切换 | map_server 多地图 | 切换正确 |
+| 视觉引导导航 | detection → TF → goal（Phase 4 目标） | 到达 1m 内 |
+| 异常注入 | 拔传感器/堵转/急停（Phase 5 EVENT 设计） | 降级运行不崩溃 |
+| 连续 3 次完整流程 | plan.md 验收标准"稳定"项 | 无人工干预 |
 
 ---
 
