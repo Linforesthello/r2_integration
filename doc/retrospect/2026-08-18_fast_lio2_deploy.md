@@ -199,9 +199,7 @@ ros2 topic hz /Odometry
 
 - [x] ~~VM 启动验证~~（08-18 ✅，见 §9）
 - [x] ~~N97 录 30s 短 bag~~（不需要：stage_0812_2111 现成可用，见 §9.2）
-- [ ] 实车部署：源码同步 N97（git push → pull 或独立工作区）+ `extrinsic_T` 按实车量测 IMU→LiDAR 外参
-- [ ] 实车链路验证：全栈启动（雷达+IMU+FAST-LIO）推车走一段，对比 `/Odometry` vs `/odometry/filtered`（EKF）
+- [ ] N97 实车部署：**完整检查清单见 [fastlio2-n97-deploy.md](../fastlio2-n97-deploy.md)**
+      （依赖全量安装 / 外参量测 / 运行纪律 / 验证流程 / 决策）
 - [ ] 决策：FAST-LIO2 vs KISS-ICP+EKF（01-plan §8.4 候选池）——Nav2 侧 AMCL 定位不依赖 FAST-LIO，
-      价值主要在**建图质量/里程计精度**（旋转漂移痛点）；实车对比后定
-- [ ] 集成注意：FAST-LIO frame_id 写死 `camera_init`（odom 系）/`body`（IMU 系），无 base_frame 参数
-      （KISS-ICP 有），接入 R2 TF 树需静态 TF 桥
+      价值主要在**建图质量/里程计精度**（旋转漂移痛点）；实车对比后定（对比方法见部署手册 §六）
