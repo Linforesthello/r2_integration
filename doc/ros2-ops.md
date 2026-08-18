@@ -83,5 +83,6 @@
 ## 相关
 
 - 文档/git/Obsidian 规范：[standards.md](standards.md) ｜ [obsidian-tags.md](obsidian-tags.md)
+- QoS/DDS 问题手册：[ros2-qos-dds.md](ros2-qos-dds.md)（hz 大消息假阴性/兼容矩阵/排查四步法）
 - 启动手册：[w1-operation.md](minimal-loop/w1-operation.md)
 - 排障记录：[retrospect/](retrospect/)

@@ -21,6 +21,7 @@ r2_integration/
 │   ├── standards.md                  文档标准 ← 先看这个
 │   ├── obsidian-tags.md              Obsidian 标签体系习惯
 │   ├── ros2-ops.md                   ROS/ROS2 操作规范（构建/启动/录包/分析）
+│   ├── ros2-qos-dds.md               QoS/DDS 问题手册（hz 大消息坑/兼容矩阵/排查四步法）
 │   ├── obsidian-sync.md              Obsidian 镜像同步规范（全局适用）
 │   ├── 01-plan.md                    五阶段集成方案总纲
 │   ├── minimal-loop/                  最小闭环计划（plan.md）+ W1/W2/W3 操作手册（w1/w2/w3-operation.md）+ Nav2 bringup + 审计数据
