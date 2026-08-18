@@ -1,8 +1,8 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-08-15
-> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%｜Phase 3 ⏳ 10%（Nav2 首闭环跑通 08-15）
-> 下一阶段: Nav2 全速参数验证 → 避障实测 → 长时间稳定性
+> 最后更新: 2026-08-18
+> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%｜Phase 3 ⏳ 25%（首闭环 08-15；降额过缝验证 08-17，全速暂缓）
+> 下一阶段: Nav2 避障实测 → 长时间稳定性（全速验证暂缓，保持降额现状）
 > 基础设施: 08-15 VLP-16 运行物抽包 r2_sensors（launch/r2.urdf 移入，dds 留 r2_bringup，启动命令见 §三）；08-14 两机 git 同步统一；VM 单机跑通 VLP-16（DDS 根因修复，见 §五 8-14）
 >
 > **部署环境**：N97 Mini PC（192.168.1.210，Ubuntu 22.04 + Humble），enp1s0: 10.18.18.20/24
@@ -18,7 +18,7 @@
 | 0 | 底盘 ROS2 + CAN 控制 | ✅ 100% | 四全向轮，全命令可用 |
 | 1 | G354 IMU + 轮速 EKF 融合 | ✅ 95% | 实车验证完成（08-06）；z 漂移修复（08-09）；yaw 偏差方案①实施并验证通过（08-12）；仅剩 slip 剧烈加减速严格复测 |
 | 2 | VLP16 + KISS-ICP SLAM | ✅ 100% | 驱动+里程计+键盘建图全跑通（8-02） |
-| 3 | VLP16 + Nav2 导航 | ⏳ 10% | D2 重影消除（08-11）；**D4 复用验证 + Nav2 首闭环跑通**（08-15，降额 0.2m/s），见 [retrospect/2026-08-15_nav2_bringup.md](retrospect/2026-08-15_nav2_bringup.md)；待全速验证 + 避障实测 |
+| 3 | VLP16 + Nav2 导航 | ⏳ 25% | D2 重影消除（08-11）；**D4 复用验证 + Nav2 首闭环跑通**（08-15，降额 0.2m/s），见 [retrospect/2026-08-15_nav2_bringup.md](retrospect/2026-08-15_nav2_bringup.md)；**降额过缝验证通过**（08-17，inflation 0.30，无碰撞），见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)；全速验证暂缓，待避障实测 |
 | 4 | D435 + Jetson 视觉 | ⏳ 0% | — |
 | 5 | 气动+异常+编排 | ⏳ 0% | — |
 
@@ -31,6 +31,9 @@
 **8-12 新增**：yaw 偏差方案①（轮速开放 yaw）实施并验证通过（起点 0.00°/峰值 0.07°，含 90°/190°
 转弯），见 [ekf-yaw-plan.md](phase1/ekf-yaw-plan.md) 验证结果段；stage_0812_2111 保守留档 bag 地图
 对照生成（`bags/stage_0812_map/`）。
+**8-17 新增**：降额参数实车验证：inflation_radius 0.55→0.30（local/global）修复窄缝 costmap 全灰过不去，
+实测**基本无碰撞、能通过过道**（此前明明有路不通过）；**全速验证暂缓，保持降额现状**（08-17 决策），
+见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)。
 
 ---
 
@@ -108,6 +111,7 @@ ros2 run r2_bringup teleop_keyboard
 # bash ~/Lin_workspace/r2_integration/scripts/r2_startup.sh
 
 # 终端 7: Nav2 导航（08-15 起；首次实机用降额参数 nav2_params_low，KISS 不启动）
+#   ⚠️ 08-17 起参数含 inflation_radius 0.30 修复（窄缝过不去）；初始位姿只设一次、设完先动一下确认收敛，见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
 #   操作: rviz 出现后 2D Pose Estimate(P) 设初始位姿 → Navigation2 Goal(G) 发目标
 #   注意: 设位姿前 planner/costmap 报 "map frame does not exist" 是正常等待噪音；
 #         车静止时 AMCL 不发布 /amcl_pose 与粒子（update_min_d/a 阈值设计），动起来才有
@@ -116,7 +120,13 @@ ros2 launch r2_bringup nav2.launch.py \
   map:=/home/lin/maps/map_0815_clean.yaml \
   params_file:=~/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml \
   rviz:=true
+
+或者
+ros2 launch r2_bringup nav2.launch.py map:=/home/lin/maps/map_0815_clean.yaml params_file:=/home/lin/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml rviz:=true
 ```
+
+
+
 
 **IMU 独立看姿态**：`ros2 run rviz2 rviz2` → Fixed Frame 填 `imu_link` →
 Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ Topic `/imu/data` → QoS **Reliable**。
@@ -132,6 +142,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 | 静态 TF | `ekf.launch.py` | `base_link→imu_link` 单位变换 |
 | KISS-ICP | `~/kiss_icp_ws/src/kiss_icp/config/config.yaml` | max_range 30 / min_range 0.5 / voxel_size 0.2（8-02 调优，备份 .bak_20260802） |
 | 雷达驱动 | `r2_sensors velodyne.launch.py` | device_ip 10.18.18.6；08-15 起 launch 覆写 organize_cloud=false、max_range=40m（见 [retrospect 08-15](retrospect/2026-08-15_velodyne_perf_tuning.md)） |
+| Nav2 膨胀参数 | `r2_bringup/config/nav2_params_low.yaml` | inflation_radius **0.30** / cost_scaling_factor 3.0（08-17 从 0.55 收窄，修复窄缝过不去，见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)）；⚠️ **全速版 `nav2_params.yaml` 仍是 0.55**，切回前须先同步 |
 | 底盘参数 | `r2_bringup/config/r2_params.yaml` | 全实车标定值（speed_scale 94.5 等） |
 
 ---
@@ -142,6 +153,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 
 | 日期 | 结论 | 详情 |
 |:---|:---|:---|
+| 08-17 | 降额参数过缝验证：inflation_radius 0.55→0.30 修复窄缝全灰过不去（实测基本无碰撞、能过过道）；多次设初始位姿致 map 重叠诊断留档；**全速验证暂缓，保持降额现状** | [retrospect](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md) |
 | 08-15 | velodyne 抽包 r2_sensors（launch/urdf 移出 r2_bringup，启动命令改为 `ros2 launch r2_sensors velodyne.launch.py`）；g354 补 ament index marker | [retrospect](retrospect/2026-08-15_r2_sensors_extract.md) |
 | 08-15 | **干净 bag 重录（165547：9.63Hz 零空窗）+ 人形块过滤工具 filter_person_blobs.py**（空地散点=建图在场的人），清洗版导航图就绪；同日长录 170058 KISS 漂移 163° 按失败样本归档 | [clean_bag](retrospect/2026-08-15_clean_bag_rerecord.md)、[kiss_drift](retrospect/2026-08-15_kiss_drift_170058.md) |
 | 08-15 | VLP-16 链路性能调优：points 7.7~8.5 → 9.3~9.4Hz 稳定；根因=雷达供电不足 + 转换节点 CPU（organize_cloud/max_range） | [retrospect](retrospect/2026-08-15_velodyne_perf_tuning.md) |
@@ -179,9 +191,10 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 待办（按优先级）：
 - [x] **performance 持久化**（08-11）：已入启动流程（§三 前置 0 步骤），每次开机手动执行；systemd 固化暂缓
 - [x] **D4 地图复用验证**（08-15 完成）：`map_0815_clean` 加载回显一致 + **Nav2 首闭环跑通**（降额 0.2m/s），见 [retrospect/2026-08-15_nav2_bringup.md](retrospect/2026-08-15_nav2_bringup.md)（⚠️ 首测有擦碰，见下条）
-- [ ] **盲区/footprint 修复复测**（08-15 已改参数，待实机验证）：雷达裁剪 min_range 0.9→0.5、local_costmap 3×3→6×6、footprint 0.62→0.84×0.66 匹配 urdf（撞障碍根因，见 [retrospect 五-2](retrospect/2026-08-15_nav2_bringup.md)）
-- [ ] **Nav2 全速验证**：降额闭环通过后切 `nav2_params.yaml`（0.5/0.3/0.8）复测
+- [x] **盲区/footprint 修复复测**（08-17 顺带覆盖）：雷达裁剪 min_range 0.5、local_costmap 6×6、footprint 0.84×0.66（撞障碍根因，见 [retrospect 五-2](retrospect/2026-08-15_nav2_bringup.md)）；08-17 降额实测基本无碰撞（[retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)）
+- [ ] **Nav2 全速验证**（**暂缓 08-17，保持降额现状**）：后续切 `nav2_params.yaml`（0.5/0.3/0.8）前须先同步其膨胀参数（仍 0.55）再复测
 - [ ] **Nav2 避障实测**：costmap 实时刷新已见（人体移动出膨胀圈），静态/动态障碍绕行 + 恢复行为实测
+- [ ] **多次设初始位姿→map 重叠**（诊断 + 操作纪律见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)）：待 N97 确认 AMCL 日志是否 "Ignoring initial pose"（后续点击无效），必要时加 `always_reset_initial_pose: true`
 - [x] **yaw 偏差**（08-12 完成）：方案①（odom0_config yaw=true）实施并验证通过，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
 - [ ] **z 回归项**：slip 场景剧烈加减速 z 漂 +2.5m（08-05 遗留）复测——08-12 转弯/直行全程 z 恒 0（two_d_mode 结构性钳位），仅"剧烈加减速"动作未严格复测
 - [ ] VNC 开机自启（N97 重启后远程桌面不丢）
@@ -204,7 +217,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 3. 本阶段 7 个问题的共性教训：跨机器同步必须全覆盖（含配置）、第三方 launch 默认值必须实测、配置不合法可能不报错
 4. **N97 单机跑全套是性能瓶颈**：EKF 降频 + KISS 吞帧同源，CPU 余量优先于功能扩展
 
-**资源状态**：VM 与 N97 代码同步基线 = 提交 5c46c58（main，08-12，yaw 开放）；
+**资源状态**：VM 与 N97 代码同步基线 = 提交 fc778da（main，08-17，Nav2 膨胀参数 0.30）；
 bag 分析副本在 VM `~/Lin_workspace/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 /
 map_run_0809_2133 / **map_run_0811_1925** / **ekf_yaw_v2_0812** / **stage_0812_2111** /
 **map_run_20260815_165547** 干净包 / **map_run_20260815_170058** KISS 漂移失败样本 /
@@ -220,7 +233,7 @@ stage_0812 保守录制对照地图 `bags/stage_0812_map/`（pgm/yaml + raw.ply�
 
 ## 八、相关文档索引
 
-- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）｜`retrospect/2026-08-11_r2_bringup_code_review.md`（代码审查 P1~P10）｜`retrospect/2026-08-14_vm_vlp16_dds_fix.md`（VM 单机 DDS 修复）｜`retrospect/2026-08-15_velodyne_perf_tuning.md`（VLP-16 性能调优+供电根因）
+- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）｜`retrospect/2026-08-11_r2_bringup_code_review.md`（代码审查 P1~P10）｜`retrospect/2026-08-14_vm_vlp16_dds_fix.md`（VM 单机 DDS 修复）｜`retrospect/2026-08-15_velodyne_perf_tuning.md`（VLP-16 性能调优+供电根因）｜[08-17 初始位姿诊断+膨胀修复](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
 - 进度看板：`02-progress.md` ｜ 状态快照：`03-current_state.md`
 - EKF yaw 预案：`phase1/ekf-yaw-plan.md` ｜ SLAM 方案探索：`retrospect/vlp16_slam_exploration.md`
 - W1 建图手册：`minimal-loop/w1-operation.md`（D1~D5，含 D2 执行记录）

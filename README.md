@@ -44,6 +44,7 @@ r2_integration/
 │   │   └── 2026-08-04_ekf-verification-result.md  EKF 验证结果记录
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
+│       ├── 2026-08-17_nav2_initialpose_inflation_fix.md  初始位姿诊断 + 膨胀参数 0.30 过缝修复（08-17 实车验证，全速暂缓）
 │       ├── 2026-08-15_nav2_bringup.md             Nav2 首闭环跑通（D4 验证 + 降额实机 + 7 条排障 + 盲区/footprint 修复）
 │       ├── 2026-08-15_kiss_drift_170058.md          KISS 长录整程漂移留档（旋转+空窗→航向漂163°，双录对比）
 │       ├── 2026-08-15_r2_sensors_extract.md       velodyne 抽包 r2_sensors + g354 marker 补全（全流程/坑/决策/经验）
@@ -124,7 +125,7 @@ r2_integration/
 Phase 0 底盘 ROS2 + CAN 控制            ✅ 100% 完成（含 08-06 里程计修复）
 Phase 1 G354 IMU + EKF 融合             ✅ 95% 实车验证完成（08-06）；yaw 方案①验证通过（08-12）
 Phase 2 3D LiDAR SLAM (VLP16+KISS-ICP)  ✅ 驱动 + 3D 里程计已跑通
-Phase 3 VLP16 + Nav2 导航              ⏳ 10%（08-15 首闭环跑通，降额参数；盲区/footprint 修复待复测）
+Phase 3 VLP16 + Nav2 导航              ⏳ 25%（08-15 首闭环；08-17 降额过缝验证通过，无碰撞；全速验证暂缓）
 Phase 4 D435 + Jetson 视觉             ⏳
 Phase 5 气动 + 异常处理 + Robocon 编排   ⏳
 ```
@@ -188,6 +189,9 @@ ros2 launch r2_bringup nav2.launch.py \
   map:=/home/lin/maps/map_0815_clean.yaml \
   params_file:=~/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml \
   rviz:=true
+
+或者
+ros2 launch r2_bringup nav2.launch.py map:=/home/lin/maps/map_0815_clean.yaml params_file:=/home/lin/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml rviz:=true
 
 # 观看融合里程计
 ros2 topic echo /odometry/filtered

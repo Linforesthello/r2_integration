@@ -78,8 +78,8 @@
 
 ## 七、后续
 
-- [ ] **盲区/footprint 修复复测**（优先级最高）：新参数实机验证——近距离障碍（<1m）能上 costmap、绕障不擦碰
-- [ ] Nav2 全速验证：切 `nav2_params.yaml`（0.5/0.3/0.8）复测
+- [x] **盲区/footprint 修复复测**（08-17 降额实测顺带覆盖：基本无碰撞；inflation_radius 0.55→0.30 同时修复窄缝过不去，见 [retrospect 08-17](2026-08-17_nav2_initialpose_inflation_fix.md)）
+- [ ] Nav2 全速验证：切 `nav2_params.yaml`（0.5/0.3/0.8）复测（⚠️ 08-17 决策暂缓，保持降额现状）
 - [ ] 避障实测：costmap 实时刷新已见（人体移动出膨胀圈），静态/动态障碍绕行 + 恢复行为实测
 - [ ] 到达误差精确测量（goal 位姿 vs 实际停位，bag 录制加 /goal_pose）
 - [ ] rviz 显示项确认：Global Planner→Path、Controller→Trajectories（默认关）、Amcl Particle Swarm 运行中勾选

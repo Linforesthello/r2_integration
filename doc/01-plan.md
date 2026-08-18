@@ -725,13 +725,13 @@ rviz2
   - Nav2 链路完整：AMCL 定位 + Navfn 全局规划 + MPPI 局部控制 + velocity_smoother
   - 降额参数（0.2/0.15/0.4）实机闭环成功，速度精确钳限幅，全程无碰撞（首测有擦碰）
   - 清洗版导航图 map_0815_clean 接入，D4 地图复用验证通过
-  - 已修复：雷达盲区 0.9→0.5m、local costmap 3×3→6×6、footprint 对齐 urdf（待实机复测）
+  - 已修复：雷达盲区 0.9→0.5m、local costmap 3×3→6×6、footprint 对齐 urdf（08-17 实机顺带复测通过）；inflation_radius 0.55→0.30 窄缝过不去修复（见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)）
 
 目标（下一阶段，分三层次推进）：
 
   ① 短中期主线：把 2D Nav2 做扎实（全向车 3 自由度已够用）
-     □ 盲区/footprint 修复实机复测（近距离绕障不擦碰，最高优先）
-     □ 全速验证：切 nav2_params.yaml（0.5/0.3/0.8）复测
+     ☑ 盲区/footprint 修复实机复测（08-17 降额实测顺带覆盖，基本无碰撞）
+     □ 全速验证：切 nav2_params.yaml（0.5/0.3/0.8）复测（⚠️ 08-17 决策暂缓，保持降额现状；切回前先同步膨胀参数 0.55→0.30）
      □ 避障实测：静态/动态障碍绕行 + 恢复行为（spin/backup）
      □ 稳定性：长时间连续导航、到达误差量化（bag 加 /goal_pose）
 

@@ -1,7 +1,18 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-08-06
+> 最后更新: 2026-08-18
 > 内容: 截至今日已完成的所有工作的详细记录
+
+---
+
+## 〇、2026-08-17 近期完成
+
+| 事项 | 详情 |
+|:-----|:-----|
+| Nav2 降额过缝验证 | inflation_radius 0.55→0.30（local/global）修复窄缝 costmap 全灰过不去，实车验证**基本无碰撞、能通过过道**，见 [retrospect](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md) |
+| 全速验证决策 | **暂缓（08-17），保持降额现状**；切全速版前须先同步其膨胀参数（仍 0.55） |
+| 多次设初始位姿诊断 | map 重叠 = AMCL 锁错位（机制链 + 操作纪律见 [retrospect](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)） |
+| 参数提交 | nav2_params_low.yaml 膨胀参数改动 commit fc778da（08-17） |
 
 ---
 
@@ -96,9 +107,9 @@ user_vy = -formula_vx
 
 | Phase | 目标 | 前置 | 状态 |
 |:------|:-----|:------|:------|
-| **1** | G354 IMU + 轮速 → EKF 融合 | Phase 0 | ⏳ 驱动+轴映射修复完成（8-03），**实车验证待做** |
+| **1** | G354 IMU + 轮速 → EKF 融合 | Phase 0 | ✅ 95% 实车验证完成（08-06）；yaw 方案①通过（08-12） |
 | **2** | 3D LiDAR SLAM (VLP16 + KISS-ICP) | Phase 0 | ✅ 驱动+里程计+键盘建图全跑通 |
-| **3** | VLP16 + Nav2 导航 | Phase 1+2 | ⏳ |
+| **3** | VLP16 + Nav2 导航 | Phase 1+2 | ⏳ 25% 首闭环（08-15）+ 降额过缝验证（08-17）；全速验证暂缓 |
 | **4** | D435 + Jetson YOLO 视觉 | Phase 0 | ⏳ |
 | **5** | 气动+异常处理+Robocon编排 | 全部 | ⏳ |
 
@@ -120,7 +131,7 @@ VLP-16 上尝试了四种 SLAM 方案（详见 `retrospect/vlp16_slam_exploratio
 - [x] KISS-ICP 3D 里程计（topic `/velodyne_points` → odom + 注册点云）
 - [x] 键盘控制 + 点云采集建图（2026-08-02 实车跑通，RViz 中 `odom_lidar` 系点云地图随车累积）
 - [x] IMU 轴映射修复（8-03：mount_axes + init/Mahony 符号修正，见 [sensor-mount.md](phase0/sensor-mount.md)）
-- [ ] IMU 融合实车验证（G354 EKF，挂起中，清单见 [phase1/ekf-verification.md](phase1/ekf-verification.md)）
+- [x] IMU 融合实车验证（G354 EKF，08-06 完成；yaw 方案① 08-12 通过，清单见 [phase1/ekf-verification.md](phase1/ekf-verification.md)）
 - [ ] 雷达闭环运动（基于 `/kiss/odometry` 的 waypoint 节点，待做）
 
 ---

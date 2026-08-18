@@ -2,6 +2,7 @@
 
 > 日期：2026-08-15
 > 状态：✅ **已执行完成（08-15）**——首闭环跑通，见 [retrospect/2026-08-15_nav2_bringup.md](../retrospect/2026-08-15_nav2_bringup.md)
+> 补充（08-17）：降额过缝验证通过（inflation_radius 0.30，实测无碰撞、能过过道），**全速验证暂缓，保持降额现状**，见 [retrospect 08-17](../retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
 > 前置：08-15 干净 bag 重录 + 人形块过滤完成，清洗版导航图 `map_0815_clean` 就绪（见 [clean_bag_rerecord](../retrospect/2026-08-15_clean_bag_rerecord.md)）
 > 关联：[w1-operation.md](w1-operation.md)（D1~D5 建图手册）、[plan.md](plan.md)（W2 里程碑）、[07-handover](../07-handover.md)
 
@@ -124,4 +125,5 @@ KISS **不启动**（本次决策）。Nav2 启动前可先 `ros2 bag record`（
 - D4：rviz 地图回显与场地一致（用户目检）
 - AMCL：2D Pose Estimate 后粒子 5s 内收敛
 - 首次闭环：goal 到达误差实测记录（<0.5m 目标）、全程无碰撞；bag 留档（/scan /odometry/filtered /cmd_vel /tf /map /amcl_pose）
-- 遗留：全速参数（nav2_params.yaml）首次验证通过后切回；MPPI batch 调优视 N97 CPU 实测
+- 08-17 补充：降额参数下过道通过 + 基本无碰撞实测（inflation_radius 0.30），窄缝修复留档 [retrospect 08-17](../retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
+- 遗留：全速参数（nav2_params.yaml）验证**暂缓（08-17 决策，保持降额现状）**——切回前先同步其膨胀参数（仍 0.55）；MPPI batch 调优视 N97 CPU 实测
