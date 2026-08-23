@@ -83,7 +83,7 @@ MCLM 电机 ×4（每电机内置 STM32 控制节点，FreeRTOS + PID + 编码�
 | VLP-16（10.18.18.6，经交换机） | R2 | ✅ 建图/里程计 |
 | Epson G354 IMU（JLink OB Mini 直连） | R2 | ✅ 融合 |
 | Intel RealSense D435/D430、Astra Pro | 视觉项目 | 待 Phase 4 |
-| Livox MID70 | 已弃用 | FAST-LIO2 方案否决（见 retrospect） |
+| Livox MID-70 | 闲置、计划内 | 传感器选型 A/B 候选（FAST-LIO 原生适配），见 [planning-control-roadmap.md](planning-control-roadmap.md) §三 |
 
 ---
 

@@ -48,6 +48,7 @@ r2_integration/
 │   │   └── 2026-08-04_ekf-verification-result.md  EKF 验证结果记录
 │   │
 │   └── retrospect/                   ← 事件记录（按日期排序）
+│       ├── 2026-08-23_doc_source_traceback.md  文档真实性回溯：roadmap 全篇来源规范化（1.11 落地案例 + 可复用检查清单）
 │       ├── 2026-08-17_nav2_initialpose_inflation_fix.md  初始位姿诊断 + 膨胀参数 0.30 过缝修复（08-17 实车验证，全速暂缓）
 │       ├── 2026-08-15_nav2_bringup.md             Nav2 首闭环跑通（D4 验证 + 降额实机 + 7 条排障 + 盲区/footprint 修复）
 │       ├── 2026-08-15_kiss_drift_170058.md          KISS 长录整程漂移留档（旋转+空窗→航向漂163°，双录对比）

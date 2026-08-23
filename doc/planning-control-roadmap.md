@@ -1,6 +1,6 @@
 # R2 规划控制与视觉集成路线（08-18 调研）
 
-> 状态：调研结论定稿（2026-08-18）；来源 = 官方仓库/README + WebSearch 社区核实，未实测项标注
+> 状态：调研结论定稿（2026-08-18）；§五「全流程替代方案全景」与 §六「RL 增强方向」2026-08-23 补充（WebSearch 核实）；2026-08-23 按 [standards.md §1.11](standards.md) 规范化（补 §3.2 规格来源 / §5.5-5.6 仓库链接 + §6.6 来源小节 + 相关索引）；来源 = 官方仓库/README + WebSearch 社区核实，未实测项标注
 > 定位：01-plan 第四章（集成路线图）的补充引用，视觉/规划控制的选型依据
 > 关联：[01-plan.md](01-plan.md)｜[fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)（FAST-LIO2 部署）
 
@@ -21,8 +21,8 @@
 
 - D435 内参 + RGB-depth 外参**出厂已标好**，缺的只是 **lidar-camera 外参**
 - VLP-16 稀疏点云不是 hku-mars 工具的主场（为高分辨率 Livox 设计）：
-  - VLP-16 + D435 标定 → 走 koide3 路线（机械雷达友好）
-  - MID-70 + D435 标定 → livox_camera_calib 对口组合（官方示例同类）
+  - VLP-16 + D435 标定 → 走 koide3 路线（[direct_visual_lidar_calibration](https://github.com/koide3/direct_visual_lidar_calibration) 机械雷达友好）
+  - MID-70 + D435 标定 → [livox_camera_calib](https://github.com/hku-mars/livox_camera_calib) 对口组合（官方示例同类）
 
 ### 1.3 集成时机（Phase 4 前置，不阻塞当前主线）
 
@@ -92,6 +92,8 @@ Phase 5（编排）:     waypoint 任务队列（已有待办）+ 气动 + 异�
 | 集成状态 | 驱动/建图/FAST-LIO/Nav2 全跑通 | 无驱动、无集成（livox_ros_driver2 已在 FAST-LIO 工作区装好） |
 | 物理成本 | 供电已验证紧张（08-15 供电不足教训） | 供电 + 网口 + 车顶空间 |
 
+> 规格来源（2026-08-23 WebSearch 核实）：[VLP-16 官方数据表（Velodyne 对比表，300k pts/s 单回波 / 360°×±15° / 2° 垂直角分辨）](http://velodynelidar.com/docs/datasheet/LiDAR%20Comparison%20chart_Rev-A_Web.pdf)｜[MID-70 官方规格页（livoxtech.com，70.4° 圆形 FOV / 100k pts/s / 905nm / IP67）](https://www.livoxtech.com/mid-70/specs)；"近距小物体/层间空洞"表现为 08-18 用户实测反馈，非官方规格项
+
 ### 3.3 三方案对比（不预设结论，A/B 实测定夺）
 
 | 方案 | 结构 | 优点 | 代价/风险 |
@@ -135,6 +137,220 @@ FAST-Calib）都是**离线批处理**：容器里读 bag、输出 yaml，**无�
 
 ---
 
+## 五、全流程替代方案全景（两大阵营各环节选型）
+
+> 补充时间：2026-08-23（WebSearch 核实）；定位：§二「两大阵营对比」的逐环节展开——每个环节的候选方案、现状与 R2 推荐
+
+### 5.1 流程分解与环节定位
+
+```
+A 离线地图导航: 采集(bag) → 离线建图 → 地图后处理 → 定位 → 规划(全局+局部) → 任务编排
+B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任务编排
+              └── 共享: 标定(外参) / 传感器 / 底盘
+```
+
+### 5.2 建图算法（A 离线 / B 实时共用一个选型池）
+
+| 算法 | 维度 | 回环 | IMU | ROS2 状态 | 特点 |
+|:---|:---:|:---:|:---:|:---|:---|
+| SLAM Toolbox | 2D | ✅ 图优化 | 可选 | ✅ 原生 | 轻量、易调试；2025 实测 ATE 0.13m（Cartographer 0.21m）、CPU 70% |
+| Cartographer | 2D/3D | ✅ 最强 | ✅ | ⚠️ 社区移植 | 大场景/长廊/仓库强，回环消累积误差，但对参数调优敏感、资源重 |
+| KISS-ICP（现役） | 3D | ❌ | ❌ | ✅ 原生 | 纯激光、极简；无 IMU 旋转漂移（R2 163° 教训） |
+| FAST-LIO2（候选） | 3D | ❌ | ✅ | ✅ 原生 | LIO 紧耦合，运动预测强、退化场景稳；VLP-16 已原生支持 |
+| LIO-SAM | 3D | ✅ 因子图 | ✅ | ⚠️ 社区 | 系统完整、回环强，但重、调参成本高 |
+| Point-LIO | 3D | ❌ | ✅ | ✅ | Livox 固态雷达主场 |
+
+**选型逻辑（2025 社区共识）**：接 Nav2 实时导航 → FAST-LIO/KISS 类低延迟连续稳；要全局地图一致性 → LIO-SAM/回环模块；嵌入式 → 2D slam_toolbox 远优于 3D（与 §2.1 引文结论一致）。
+
+**R2 落点**：3D 主线 = KISS → **FAST-LIO2**（接 G354 解决旋转痛点）；B 阵营 2D 探索 = **SLAM Toolbox**。LIO-SAM 的因子图回环是"更远的地图质量升级"，但 N97 上不值。
+
+### 5.3 定位（A 阵营：先验地图下的重定位）
+
+| 方案 | 维度 | 特点 | ROS2 |
+|:---|:---:|:---|:---:|
+| AMCL（现役） | 2D | 粒子滤波，轻量，已有闭环 | ✅ 原生 |
+| SLAM Toolbox localization 模式 | 2D | 复用建图引擎做定位，支持 lifetime map | ✅ 原生 |
+| Cartographer localization | 2D/3D | 回环强的定位模式 | ⚠️ 社区 |
+| FAST-LIO-Localization | 3D | 点云配准重定位，接 FAST-LIO 工作区（§2.1 已列为升级项） | ✅ |
+| NDT/ICP scan matcher | 3D | Autoware 系（ndt_scan_matcher），工程成熟 | ✅ |
+| 视觉重定位（ORB-SLAM3 等） | 视觉 | 需要相机先验标定 | ⚠️ |
+
+**R2 落点**：AMCL 现状够用（map_0815_clean 已跑通）；升级路 = FAST-LIO-Localization（若 FAST-LIO2 替代 KISS 后定位一起升 3D）。⚠️ 注意：3D 定位意味着地图底图质量也必须 3D 级——建图升 FAST-LIO2、定位留 AMCL 2D 是可行的过渡态。
+
+### 5.4 规划——"只有 Nav2 吗"
+
+**结论**：Nav2 不是唯一，但它是 ROS2 事实标准，且本身是"可插拔组件框架"——换算法不用换栈。
+
+| 层次 | 可替代选项 |
+|:---|:---|
+| 框架 | Nav2（✅ 现役）/ move_base（ROS1 前身）/ 完全自研（仅当 Nav2 覆盖不了底盘约束时值得） |
+| 全局规划器 | NavFn（现役，A*）/ Smac Planner（Hybrid-A*，支持 omni/差速/阿克曼）/ Theta* / Grid-A* |
+| 局部控制器 | MPPI（现役，Nav2 官方指定 TEB/DWB 继任者）/ DWB / Regulated Pure Pursuit / TEB（⚠️ 见下）/ MPC-Local-Planner |
+| 恢复行为 | Nav2 Recovery（卡死后退/旋转，内置） |
+
+**关键避坑（已核实）**：TEB 在 ROS2 Humble 处于"官方弃养"——无 apt 二进制、无 humble 分支、作者已停止维护，Nav2 官方明确推荐 MPPI 接任；社区源码移植需手修 cv_bridge/nav2_core 的 Humble API 差异，2025 年仍有大量"换 TEB 后无法导航"求助帖。**R2 结论：别碰 TEB，MPPI 就是正解。**
+
+**全向轮适配**：Nav2 Smac/MPPI 均有 omni 运动模型，四舵轮全向底盘在 Nav2 模型覆盖内——"不换栈"的底气；真要自研，理由只可能是 MPPI 跑不出特定运动学约束（如舵轮转角限制）。
+
+### 5.5 探索（B 阵营独有环节）
+
+| 方案 | 特点 | R2 适配 |
+|:---|:---|:---:|
+| explore_lite（[m-explore-ros2](https://github.com/robo-friends/m-explore-ros2)，首选） | 前沿检测+黑名单+NavigateToPose 循环；2026-04 仍在更新；源码构建（无二进制包）；参数成熟（potential/orientation/gain 权重） | ✅ 轻量 |
+| [frontier_exploration_ros2](https://discourse.openrobotics.org/t/frontier-exploration-ros2-modern-autonomous-exploration-system-for-ros-2/57222/1) | WFD 前沿 + 动态规划优化目标排序；基准：行驶距离 338.6m→263.7m、时间 9:47→7:22（vs m_explore_ros2） | ✅ 备选 |
+| [roadmap_explorer](https://github.com/suchetanrs/roadmap-explorer) | 路标式；实测 3520㎡ 大场景；Jetson 上单核 ~10%；会话保存/恢复（探索中断可续）；与 Nav2 端到端集成 | ✅ 效率最优 |
+| dynamic-window-frontier | explore_lite 增强版（局部/全局窗口切换） | 可选 |
+| rrt_exploration | 非凸/多房间强，计算重 | ❌ N97 |
+| [TARE_planner](https://github.com/caochao39/tare_planner)（[RSS 2021 最佳论文](https://www.cmu-exploration.com/tare-planner)，CMU 层级探索） / [ARiADNE-ROS-Planner](https://github.com/marmotlab/ARiADNE-ROS-Planner)（RL 探索） | 工程化强但 ROS2 移植非官方；ARiADNE 2025-08 才出 Humble 版、RL 训练重 | ❌ 过度工程 |
+
+**R2 落点**：先 explore_lite（§2.1 结论不变）；探索效率不够/场地大 → roadmap_explorer 比 frontier_exploration 更值得作第二选择（会话保存对"探索中断继续"实用）。TARE 不上——N97 扛不住，Robocon 也用不上。
+
+### 5.6 标定方案（§一 之外补全的环节）
+
+| 要标定的外参 | 方案 | 状态 |
+|:---|:---|:---:|
+| 雷达-相机（D435+VLP-16） | livox_camera_calib / joint-lidar-camera-calib / FAST-Calib / [direct_visual_lidar_calibration](https://github.com/koide3/direct_visual_lidar_calibration)（§1.2 已定 koide3 路线） | ✅ 已规划（Phase 4 前置） |
+| **雷达-IMU** | [LI-Init](https://github.com/hku-mars/LI-Init)（自动标定）/ 手测初值 | ⚠️ **§一 未覆盖，FAST-LIO2 前置刚需**——VLP-16 与 G354 外参（平移+旋转）直接影响 LIO 精度 |
+| 雷达-雷达（§3.3 方案 b） | Autoware 点云标定 / 手工量测 | 仅当方案 b 选中 |
+| 相机内参 | D435 出厂已标 | ✅ |
+| 底盘里程计/舵轮 | 已有脚本（ticks/圈、speed_scale、MT6701 中位） | ✅ |
+
+> ⚠️ **雷达-IMU 外参标定是比 lidar-camera 更优先的环节**（FAST-LIO2 上线前必做；不做会吃精度亏）。
+
+### 5.7 任务编排（全流程最后一环，Phase 5）
+
+| 方案 | 特点 | R2 |
+|:---|:---|:---:|
+| Nav2 BT Navigator | 行为树是 ROS2 任务编排事实标准（2025 大量实践）；多航点巡逻 = NavigateThroughPoses / FollowWaypoints（循环+断点续）；Groot2 可视化调试 | ✅ 首选 |
+| 自研 waypoint 循环节点 | 简单需求够用（待办"waypoint 雷达闭环"可先这么干） | ✅ 过渡 |
+| py_trees / SMACH | BT 的前辈，可读性/复用不如 BT | 可选 |
+
+**R2 落点**：Phase 5 waypoint 队列直接用 Nav2 自带 BT（navigate_through_poses 插件）或包一层自定义 BT 节点，不自己写状态机——Robocon"跑任务序列"环节的正解（巡逻→检测→恢复可挂恢复逻辑）。
+
+### 5.7bis 上层车体控制（MBD 状态机 → 车体部署，2026-08-23 用户规划方向）
+
+> 状态：**规划中，未实测**。与 §5.7 的 BT 任务编排互补——BT 管"任务序列"，状态机管"车体行为/决策层"；
+> 秋招（2026-09-10）前优先级低，实车验证后再计入简历（信息池 F12）。
+
+| 环节 | 方案 | 状态 |
+|:---|:---|:---|
+| 状态机建模 | MATLAB/Simulink Stateflow（MBD 正规流程：建模 → 仿真验证 → 部署车体） | 规划中 |
+| 部署路径 | 代码生成（Embedded Coder）→ 车体；或建模验证后手写实现部署 | 未定 |
+| 自动驾驶上层框架 | Autoware.universe 等大型框架部署评估 | 未评估（量级/资源成本高，N97 CPU 瓶颈谨慎） |
+| 与 Nav2 关系 | 上层输出 goal/行为指令，Nav2 仍是规划执行层 | 不冲突 |
+
+**R2 落点**：先 Phase 3 收尾 + 避障 + 主动探索（explore_lite）出量化；MBD 状态机作为 Phase 5 正规化手段记录，不抢主线。
+
+### 5.8 汇总：R2 全流程决策表
+
+| 环节 | 现状 | 候选池 | 推荐 |
+|:---|:---|:---|:---|
+| 传感器 | VLP-16 | MID-70 / 双雷达 | 等 FAST-LIO2 实车 A/B（§3.4） |
+| 建图(3D) | KISS-ICP | FAST-LIO2 / LIO-SAM / Point-LIO | FAST-LIO2（接 G354） |
+| 建图(2D, B 阵营) | — | SLAM Toolbox / Cartographer | SLAM Toolbox（轻量、ATE 更优） |
+| 定位 | AMCL | FAST-LIO-Localization / NDT / SLAM-Toolbox-localization | AMCL 过渡 → FAST-LIO-Localization |
+| 规划框架 | Nav2 | move_base / 自研 | Nav2（可插拔，不换栈） |
+| 局部控制 | MPPI | TEB ❌（弃养）/ DWB / 纯跟踪 | MPPI（Nav2 官方指定） |
+| 探索 | — | explore_lite / roadmap_explorer / frontier_exploration_ros2 | explore_lite 起步，效率不够换 roadmap_explorer |
+| 标定(雷达-相机) | — | koide3 路线（§1.2 已定） | 不变 |
+| 标定(雷达-IMU) | 未规划 | LI-Init | **补为 FAST-LIO2 前置** |
+| 任务编排 | 自研待办 | Nav2 BT / py_trees | Nav2 BT（NavigateThroughPoses） |
+| 上层车体控制 | — | MBD 状态机（MATLAB/Simulink → 部署）/ 自动驾驶框架 | 规划中（§5.7bis，秋招后优先） |
+
+**一句话**：Nav2 不是"只有它"，但是标准底盘——规划层可插拔、任务层用 BT、建图/定位/探索层各有一个"现状→升级"路径；真正要补的缺口只有两个：**雷达-IMU 外参标定（FAST-LIO2 前置）** 和 **探索效率升级路（explore_lite → roadmap_explorer）**。
+
+### 5.9 来源（2026-08-23 WebSearch 核实）
+
+- [SLAM Toolbox vs Cartographer 仿真到实机对比（2025 预印本）](https://ggnpreprints.authorea.com/doi/full/10.22541/au.175199254.49549720/v1)
+- [ROS2 3D LiDAR 选型实战（FAST-LIO/LIO-SAM/Point-LIO/KISS-ICP）](https://blog.csdn.net/pipoa/article/details/162098227)
+- [m-explore-ros2 仓库](https://github.com/robo-friends/m-explore-ros2)｜[DeepWiki 参数文档](https://deepwiki.com/robo-friends/m-explore-ros2/1-overview)
+- [frontier_exploration_ros2 发布帖（OpenRobotics Discourse）](https://discourse.openrobotics.org/t/frontier-exploration-ros2-modern-autonomous-exploration-system-for-ros-2/57222/1)
+- [roadmap_explorer（路标式探索）](https://github.com/suchetanrs/roadmap-explorer)
+- [TEB Humble 踩坑记录](https://jishuzhan.net/article/2025430982359318529)｜[TEB 在 Nav2 Humble 失效讨论](https://robotics.stackexchange.com/feeds/question/104822)
+- [ARiADNE-ROS-Planner（RL 探索，Humble 2025-08 支持）](https://github.com/marmotlab/ARiADNE-ROS-Planner)
+- [TARE_planner（CMU 层级探索，RSS 2021）](https://github.com/caochao39/tare_planner)｜[项目主页](https://www.cmu-exploration.com/tare-planner)
+- [ROSCon Spain 2025 RB-Watcher（Nav2 BT 巡逻工作坊）](https://github.com/RobotnikAutomation/roscon2025_rbwatcher_workshop)
+- [Nav2 多航点导航 BT 实践（WayWiseR）](https://deepwiki.com/das-rise/WayWiseR/4.1-nav2-integration-(waywiser_nav2))
+
+---
+
+## 六、RL 增强方向（规划控制的 RL 化，2026-08-23 用户规划）
+
+> 状态：方向确认，**实施方式未定**（用户原话："具体怎么实施我还没想好"）。
+> 定位：§五 决策表的"RL 增强"延伸，横跨**足式全身控制**与**车构型规划**两层；
+> 训练框架 = Isaac Lab/Gym、MuJoCo、UniLab。
+
+### 6.1 足式 RL 扩展（四足/双足全身控制 → 地形适应）
+
+| 能力 | 现状 | 目标 | 训练框架 |
+|:---|:---|:---|:---|
+| 稳定行走 | Go2 APPO 512 并行 22.8 万轮（UniLab）、G1 FastSAC 2048 并行 1024 万步（MuJoCo） | ✅ 已做 | UniLab / MuJoCo |
+| **越障、过地形** | 未做 | 复杂地形适应（跨障/坡面/台阶） | Isaac Lab/Gym、MuJoCo、UniLab |
+
+### 6.2 车构型 RL（底盘/车辆规划层）
+
+| 方向 | 内容 | 与 Nav2 关系 | 状态 |
+|:---|:---|:---|:---|
+| 局部避障 RL | RL 策略替代/增强 MPPI 局部控制器（端到端或与 costmap 融合） | 可插拔（Nav2 控制器插件） | 方向确认，实施未定 |
+| 倒车入库 RL | 精确机动策略（窄位泊车/往返倒库）= 高精度运动规划的 RL 化 | goal 级任务，Nav2 规划层之上/替代 | 方向确认，实施未定 |
+
+### 6.3 实施路径建议（待定夺）
+
+- **足式**：Isaac Lab（GPU 并行）训练 → 与 UniLab/MuJoCo 既有链路对比一致性 → ONNX 部署（链路已通）
+- **车构型**：仿真环境选型（Isaac Lab vehicle/car 环境，或自建 gym env 包 Nav2 代价图）→ 训练 → Sim-to-Real（N97 部署，接 R2）
+
+### 6.4 优先级（秋招 2026-09-10 视角）
+
+- 秋招前：现有 RL 素材（Go2/G1/ONNX 一致性）已够支撑"RL 背景"叙事；新方向按"探索中"写，不写成果
+- 秋招后：Isaac Lab 车构型 RL 与 R2 实车联动（局部避障策略 vs MPPI 实车对比，数据说话再定）
+
+### 6.5 多传感器融合 RL 观测（D435 + IMU + 里程计 + LiDAR 融合导入训练）
+
+> 2026-08-23 用户设想（"我也没有头绪"），WebSearch 核实结论：**可行，且是 Isaac Lab 多模态标准玩法**。
+> 用户原话："RL 这一块好像还支持 D435+IMU+里程计+LiDAR 的融合导入训练"。
+
+**模态支持与 R2 资产对照**：
+
+| 模态 | Isaac Lab 支持 | R2 资产 |
+|:---|:---|:---|
+| RGB-D 相机（D435） | RTX 照片级渲染（TiledCameraCfg：rgb/depth/fisheye） | D435 SDK 已编译（Phase 4 接入） |
+| LiDAR 点云 | RayCasterCfg（2D/3D，多通道 ±180° 等） | VLP-16 实车 ✅ |
+| IMU | 加速度/角速度传感器 | G354 实车 ✅（已入 EKF） |
+| 里程计 | 机器人状态（位姿/速度，ROS2 /odom） | /odom_wheels + /odometry/filtered ✅ |
+
+**关键坑：混合观测空间（hybrid observation space）**
+- 图像/LiDAR 等非向量观测与 proprioception（IMU/里程计/关节）**不能简单 concat**，须分 observation group
+  （[IsaacLab issue #768](https://github.com/isaac-sim/IsaacLab/issues/768)）
+- RL 库兼容性：RSL-RL **不支持**混合观测；skrl / rl-games 部分支持；SB3 MultiInputPolicy 支持但数据转 CPU 掉性能 → **RL 库选 skrl / rl-games**
+
+**参考实例（可作实现蓝本）**
+- 智能轮椅多模态导航（[IEEE](https://ieeexplore.ieee.org/document/11469504)）：2D LiDAR + 4×轮装 IMU + 4×RGB 相机融合编码 → PPO 室内导航 —— **与 R2 车构型最接近**
+- 四足巡检机器人（中文期刊，链接待核实）：LiDAR + IMU + RGB + 里程计 + 关节状态经 ROS2 发布 → RL 策略地形行走
+- [V550-Ackermann-DRL-Nav2](https://github.com/Jacob-Tan666/V550-Ackermann-DRL-Nav2)：TD3 + 50-bin LiDAR 扇区 + 运动学量（目标距离/方向/速度/转角）→ Nav2 集成（Smac Hybrid-A* + MPPI），含域随机化 Sim-to-Real
+- [ros-navigation #4613](https://github.com/orgs/ros-navigation/discussions/4613)：RL local planner 替换 Nav2 内控制器的学术方案——社区建议按 **MPPI/RPP 控制器插件模式**集成
+
+**R2 落点（实施路径建议，待定夺）**
+1. **仿真先行**：Isaac Lab 建 R2 数字孪生（URDF + VLP-16 雷达 + D435 + IMU + odom 传感组），观测 = LiDAR 分箱 + 视觉 + proprioception，PPO/skrl 训练局部避障策略
+2. **观测复用**：真实侧直接复用 EKF 融合链输出（/odometry/filtered）+ 原始传感器话题，与仿真观测对齐
+3. **集成两条路**：a) Nav2 控制器插件（MPPI 插件模式，社区认可路径）b) goal 级独立策略（倒车入库/窄位泊车）
+4. **Sim-to-Real**：域随机化（传感器噪声/执行器延迟）→ N97 部署（参照 V550 工作流）
+
+**风险标注（未实测）**：Isaac Lab 训练算力需求待确认（GPU 环境）；RL 导航策略成功率/泛化是开放问题；
+观测维度爆炸（图像+点云）训练成本高——起步建议从"LiDAR 分箱 + 运动学量"最小观测做起（V550 模式），再逐步加视觉。
+
+### 6.6 来源（2026-08-23 WebSearch 核实）
+
+- [IsaacLab issue #768（混合观测空间须分 observation group，RSL-RL 不支持）](https://github.com/isaac-sim/IsaacLab/issues/768)
+- [智能轮椅多模态导航（IEEE，2D LiDAR + 4×轮装 IMU + 4×RGB 融合 → PPO 室内导航）](https://ieeexplore.ieee.org/document/11469504)
+- [V550-Ackermann-DRL-Nav2 仓库（TD3 + 50-bin LiDAR 扇区 + 运动学量 → Nav2 集成，含 Sim-to-Real）](https://github.com/Jacob-Tan666/V550-Ackermann-DRL-Nav2)
+- [ros-navigation #4613（RL local planner 替换 Nav2 控制器，社区建议按 MPPI/RPP 插件模式集成）](https://github.com/orgs/ros-navigation/discussions/4613)
+- 四足巡检机器人（中文期刊）链接未核实，未列入
+
+---
+
 ## 相关
 
 - [01-plan.md](01-plan.md)（集成计划总纲，第四章路线图）｜[fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)（FAST-LIO2 部署手册）
+- [standards.md](standards.md) §1.11（调研/选型文档附来源规范——本文格式依据）｜[07-handover.md](07-handover.md)（运行状态与参数快照）
+- [ros2-ops.md](ros2-ops.md)（ROS 操作规范）｜[ros2-qos-dds.md](ros2-qos-dds.md)（QoS/DDS 问题手册）
+- [retrospect/2026-08-18_fastlio_laser_map_debug.md](retrospect/2026-08-18_fastlio_laser_map_debug.md)（FAST-LIO 排障全记录）
