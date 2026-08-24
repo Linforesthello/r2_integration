@@ -144,7 +144,7 @@ ros2 topic echo /odometry/filtered --field pose.pose   # EKF（若对比场景�
 |:---|:---|:---|
 | IMU 接入 | `IMU Initial Done`，无同步告警 | ✅ |
 | /Odometry | 连续 8Hz+（雷达 10Hz），pose 随推车移动 | ✅ 连续发布；推车/转弯 pose 真实跟踪 |
-| 平移漂移 | 直线段位移误差 vs 尺子实测（目标 <5%） | ⏳ 待严格直线段量测（推车段已跟踪，未对尺子） |
+| 平移漂移 | 直线段位移误差 vs 尺子实测（目标 <5%） | ✅ 前进 169cm（尺子，沿地面量）→ FAST-LIO 位移（起点/终点各取多帧均值，Δx 1.6985m / Δy 0.0206m / Δz +0.0638m）。⚠️ 场地地面不平（车真爬坡/过坎），z 变化 +6.4cm 为真实地形响应非漂移（FAST-LIO 3D 里程计，与 EKF two_d_mode 锁 z 的 2D 设计不冲突）；故双口径对比：**2D 平面 169.86cm（+0.86cm ≈ 0.51%）/ 3D 空间 169.98cm（+0.98cm ≈ 0.58%）**，均 <5% 达标；yaw 变化 ~3.4°（含地面不平真实偏转，非纯累积）。原始数据见 [2026-08-24_fastlio2_verification.md](retrospect/2026-08-24_fastlio2_verification.md) |
 | 旋转漂移 | 90° 转弯后 yaw 误差（对比 KISS 基线 163°/38 空窗教训） | ✅ 左转 91.9°（误差 1.9°）/ 右转 −89.4°（误差 0.6°），z 稳定 ±4cm |
 | 对比结论 | FAST-LIO2 vs KISS-ICP+EKF：建图质量/旋转表现 → 决策 | 旋转表现远优于 KISS（163°→<2°），决策建议见 §六 后 |
 
@@ -170,7 +170,7 @@ ros2 topic echo /odometry/filtered --field pose.pose   # EKF（若对比场景�
 - [x] **extrinsic_T / extrinsic_R 实车量测填值**——08-24 ✅（`[0.36, 0.035, 0.47]` + 单位阵，`extrinsic_est_en: true`）
 - [x] performance governor + 启动顺序就绪（§四）——08-24 ✅
 - [x] 独立链路跑通：IMU Initial Done + /Odometry 8Hz+——08-24 ✅
-- [ ] 对比数据采集（平移/旋转误差）→ 决策——旋转 ✅（<2°），平移严格量测待做；**决策建议：旋转表现远优于 KISS（163°→<2°），FAST-LIO2 可作为建图/里程计替代，Nav2 场景仍 AMCL**
+- [x] 对比数据采集（平移/旋转误差）→ 决策——旋转 ✅（<2°）+ 平移 ✅（169cm 实测误差 0.5%）；**决策建议：旋转表现远优于 KISS（163°→<2°），FAST-LIO2 可作为建图/里程计替代，Nav2 场景仍 AMCL**
 - [ ] TF 桥集成（验证对比后做，方案见 §五）——未做
 
 ---
