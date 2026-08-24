@@ -1,9 +1,9 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-08-18
+> 最后更新: 2026-08-24
 > 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%｜Phase 3 ⏳ 25%（首闭环 08-15；降额过缝验证 08-17，全速暂缓）
 > 下一阶段: Nav2 避障实测 → 长时间稳定性（全速验证暂缓，保持降额现状）
-> 基础设施: 08-15 VLP-16 运行物抽包 r2_sensors（launch/r2.urdf 移入，dds 留 r2_bringup，启动命令见 §三）；08-14 两机 git 同步统一；VM 单机跑通 VLP-16（DDS 根因修复，见 §五 8-14）
+> 基础设施: 08-15 VLP-16 运行物抽包 r2_sensors（launch/r2.urdf 移入，dds 留 r2_bringup，启动命令见 §三）；08-14 两机 git 同步统一；VM 单机跑通 VLP-16（DDS 根因修复，见 §五 8-14）；08-24 N97 风扇可命令行调速（IT8613E + it87 force_id=0x8622，sysfs pwm2，见 §四/§五）
 >
 > **部署环境**：N97 Mini PC（192.168.1.210，Ubuntu 22.04 + Humble），enp1s0: 10.18.18.20/24
 > 开发环境：VM（lin-virtual-machine，192.168.1.204）；VM→N97 SSH 免密可用
@@ -78,6 +78,15 @@ echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governo
 # 检查（应输出 performance）:
 cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
+# 前置 1（可选）: 风扇固定转速（08-24 起；驱动不持久化，重启后需重跑，完整指令见 [retrospect 08-24](retrospect/2026-08-24_n97_fan_control.md)）
+sudo modprobe it87 force_id=0x8622
+echo 1 | sudo tee /sys/class/hwmon/hwmon4/pwm2_enable    # 切手动（只需设一次）
+echo 200 | sudo tee /sys/class/hwmon/hwmon4/pwm2          # 设转速（0-255），即刻生效
+# 恢复自动: echo 2 | sudo tee /sys/class/hwmon/hwmon4/pwm2_enable（重启兜底）
+# 查询当前转速: cat /sys/class/hwmon/hwmon4/fan2_input
+# 查询当前自动信息: cat /sys/class/hwmon/hwmon4/pwm{1,2,3,4,5}_enable
+
+
 # 终端 0: CAN 总线
 python3 ~/Lin_workspace/command/can_command.py
 
@@ -144,6 +153,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 | 雷达驱动 | `r2_sensors velodyne.launch.py` | device_ip 10.18.18.6；08-15 起 launch 覆写 organize_cloud=false、max_range=40m（见 [retrospect 08-15](retrospect/2026-08-15_velodyne_perf_tuning.md)） |
 | Nav2 膨胀参数 | `r2_bringup/config/nav2_params_low.yaml` | inflation_radius **0.30** / cost_scaling_factor 3.0（08-17 从 0.55 收窄，修复窄缝过不去，见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)）；⚠️ **全速版 `nav2_params.yaml` 仍是 0.55**，切回前须先同步 |
 | 底盘参数 | `r2_bringup/config/r2_params.yaml` | 全实车标定值（speed_scale 94.5 等） |
+| N97 风扇（硬件层） | `it87` 驱动 + `/sys/class/hwmon/hwmon4/` | 风扇在 IT8613E **fan2** 通道；调速 `echo 1 > pwm2_enable` + `echo N > pwm2`（0-255），撤销 `echo 2 > pwm2_enable`（重启兜底）；实测 150→2537 / 200→3068 / 255→3534 RPM；**不持久化**，完整指令与速查见 [retrospect 08-24](retrospect/2026-08-24_n97_fan_control.md) 与 [n97info.md](n97info.md) |
 
 ---
 
@@ -153,6 +163,8 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 
 | 日期 | 结论 | 详情 |
 |:---|:---|:---|
+| 08-24 | **FAST-LIO2 N97 部署 + 实车验证通过**：IMU Initial Done + /Odometry 跟踪 + 左转 91.9°/右转 −89.4°（误差<2°，KISS 基线 163°）；外参实测 [0.36,0.035,0.47]；⚠️ 编译必须 `PATH=/usr/bin:$PATH`（cmake 4.4 坑）；平移严格量测 + TF 桥未做 | [fastlio2-n97-deploy.md](fastlio2-n97-deploy.md) |
+| 08-24 | **N97 风扇调速打通**：ACPI thermal/EC 逆向均死路（cur_state 写入曾致停转、撤销无效）→ sensors-detect 找到 IT8613E → 主线 it87 失败 → `force_id=0x8622` 突破；sysfs pwm2 即刻调速可撤销（实测 100→1956~255→3534 RPM）；**暂不持久化** | [retrospect](retrospect/2026-08-24_n97_fan_control.md) |
 | 08-17 | 降额参数过缝验证：inflation_radius 0.55→0.30 修复窄缝全灰过不去（实测基本无碰撞、能过过道）；多次设初始位姿致 map 重叠诊断留档；**全速验证暂缓，保持降额现状** | [retrospect](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md) |
 | 08-15 | velodyne 抽包 r2_sensors（launch/urdf 移出 r2_bringup，启动命令改为 `ros2 launch r2_sensors velodyne.launch.py`）；g354 补 ament index marker | [retrospect](retrospect/2026-08-15_r2_sensors_extract.md) |
 | 08-15 | **干净 bag 重录（165547：9.63Hz 零空窗）+ 人形块过滤工具 filter_person_blobs.py**（空地散点=建图在场的人），清洗版导航图就绪；同日长录 170058 KISS 漂移 163° 按失败样本归档 | [clean_bag](retrospect/2026-08-15_clean_bag_rerecord.md)、[kiss_drift](retrospect/2026-08-15_kiss_drift_170058.md) |
@@ -180,7 +192,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 ✅ 已关闭（历史项）：
 - Phase 1 EKF 实车验证（08-06 完成）
 - z 轴 process noise 漂移（08-09 two_d_mode 修复；回归项见下）
-- IMU/雷达坐标基准与雷达高度冲突（08-06 定案 base_joint 0.13 / velodyne_joint 0.56）
+- IMU/雷达坐标基准与雷达高度冲突（08-06 定案 base_joint 0.13 / velodyne_joint 0.56；**08-24 复测更新** base_link 离地 12cm / velodyne_joint 0.655，见 [sensor-mount.md](phase0/sensor-mount.md)）
 - 雷达掉帧调查（08-09 bag 实测 9.9Hz 稳定，未复现）
 - **KISS 帧率 3.6Hz**（08-11 修复）：CPU `powersave` 低频 → `performance` 后 9.5Hz，
       详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)
@@ -198,9 +210,10 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 - [x] **yaw 偏差**（08-12 完成）：方案①（odom0_config yaw=true）实施并验证通过，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
 - [ ] **z 回归项**：slip 场景剧烈加减速 z 漂 +2.5m（08-05 遗留）复测——08-12 转弯/直行全程 z 恒 0（two_d_mode 结构性钳位），仅"剧烈加减速"动作未严格复测
 - [ ] VNC 开机自启（N97 重启后远程桌面不丢）
-- [ ] FAST-LIO2 评估（长期，VLP-16 原生支持，接 G354 解决旋转痛点）— VM 先编译验证
+- [x] **FAST-LIO2 N97 部署 + 实车验证**（08-24 完成）：IMU Initial Done + /Odometry 跟踪 + 旋转 90° 误差<2°（KISS 基线 163°/38 空窗）；详见 [fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)。⚠️ **N97 编译 fast_lio_ws 必须 `PATH=/usr/bin:$PATH colcon build`**（`~/.local/bin/cmake` 4.4 不兼容，报 callback_variant_）；extrinsic_T=[0.36,0.035,0.47] 已实测；平移严格量测 + TF 桥集成未做
 - [ ] 可选：VLP-16 rpm 600→1200（20Hz）试验（帧内畸变减半）
 - [ ] waypoint 雷达闭环（基于 /kiss/odometry 自主行走）
+- [ ] N97 风扇驱动持久化（**08-24 用户决策暂不做**）：开机自动加载 it87（/etc/modprobe.d + /etc/modules-load.d），纯 OS 层不碰固件，删除即恢复出厂，见 [retrospect 08-24](retrospect/2026-08-24_n97_fan_control.md)
 
 ---
 
@@ -233,7 +246,7 @@ stage_0812 保守录制对照地图 `bags/stage_0812_map/`（pgm/yaml + raw.ply�
 
 ## 八、相关文档索引
 
-- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）｜`retrospect/2026-08-11_r2_bringup_code_review.md`（代码审查 P1~P10）｜`retrospect/2026-08-14_vm_vlp16_dds_fix.md`（VM 单机 DDS 修复）｜`retrospect/2026-08-15_velodyne_perf_tuning.md`（VLP-16 性能调优+供电根因）｜[08-17 初始位姿诊断+膨胀修复](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
+- 排障全记录：`retrospect/2026-08-02_ekf_tf_fusion_fix.md`（7 问题）｜`retrospect/2026-08-09_ekf_z_drift_fix.md`（z 漂移）｜`retrospect/2026-08-09_map_double_ghost.md`（重影留档）｜`retrospect/2026-08-11_kiss_frame_rate_fix.md`（帧率修复）｜`retrospect/2026-08-11_r2_bringup_code_review.md`（代码审查 P1~P10）｜`retrospect/2026-08-14_vm_vlp16_dds_fix.md`（VM 单机 DDS 修复）｜`retrospect/2026-08-15_velodyne_perf_tuning.md`（VLP-16 性能调优+供电根因）｜[08-17 初始位姿诊断+膨胀修复](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)｜[08-24 N97 风扇调速](retrospect/2026-08-24_n97_fan_control.md)（IT8613E force_id=0x8622 + pwm2，原始命令记录 [n97info.md](n97info.md)）
 - 进度看板：`02-progress.md` ｜ 状态快照：`03-current_state.md`
 - EKF yaw 预案：`phase1/ekf-yaw-plan.md` ｜ SLAM 方案探索：`retrospect/vlp16_slam_exploration.md`
 - W1 建图手册：`minimal-loop/w1-operation.md`（D1~D5，含 D2 执行记录）
