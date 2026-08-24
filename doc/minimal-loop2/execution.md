@@ -25,6 +25,7 @@
 - [ ] N97 在线；降额参数 `nav2_params_low.yaml`（0.2/0.15/0.4）；`map_0815_clean`
 - [ ] 箱子/立柱障碍物 ≥2 个（≥0.3m³）；人横穿安全区（首次 ≥2m）
 - [ ] 手放急停随时可拍；全程录 bag + rviz 截图 + **运行视频（作品集素材）**
+- [ ] 参数盘点（零改动直接复用）：min_range 0.5 / local_costmap 6×6 / footprint 0.84×0.66 / inflation 0.30（local/global）/ MPPI consider_footprint=true
 
 ### 1.3 流程
 
@@ -52,6 +53,12 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/nav2_avoid_$(date +%m%d_%
 - **恢复行为 ×1**：三面围堵（两箱+墙）堵死路径。预期: 不撞、原地旋转/backup → 移箱解除 → 自主恢复到达
 - **综合演练**：3 目标序列（含 90° 转角、窄缝）+ 中途 1 次横穿。预期: 连续 3 次无人工干预
 - **验收**：bag 拷 VM → `python3 ~/Lin_workspace/bags/analysis/analyze_nav2_goal_error.py <bag_dir>` → 判据核对
+
+**收尾留档**（达标 5/5 后当天完成）：
+- retrospect 复盘（`retrospect/YYYY-MM-DD_minimal_loop_done.md`：数据/经验/遗留）
+- 02-progress / 03-current_state / 07-handover 更新；本目录 plan.md/execution.md 本地打勾（不 push，按 plan.md 头注）
+- 作品集素材整理：运行视频、bag、日志、参数、复盘
+- git 提交（`R2|` + 描述体，关联 retrospect）
 
 ### 1.4 预判风险与预案
 
@@ -88,7 +95,26 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/nav2_avoid_$(date +%m%d_%
 
 1. VM 侧先把两个静态桥写进 launch（`fastlio_bridge.launch.py`，/tf_static，transient_local——手册 §五纪律）
 2. N97: FAST-LIO（`~/fast_lio_ws`，PATH=/usr/bin 编译产物）→ 桥节点 → rviz 对比 EKF 轨迹
-3. 建图: 沿 D3b 录制纪律重跑一圈 → build_map/pcd_to_map 出图（z_min 参数实测定）
+3. **建图（路径 A：实时建图 + 服务保存全图）**——改 `velodyne.yaml` 的 `publish.map_en: true`
+   （键名以源码为准，08-18 教训）→ 重启 FAST-LIO（参数一次性读取）→ 全栈启动（**FAST-LIO 替代
+   KISS/EKF**，N97 CPU 不能双 LIO 同跑，手册 §四）: performance → CAN → 雷达 → 底盘(publish_tf:=false)
+   → IMU(静止 3s 校准) → FAST-LIO → 静态 5s 等 `IMU Initial Done` → 键盘遥控绕场 1-2 圈（D3b 纪律：
+   performance/关 GUI/分段 ≤3min/缓慢匀速）→ 跑完原地停 2-3s → 触发保存（导出 ikd-Tree 全图 PCD）：
+
+```bash
+# 服务名以 N97 源码为准（ROS2 版 std_srvs/Trigger，成功返回 "Map saved."）
+ros2 service list | grep -iE "map|pcd|save"
+grep -n "advertiseService" ~/fast_lio_ws/src/FAST_LIO/src/laserMapping.cpp
+ros2 service call /map_save std_srvs/srv/Trigger    # 服务名按核实结果替换
+```
+
+   - 录制留档只录小话题（⚠️ 不录 /Laser_map：22MB/帧 ≈ 95.7s/1.5G，QoS 手册 §五）:
+     `/imu/data /velodyne_points /Odometry /path /tf`
+   - ⚠️ 禁用 `pcd_save_en: true` 跑全程——interval -1 把所有帧存进一个 PCD，内存崩溃（手册 §三 + 社区同坑）；服务保存只导出最终一张图
+4. **出图**：PCD 拷 VM → `python3 ~/Lin_workspace/bags/analysis/pcd_to_map.py <scan.pcd> <map.pgm>`
+   （z_min 按雷达 0.655m 抬升量上调 ~0.1 试）→ 2D 占用网格 → 按 2.1 判据 2/3 验收
+5. 备选（调参迭代用；A2 赶进度优先路径 A）：录 bag（`/imu/data /velodyne_points`）→
+   `ros2 bag play --clock` + FAST-LIO 离线重建 → 同法保存
 
 ### 2.4 预判风险
 
@@ -97,6 +123,7 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/nav2_avoid_$(date +%m%d_%
 | camera_init→odom 对齐无初值 | 启动时车不动，取 FAST-LIO 首帧位姿作静态对齐（待定实现） |
 | 桥接后 TF 树混乱 | 先 rviz 单系验证，再并入；回滚 = 不启桥节点（零风险） |
 | 新图地面雾 | z_min 0.3 按 0.655 抬升量上调 ~0.1 试（w1-operation 已标注） |
+| 保存服务名/路径记错 | 先 `grep advertiseService laserMapping.cpp` 核实再 call；PCD 落点以源码为准（`~/fast_lio_ws/PCD/`） |
 
 ---
 
