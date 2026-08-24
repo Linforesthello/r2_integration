@@ -29,6 +29,6 @@
 
 ## 关键结论速查
 
-- base_link 离地 13cm；雷达光学中心离地 69cm；base_link→velodyne = 0.56m（URDF 已更新）
+- base_link 离地 12cm；雷达光学中心离地 77~78cm；base_link→velodyne = 0.655m（08-24 复测更新）
 - base_footprint 已删除（TF2 双父冲突）
 - 记录项：transform 层偶发丢帧（6.4Hz vs 驱动 9.9Hz）；EKF 输出偶发 332ms 抖动——先端到端，建图验证受影响再处理

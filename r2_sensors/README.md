@@ -17,7 +17,7 @@ ros2 launch r2_sensors velodyne.launch.py device_ip:=10.18.18.6
 | velodyne_driver_node | velodyne_driver | /velodyne_packets | UDP 收包 |
 | velodyne_transform_node | velodyne_pointcloud | /velodyne_points | 点云转换；organize_cloud=false、max_range 40m、**min_range 0.5m**（08-15 盲区修复，原 0.9） |
 | velodyne_laserscan_node | velodyne_laserscan | **/scan** | 2D LaserScan（08-15 恢复：Nav2 AMCL/costmap 订阅），frame_id=velodyne |
-| robot_state_publisher | robot_state_publisher | /tf_static | base_link→velodyne（config/r2.urdf，z=0.56m） |
+| robot_state_publisher | robot_state_publisher | /tf_static | base_link→velodyne（config/r2.urdf，z=0.655m，08-24 实测更新） |
 
 ## 关键参数
 

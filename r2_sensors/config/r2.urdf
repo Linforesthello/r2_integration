@@ -16,11 +16,11 @@
   <!-- VLP-16 雷达（车顶中心，水平安装） -->
   <link name="velodyne"/>
 
-  <!-- base_link → velodyne（实测: 地面69cm - base_link 13cm = 56cm, 2026-08-06） -->
+  <!-- base_link → velodyne（实测: 地面77.5cm - base_link 12cm = 65.5cm, 2026-08-24） -->
   <joint name="velodyne_joint" type="fixed">
     <parent link="base_link"/>
     <child link="velodyne"/>
-    <origin xyz="0 0 0.56"/>  <!-- 实测定案2026-08-06: 地面69 - base_link13 = 56cm -->
+    <origin xyz="0 0 0.655"/>  <!-- 实测定案2026-08-24: 光学中心距地77~78 - base_link12 = 65.5cm（08-06 曾定 69-13=56cm，雷达安装已抬高） -->
     <axis xyz="0 0 1"/>
   </joint>
 

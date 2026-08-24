@@ -67,14 +67,14 @@ ros2 run tf2_ros tf2_echo odom_lidar velodyne   # KISS-ICP 自带
 ```
 map ←[桥，W1 可为单位静态]→ odom ←[EKF]→ base_link
                                     ├──→ imu_link（静态，ekf.launch.py 已含 ✅）
-                                    └──→ velodyne（静态，✅ 已定案 z=0.56）
+                                    └──→ velodyne（静态，✅ 已定案 z=0.655）
 odom_lidar（KISS 自身系）──→ velodyne（KISS 发布）
 ```
 
 **✅ 定案（2026-08-06 D0 审计）**：
 - `base_link → velodyne` 静态 TF 由 robot_state_publisher 发布（URDF velodyne_joint）
-- 实测定案: 雷达离地 **69cm**、base_link 离地 **13cm** → base_link→velodyne = **0.56m**
-- URDF 已更新（base_joint 0.13 / velodyne_joint 0.56 / 删除 base_footprint，备份 .bak_20260806）
+- 实测定案（08-24 复测更新）: 雷达光学中心离地 **77~78cm**、base_link 离地 **12cm** → base_link→velodyne = **0.655m**（08-06 曾定 69/13/0.56，雷达安装已抬高 ~8cm）
+- URDF 已更新（velodyne_joint 0.655 / 删除 base_footprint，原备份 .bak_20260806）
 - 验证: `tf2_echo base_footprint velodyne` 报 frame 不存在（已删干净）；frame 快照存档 minimal_loop/
 
 ### 1.4 D1 验收
@@ -118,7 +118,9 @@ python3 ~/Lin_workspace/bags/analysis/build_map.py <bag_dir> <输出.ply> [抽�
 """PCD/PLY → 2D 占用网格（PGM+YAML，Nav2 map_server 格式）
 流程: 读点云 → z 高度滤波(0.3<z<1.5) → xy 栅格化 → 占用阈值 → 输出 map.pgm/map.yaml
 注: z_min 默认 0.3（2026-08-13 修正）：雷达装高 0.56m，z<0.3 为下射环地面点，
-    投影产生"地面雾"（0811 地图 28% 占用格来自地面）；脚本权威版 ~/Lin_workspace/bags/analysis/pcd_to_map.py
+    投影产生"地面雾"（0811 地图 28% 占用格来自地面）；⚠️ 08-24 雷达抬高至 0.655m，
+    下射环地面点整体上移 ~0.1m，z_min 0.3 是否需同步上调待下次建图验证；
+    脚本权威版 ~/Lin_workspace/bags/analysis/pcd_to_map.py
 """
 import sys, struct
 import numpy as np
