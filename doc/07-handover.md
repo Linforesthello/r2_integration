@@ -120,18 +120,19 @@ ros2 run r2_bringup teleop_keyboard
 # bash ~/Lin_workspace/r2_integration/scripts/r2_startup.sh
 
 # 终端 7: Nav2 导航（08-15 起；首次实机用降额参数 nav2_params_low，KISS 不启动）
-#   ⚠️ 08-17 起参数含 inflation_radius 0.30 修复（窄缝过不去）；初始位姿只设一次、设完先动一下确认收敛，见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
+#   ⚠️ 08-17 起参数含 inflation_radius 0.30 修复（窄缝过不去）；初始位姿：启动初期设偏可静止重设 1~2 次（08-25 实车验证有效），导航运行中不要重设（多次设→map 重叠）；每次设完先动一下确认收敛，见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
 #   操作: rviz 出现后 2D Pose Estimate(P) 设初始位姿 → Navigation2 Goal(G) 发目标
 #   注意: 设位姿前 planner/costmap 报 "map frame does not exist" 是正常等待噪音；
 #         车静止时 AMCL 不发布 /amcl_pose 与粒子（update_min_d/a 阈值设计），动起来才有
+n97
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch r2_bringup nav2.launch.py \
   map:=/home/lin/maps/map_0815_clean.yaml \
-  params_file:=~/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml \
+  params_file:=/home/lin/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml \
   rviz:=true
 
-或者
-ros2 launch r2_bringup nav2.launch.py map:=/home/lin/maps/map_0815_clean.yaml params_file:=/home/lin/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml rviz:=true
+或者vmware
+ros2 launch r2_bringup nav2.launch.py   map:=/home/lin/Lin_workspace/bags/maps/d4/map_0815_clean.yaml   params_file:=/home/lin/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml   rviz:=true
 ```
 
 
@@ -206,7 +207,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 - [x] **盲区/footprint 修复复测**（08-17 顺带覆盖）：雷达裁剪 min_range 0.5、local_costmap 6×6、footprint 0.84×0.66（撞障碍根因，见 [retrospect 五-2](retrospect/2026-08-15_nav2_bringup.md)）；08-17 降额实测基本无碰撞（[retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)）
 - [ ] **Nav2 全速验证**（**暂缓 08-17，保持降额现状**）：后续切 `nav2_params.yaml`（0.5/0.3/0.8）前须先同步其膨胀参数（仍 0.55）再复测
 - [ ] **Nav2 避障实测**：costmap 实时刷新已见（人体移动出膨胀圈），静态/动态障碍绕行 + 恢复行为实测
-- [ ] **多次设初始位姿→map 重叠**（诊断 + 操作纪律见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)）：待 N97 确认 AMCL 日志是否 "Ignoring initial pose"（后续点击无效），必要时加 `always_reset_initial_pose: true`
+- [ ] **多次设初始位姿→map 重叠**（诊断 + 操作纪律见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)）：待 N97 确认 AMCL 日志是否 "Ignoring initial pose"（后续点击无效），必要时加 `always_reset_initial_pose: true`；⚠️ 边界（08-25 定）：此问题指**导航运行中**反复设位姿；启动初期设偏后静止重设 1~2 次属正常修正（08-25 实车验证有效，见终端 7 纪律）
 - [x] **yaw 偏差**（08-12 完成）：方案①（odom0_config yaw=true）实施并验证通过，见 [phase1/ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
 - [ ] **z 回归项**：slip 场景剧烈加减速 z 漂 +2.5m（08-05 遗留）复测——08-12 转弯/直行全程 z 恒 0（two_d_mode 结构性钳位），仅"剧烈加减速"动作未严格复测
 - [ ] VNC 开机自启（N97 重启后远程桌面不丢）

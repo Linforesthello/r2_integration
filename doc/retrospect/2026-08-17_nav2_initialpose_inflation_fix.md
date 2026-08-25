@@ -28,6 +28,11 @@
 - **待确认**：Humble AMCL 默认 `always_reset_initial_pose=false`，部分版本首次设置后忽略后续 /initialpose（日志出现 "Ignoring initial pose" 即后续点击无效）→ 下次复现看 AMCL 终端日志确认
 - **操作纪律**（避免复现）：
   1. 停遥控、RViz 拉远视角看清全图、在特征点（墙角等）点击、箭头对准车头方向，**只设一次**
+     ⚠️ 边界（08-25 实车验证补充）："只设一次"指**导航运行中**不要重设；
+     **启动初期（未发 goal 前）设偏时，车静止重设 1~2 次属正常修正**——
+     08-25 实测：第一次设后 global/local 未对齐，第二次静止重设后对齐、走图正常。
+     原理：第一次设的位姿/朝向有鼠标点击误差，且静止时 AMCL 不更新
+     （update_min_d/a 阈值）不收敛；重设落在更准确位置 → 粒子云直接收敛
   2. 设完先动一下（前进 ~0.5m 或原地转 30°+），确认粒子云收缩、scan 与地图墙对齐，再发 goal
   3. 已错位：RViz Nav2 面板 Clear Costmap（Global）清旧障碍 → 重新准确设初始位姿 → 仍不行 `ros2 service call /reinitialize_global_localization std_srvs/srv/Empty {}` 全图撒粒子再动一下 → 最后手段重启 nav2.launch
 

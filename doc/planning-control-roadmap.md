@@ -241,6 +241,49 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 
 **R2 落点**：先 Phase 3 收尾 + 避障 + 主动探索（explore_lite）出量化；MBD 状态机作为 Phase 5 正规化手段记录，不抢主线。
 
+### 5.7ter 争议点：全向轮底盘运动模式（车头为主 vs 目标点为主）
+
+> 状态：**争议中（2026-08-25 用户提出，未定论）**——有讨论空间，且对后续四舵轮转向底盘
+> 的运动学考虑影响更大，先留档待议。R2 当前行为分析基于 08-25 避障实车 bag 数据 + WebSearch 官方资料。
+
+**问题**：全向轮底盘（vx/vy/wz 全自由）存在两种运动策略——
+
+| 模式 | 行为 | 适用 |
+|:---|:---|:---|
+| **车头为主**（head-aligned） | 车头跟随路径方向缓转，用横向平移（vy）修正位置，少旋转 | R2 推荐方向：雷达盲区最小、可预测、绕障友好（AGV 主流） |
+| **目标点为主**（rotate-then-go） | 先转到目标方向再平移 / 到位再对准 | 观感"奇怪"（用户原话：不是车头为准，先变换姿态，甚至斜着过去） |
+
+**R2 现状与机理（08-25 bag 数据 + 官方资料）**：
+- 行为：1405 bag 22 段运动中 12 段"旋转为主"；运动中前向最近障碍频繁 0.50m（min_range 下限）——旋转时贴障碍走
+- 机理：`motion_model: "Omni"` 下 vx/vy/wz 独立采样，MPPI 只按 cost 最小化选轨迹 → 斜着平移常是最优解；
+  ConstraintCritic 对 omni **无任何约束**；朝向相关 critic 权重低（PathAngleCritic w=2.0 / max_angle 1.0rad / GoalAngleCritic 0.5m 内才考虑）→ 车头基本无人管；
+  且 holonomic 车可用 vy 满足朝向要求（官方明确），不必旋转
+- 实锤：1401 bag 单 goal 全程，前方障碍 1.88m 可见，车 0.22m/s 直冲到 0.85m 才停——感知通、决策晚
+  （MPPI 1.92s×0.2m/s≈0.38m 空间前瞻，障碍未入轨迹视野不触发 cost）
+
+**候选方案对比**：
+
+| 方案 | 做法 | 效果 | 代价 |
+|:---|:---|:---|:---|
+| ① 调权重（倾向推荐） | TwirlingCritic 10→30 + PathAngleCritic w 2→10、max_angle 1.0→0.5 | 旋转变贵→平移修正、车头被引导朝路径方向 | 参数级，实车一趟验证 |
+| ② Rotation Shim Controller | 前置控制器先原地转到位再跟踪 | 严格"目标点为主" | 正是用户不想要的模式 |
+| ③ motion_model 换 DiffDrive | 禁 vy | 车头必须朝运动方向 | 丢横向能力，窄缝/平移绕障全废 |
+| ④ Smac 2D 平滑路径 | 路径圆滑 | 减轻"先转姿态"观感 | 对"斜走"无效 |
+
+**四舵轮底盘延伸考虑（2026-08-25 用户提出，预期待验证）**：后续四舵轮转向底盘（转向电机 + 驱动电机，
+非完整约束轮）运动学约束更硬——轮子只能沿自身轴向滚动，横移需所有轮同时转向（蟹行），且转向有机械限位/
+转向速率限制。因此"车头为主"在四舵轮上是**结构强制**（类汽车/AGV 路径跟踪：轮转向角跟随路径曲率），
+"平移/蟹行"是特殊模式而非默认——运动模式选择策略与全向轮含义完全不同，需单独讨论。
+
+**留档结论**：R2 先按方案① 实车验证（若用户采纳）；四舵轮底盘（MCLM/SteeringArm 项目）运动学留作
+专项讨论，本争议点随两项目演进更新。
+
+#### 来源（2026-08-25 WebSearch 核实）
+
+- [PathAngleCritic API 文档](https://api.nav2.org/nav2-humble/html/classmppi_1_1critics_1_1PathAngleCritic.html)（参数/模式含义）
+- [path_angle_critic 源码](http://api.nav2.org/nav2-humble/html/path__angle__critic_8cpp_source.html)（mode 0/1/2 行为）
+- [MPPI 原地旋转讨论（Turtlebot3，Stack Overflow）](https://robotics.stackexchange.com/questions/114198/in-place-rotation-with-mppi-controller-using-turtlebot3?rq=1)（Rotation Shim 替代方案，未实测）
+
 ### 5.8 汇总：R2 全流程决策表
 
 | 环节 | 现状 | 候选池 | 推荐 |

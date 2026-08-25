@@ -129,6 +129,7 @@ scan:      /tmp/pub_simple_scan.py（极简 898 点，0°±2° 共 7 点有限�
 1. **lifecycle 未激活**：topic list 只有 /costmap/costmap/transition_event → `ros2 lifecycle set /costmap/costmap configure + activate` 后全部话题上线（costmap/costmap_raw/voxel_grid/clearing_endpoints/footprint）——**此前所有「0 mark」读数 = 未激活假象**
 2. **激活后四路读数（极简 1m 障碍）**：
 
+   - master：126 格 >0，值分布 **{99: 124, 100: 2}**（99=膨胀圈、100=lethal，无其它梯度）；lethal==100 的 2 格在 world≈(0,0.95) ✓ 障碍正确 mark
    - raw（nav2_msgs/msg/Costmap）：**254×2 + 253×124** —— voxel 层写 lethal、膨胀输出 253 ✓
    - clearing_endpoints：7 点 = 7 个有限 scan 点 ✓ raytrace 在跑
    - voxel_grid：uint32 读全非零垃圾（max=0x2000FFFF）——**疑似消息字段/读法问题，不影响 mark（待查）**
@@ -154,7 +155,7 @@ scan:      /tmp/pub_simple_scan.py（极简 898 点，0°±2° 共 7 点有限�
 
 1. 实车 costmap 节点 lifecycle 激活/订阅状态（实验早期同样假象过）——实车侧 `ros2 lifecycle get` 确认
 2. 显示层/MPPI 前瞻（与 ② 同根因：空间前瞻 0.38m）
-3. 远距离（>1m）mark 本身——实验 3.6 异常未完成，待重做
+3. 远距离（>1m）mark 本身——实验 3.5 异常未完成，待重做
 
 > 注：实车 **global_costmap** 才是 obstacle_layer + static_layer（含 track_unknown_space: true），与 local 不同；global 层不参与 MPPI 避让（MPPI 用 local），问题①只涉及 local。
 
@@ -175,9 +176,6 @@ scan:      /tmp/pub_simple_scan.py（极简 898 点，0°±2° 共 7 点有限�
    - 远端 mark 正常 → costmap 侧排除，问题①归入「MPPI 前瞻/显示层」，与 ②③④ 同根因链
    - 远端不 mark → 深挖距离过滤（obstacle_max_range 是否真正生效、raytrace 交互）
 3. **voxel_grid 数据垃圾**：uint32 读异常（max=0x2000FFFF≈uint8 合并），确认消息 data 字段类型（Humble VoxelGrid.msg）——不影响 mark 结论，但影响 voxel 层状态观测
-
-原第 4 条改写为：
-
 4. **实车侧验证**（N97）：`ros2 lifecycle get /local_costmap/local_costmap` 确认激活状态 + `ros2 topic echo /local_costmap/costmap --field data`（或 rviz）实测远端正值。实车 local_costmap 与实验 1:1 一致（voxel_layer 版），无插件差异；global_costmap 的 obstacle_layer+static_layer 是另一层，不参与 MPPI 避让
 
 
@@ -210,7 +208,3 @@ scan:      /tmp/pub_simple_scan.py（极简 898 点，0°±2° 共 7 点有限�
 - 实车配置：r2_bringup/config/nav2_params_low.yaml（obstacle_max_range=8.0 等，与实验一致）
 
 - 早期脚本（已弃）：/tmp/pub_scan.py（360s 定时版，疑似卡死）、/tmp/pub_scan2.py（无限循环版）
-
-
----
-
