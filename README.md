@@ -30,6 +30,7 @@ r2_integration/
 │   ├── fastlio2-n97-deploy.md        FAST-LIO2 N97 实车部署手册（依赖/外参/运行纪律/验证）
 │   ├── planning-control-roadmap.md   规划控制与视觉集成路线（离线/实时两大阵营 + 标定工具线）
 │   ├── motion-control-roadmap.md     运动控制与具身智能路线（三大方向：四足/机械臂/全车协调 + SO-101+LeRobot+OXE 开源生态）
+│   ├── recruitment-learning-plan.md  求职与学习三阶段总纲（2027届：秋招快速入门→体系多轮→全力春招排期，09-02 定）
 │   ├── 02-progress.md                全局进度一览（各Phase完成度）
 │   ├── project_status.md              全项目现状总结（08-06）
 │   ├── project_landscape.md            项目全景（R2在更大系统中的位置）

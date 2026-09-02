@@ -1,8 +1,8 @@
 # R2 规划控制与视觉集成路线（08-18 调研）
 
-> 状态：调研结论定稿（2026-08-18）；§五「全流程替代方案全景」与 §六「RL 增强方向」2026-08-23 补充（WebSearch 核实）；2026-08-23 按 [standards.md §1.11](standards.md) 规范化（补 §3.2 规格来源 / §5.5-5.6 仓库链接 + §6.6 来源小节 + 相关索引）；来源 = 官方仓库/README + WebSearch 社区核实，未实测项标注
+> 状态：调研结论定稿（2026-08-18）；§五「全流程替代方案全景」与 §六「RL 增强方向」2026-08-23 补充（WebSearch 核实）；2026-08-23 按 [standards.md §1.11](standards.md) 规范化（补 §3.2 规格来源 / §5.5-5.6 仓库链接 + §6.6 来源小节 + 相关索引）；2026-09-02 状态同步至 **08-25 基线**（FAST-LIO2 已于 08-24 实车验证全项通过，见 [07-handover.md](07-handover.md)）+ §六补 6.0 大基调「全局传统、局部 RL」/ 6.7 AI 快速复现开源总体路线 / 6.8 LocoWiki RL 素材地图（来源 = LocoWiki 全站浏览学习，2026-09-02，见 §6.9）；来源 = 官方仓库/README + WebSearch 社区核实 + 本地 LocoWiki 学习，未实测项标注
 > 定位：01-plan 第四章（集成路线图）的补充引用，视觉/规划控制的选型依据
-> 关联：[01-plan.md](01-plan.md)｜[fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)（FAST-LIO2 部署）
+> 关联：[01-plan.md](01-plan.md)｜[fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)（FAST-LIO2 部署）｜[motion-control-roadmap.md](motion-control-roadmap.md)（RL 运动控制姊妹篇，§六 6.0 大基调同适用）
 
 ---
 
@@ -57,8 +57,8 @@ Phase 3 收尾后、进视觉前，做一次标定专项。
 ### 2.2 R2 分阶段落点
 
 ```
-Phase 3（当前 25%）: A 阵营收尾 —— 全速验证（先同步膨胀参数 0.55→0.30）→ 避障实测 → 设位姿纪律
-Phase 3+（决策点）:   FAST-LIO2 vs KISS 决策 → 若替代：建图质量升级（A 阵营地图源）；FAST-LIO-Localization 定位试验（可选）
+Phase 3（当前 25%）: A 阵营收尾 —— 全速验证（08-17 低参版已同步膨胀 0.55→0.30 并降额过缝验证 ✅，全速仍暂缓——⚠️ 全速版 nav2_params.yaml 尚未同步，切回前须先同步）→ 避障实测（08-25 已跑一轮 + bag 分析，发现"旋转为主/决策晚"两问题，见 §5.7ter；静态/动态绕行 + 恢复行为复测待做）→ 设位姿纪律（08-25 定：仅启动初期可重设，运行中不重设）
+Phase 3+（决策点推进）: FAST-LIO2 实车验证 ✅（08-24，旋转误差<2° / 平移 0.5%，外参 [0.36,0.035,0.47] 手测）——当前决策点 = **TF 桥 + 是否替代 KISS 作为 A 阵营地图源**；FAST-LIO-Localization 定位试验（可选）
 Phase 3.5（探索，可插队）: B 阵营轻量版 —— SLAM Toolbox 2D + explore_lite（N97 可承受）；3D 探索（FAST-LIO2 实时地图）仅演示用
 Phase 4（视觉）:     lidar-camera 标定 → 彩色点云 → 目标检测动态避障（为 Robocon 人形障碍）
 Phase 5（编排）:     waypoint 任务队列（已有待办）+ 气动 + 异常处理
@@ -102,7 +102,7 @@ Phase 5（编排）:     waypoint 任务队列（已有待办）+ 气动 + 异�
 | **b. 双雷达组合** | VLP-16 360° 喂 Nav2 避障 + MID-70 高密度喂 FAST-LIO（**各喂一个消费者，不同时跑两份 SLAM**） | 全景避障 + 高密度建图兼得 | 供电/网口/车顶空间；两链路都要维护；N97 CPU 需实测（两链非并行 SLAM，预估可承受） |
 | **c. VLP-16 + D435 补近距** | VLP-16 主雷达 + D435 近距感知（原案） | 零新增雷达成本；D435 已在 Phase 4 计划内 | 近距仅 5m 内/依赖光照；**建图密度短板未解决** |
 
-### 3.4 定夺方法（A/B 实机对比，FAST-LIO2 验证必做环节）
+### 3.4 定夺方法（A/B 实机对比；触发条件已满足，随时可发起）
 
 同一段室内场景（场地放柱子/物料块），VLP-16 vs MID-70 分别跑 FAST-LIO2：
 
@@ -111,8 +111,9 @@ Phase 5（编排）:     waypoint 任务队列（已有待办）+ 气动 + 异�
 3. **里程计质量**：旋转漂移对比（KISS 163° 教训基线）
 4. **避障实测**：2D scan 表现
 
-半天成本，数据定夺方案 a/b/c。触发点 = **FAST-LIO2 实车验证阶段**（见
-[fastlio2-n97-deploy.md](fastlio2-n97-deploy.md) §六），不必等"质量不达标"才做。
+半天成本，数据定夺方案 a/b/c。触发点（**FAST-LIO2 实车验证阶段**）已于 08-24 满足——FAST-LIO2 验证全项
+通过（见 [fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)）；**A/B 对比本身尚未做**，现属 Phase 3 收尾
+可选项，随时可发起，不必等"质量不达标"才做。
 
 ---
 
@@ -156,7 +157,7 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 | SLAM Toolbox | 2D | ✅ 图优化 | 可选 | ✅ 原生 | 轻量、易调试；2025 实测 ATE 0.13m（Cartographer 0.21m）、CPU 70% |
 | Cartographer | 2D/3D | ✅ 最强 | ✅ | ⚠️ 社区移植 | 大场景/长廊/仓库强，回环消累积误差，但对参数调优敏感、资源重 |
 | KISS-ICP（现役） | 3D | ❌ | ❌ | ✅ 原生 | 纯激光、极简；无 IMU 旋转漂移（R2 163° 教训） |
-| FAST-LIO2（候选） | 3D | ❌ | ✅ | ✅ 原生 | LIO 紧耦合，运动预测强、退化场景稳；VLP-16 已原生支持 |
+| FAST-LIO2 | 3D | ❌ | ✅ | ✅ 原生 | LIO 紧耦合，运动预测强、退化场景稳；VLP-16 已原生支持；**08-24 实车验证 ✅ 旋转误差<2°、平移 0.5%**（由候选转实测通过，见 [fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)） |
 | LIO-SAM | 3D | ✅ 因子图 | ✅ | ⚠️ 社区 | 系统完整、回环强，但重、调参成本高 |
 | Point-LIO | 3D | ❌ | ✅ | ✅ | Livox 固态雷达主场 |
 
@@ -210,12 +211,13 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 | 要标定的外参 | 方案 | 状态 |
 |:---|:---|:---:|
 | 雷达-相机（D435+VLP-16） | livox_camera_calib / joint-lidar-camera-calib / FAST-Calib / [direct_visual_lidar_calibration](https://github.com/koide3/direct_visual_lidar_calibration)（§1.2 已定 koide3 路线） | ✅ 已规划（Phase 4 前置） |
-| **雷达-IMU** | [LI-Init](https://github.com/hku-mars/LI-Init)（自动标定）/ 手测初值 | ⚠️ **§一 未覆盖，FAST-LIO2 前置刚需**——VLP-16 与 G354 外参（平移+旋转）直接影响 LIO 精度 |
+| **雷达-IMU** | [LI-Init](https://github.com/hku-mars/LI-Init)（自动标定）/ 手测初值 | ✅ **手测外参 [0.36,0.035,0.47] 已用于 08-24 实车验证（平移误差 0.5%，达标）**；LI-Init 自动标定未做（可选精度升级，非阻塞） |
 | 雷达-雷达（§3.3 方案 b） | Autoware 点云标定 / 手工量测 | 仅当方案 b 选中 |
 | 相机内参 | D435 出厂已标 | ✅ |
 | 底盘里程计/舵轮 | 已有脚本（ticks/圈、speed_scale、MT6701 中位） | ✅ |
 
-> ⚠️ **雷达-IMU 外参标定是比 lidar-camera 更优先的环节**（FAST-LIO2 上线前必做；不做会吃精度亏）。
+> ⚠️ 雷达-IMU 外参原列为「比 lidar-camera 更优先的环节（FAST-LIO2 上线前必做）」——08-24 已以手测外参
+> [0.36,0.035,0.47] 上线，验证精度达标（平移 0.5%）；LI-Init 自动标定降级为可选升级，不再是阻塞项。
 
 ### 5.7 任务编排（全流程最后一环，Phase 5）
 
@@ -288,19 +290,19 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 
 | 环节 | 现状 | 候选池 | 推荐 |
 |:---|:---|:---|:---|
-| 传感器 | VLP-16 | MID-70 / 双雷达 | 等 FAST-LIO2 实车 A/B（§3.4） |
-| 建图(3D) | KISS-ICP | FAST-LIO2 / LIO-SAM / Point-LIO | FAST-LIO2（接 G354） |
+| 传感器 | VLP-16 | MID-70 / 双雷达 | A/B 未做（触发条件已满足，§3.4） |
+| 建图(3D) | KISS-ICP | FAST-LIO2 / LIO-SAM / Point-LIO | FAST-LIO2（接 G354；08-24 实车验证 ✅，TF 桥完成后可替代 KISS） |
 | 建图(2D, B 阵营) | — | SLAM Toolbox / Cartographer | SLAM Toolbox（轻量、ATE 更优） |
 | 定位 | AMCL | FAST-LIO-Localization / NDT / SLAM-Toolbox-localization | AMCL 过渡 → FAST-LIO-Localization |
 | 规划框架 | Nav2 | move_base / 自研 | Nav2（可插拔，不换栈） |
 | 局部控制 | MPPI | TEB ❌（弃养）/ DWB / 纯跟踪 | MPPI（Nav2 官方指定） |
 | 探索 | — | explore_lite / roadmap_explorer / frontier_exploration_ros2 | explore_lite 起步，效率不够换 roadmap_explorer |
 | 标定(雷达-相机) | — | koide3 路线（§1.2 已定） | 不变 |
-| 标定(雷达-IMU) | 未规划 | LI-Init | **补为 FAST-LIO2 前置** |
+| 标定(雷达-IMU) | 手测外参已用（08-24 验证 ✅） | LI-Init | LI-Init 自动标定（可选升级，非阻塞） |
 | 任务编排 | 自研待办 | Nav2 BT / py_trees | Nav2 BT（NavigateThroughPoses） |
 | 上层车体控制 | — | MBD 状态机（MATLAB/Simulink → 部署）/ 自动驾驶框架 | 规划中（§5.7bis，秋招后优先） |
 
-**一句话**：Nav2 不是"只有它"，但是标准底盘——规划层可插拔、任务层用 BT、建图/定位/探索层各有一个"现状→升级"路径；真正要补的缺口只有两个：**雷达-IMU 外参标定（FAST-LIO2 前置）** 和 **探索效率升级路（explore_lite → roadmap_explorer）**。
+**一句话**：Nav2 不是"只有它"，但是标准底盘——规划层可插拔、任务层用 BT、建图/定位/探索层各有一个"现状→升级"路径；FAST-LIO2 已实车验证（08-24），当前真正待补的缺口收敛为三个：**FAST-LIO2 的 TF 桥与"替代 KISS"集成决策（§2.2 Phase 3+）**、**探索效率升级路（explore_lite → roadmap_explorer）**、**VLP-16 vs MID-70 A/B（§3.4）**。
 
 ### 5.9 来源（2026-08-23 WebSearch 核实）
 
@@ -317,11 +319,26 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 
 ---
 
-## 六、RL 增强方向（规划控制的 RL 化，2026-08-23 用户规划）
+## 六、RL 增强方向（规划控制的 RL 化，2026-08-23 用户规划；09-02 定大基调与路线）
 
-> 状态：方向确认，**实施方式未定**（用户原话："具体怎么实施我还没想好"）。
+> 状态：**大基调 + 实施路线已定稿**（2026-09-02，来源 LocoWiki 全站学习，见 §6.8/6.9）；
+> 具体项目仍待逐条落地（仿真 → A/B 对比 → 实车，数据说话再定，承 §6.4 纪律）。
 > 定位：§五 决策表的"RL 增强"延伸，横跨**足式全身控制**与**车构型规划**两层；
-> 训练框架 = Isaac Lab/Gym、MuJoCo、UniLab。
+> 训练框架 = Isaac Lab/Gym、MuJoCo、UniLab；扩写素材 = `~/locowiki_ws/learn/`（§6.8）。
+
+### 6.0 大基调：全局传统、局部 RL（2026-09-02 定稿）
+
+> 一句话：**全局/宏观层用传统算法（确定性、可解释、可验收），RL 只注入"传统算法够不着"的
+> 局部/执行级环节**——R2/四舵轮/机械臂等所有运控系统的统一分层哲学，跨 [motion-control-roadmap.md](motion-control-roadmap.md)。
+
+1. **全局层保持传统**：任务编排（BT/状态机）、全局规划（Nav2/NavFn/Smac）、定位建图——责任边界清晰、
+   故障可归因、可验收，不上 RL（本文 §五 决策表全部成立，即此基调的落地）
+2. **RL 只做局部缺口**：局部控制器增强（MPPI 的 critic 权重/残差层）、末端级精确机动（倒车入库/窄位泊车）、
+   难以显式建模的执行级策略（力控/足式——后者主体在姊妹篇）
+3. **接口化嵌入**：RL 不是换栈，是「插件 / 残差叠加 / 命令接口」三种挂法之一；传统层继续兜底安全——
+   "安全由底层保证，智能由上层提供"（出处：`~/locowiki_ws/learn/04-规控.md` §Ch13 接口三原则 + §05 力控铁律）
+4. **判据（先传统后 RL）**：传统算法能行的不 RL；RL 项必须与基线传统方案**同场 A/B、量化对比**后再上实车
+   （承 §6.4 秋招纪律；与 6.7 复现路线的验收口径一致）
 
 ### 6.1 足式 RL 扩展（四足/双足全身控制 → 地形适应）
 
@@ -336,6 +353,13 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 |:---|:---|:---|:---|
 | 局部避障 RL | RL 策略替代/增强 MPPI 局部控制器（端到端或与 costmap 融合） | 可插拔（Nav2 控制器插件） | 方向确认，实施未定 |
 | 倒车入库 RL | 精确机动策略（窄位泊车/往返倒库）= 高精度运动规划的 RL 化 | goal 级任务，Nav2 规划层之上/替代 | 方向确认，实施未定 |
+
+**实现形态收敛（09-02 LocoWiki 学习后）**：上表两方向的实施形态统一为**三种挂法**——
+① **残差 RL 叠加**：RL 输出修正量叠加在 MPPI/现有控制器输出上（最稳，安全由下层兜底，无需换栈）
+② **分层命令接口**：上层策略出高层命令（目标/速度约束），下层传统控制器跟踪（分层，可单测）
+③ **critic 权重学习**：RL 只学 MPPI 代价的批评项权重（最小侵入，与 §5.7ter 方案①同层可对比）
+①②③ 均可落成 Nav2 控制器/critic 插件模式（与 §6.5 V550 / ros-navigation 社区路径一致）。
+展开与出处：`~/locowiki_ws/learn/04-规控.md` §Ch13「RL×规控混合」（RL 探索-保证两难、四层分工）。
 
 ### 6.3 实施路径建议（待定夺）
 
@@ -389,6 +413,51 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 - [ros-navigation #4613（RL local planner 替换 Nav2 控制器，社区建议按 MPPI/RPP 插件模式集成）](https://github.com/orgs/ros-navigation/discussions/4613)
 - 四足巡检机器人（中文期刊）链接未核实，未列入
 
+### 6.7 总体路线：AI 快速部署复现开源项目（2026-09-02 定稿，来源 LocoWiki）
+
+> 理念：调研/学习不再从零开始——把 [LocoWiki](https://locowiki.github.io/) 当「线索库 + 复现源」，
+> 用 AI 批量浏览消化 → 沉淀知识地图 → 按需精读 → 快速复现部署。**学习产物即文档素材**（本文 §6.0/6.2/6.8 即此流程产物）。
+
+**复现五步法**：
+
+1. **定位场景**：目标能力（如 R2 局部避障 RL / 足式地形适应 / 机械臂 RL 力控）
+2. **从索引池选型**：network-open-source（参赛方案 9 + 论文复现 13 + 开发工具 9）+ wiki 六层章节体系
+   （数学/C++/SLAM → 规控 → 方向线 → 横切专题，见知识地图 `~/locowiki_ws/learn/00-全站知识地图.md`）
+3. **AI 批量消化**：全站浏览 → 分层笔记落盘（骨架地图 + 分节精华，粒度可按"大纲 / 重点深读 / 全文"调节）
+4. **快速复现部署**：目标仓库 clone → build / 训练 → 对照原文档验收（部署范式参照 fastlio2-n97-deploy）
+5. **留档对照**：复现结论回写 roadmap / retrospect，**必须带来源链接**（[standards.md §1.11](standards.md)）
+
+> 首次全站浏览（2026-09-02，约 442 文件 / 49MB，用户定「大纲 + 重点深度浏览」）产物 = 知识地图 + 5 份分节笔记（§6.8）。
+
+### 6.8 LocoWiki RL 素材地图（学习产物 · 与 R2 / 现有资产对照）
+
+> 本地克隆：`~/locowiki_ws/LocoWiki/`（内容源）+ `~/locowiki_ws/LocoWiki.github.io/`（展示站，SPA 壳）；
+> 学习笔记：`~/locowiki_ws/learn/`——`00-全站知识地图.md`（总地图）＋ 分节细读 `01-数学_02-C++_03-SLAM.md` /
+> `04-规控.md` / `05-运动控制.md` / `06-具身智能.md` / `00-导航与杂项.md`。
+
+| 主题 | 素材（章节 / 开源项） | 与本文 §六 / 用户资产的关系 |
+|:---|:---|:---|
+| R2 车构型 RL 起步 | 06 具身 **Ch21（轮式+双臂）→ Ch22（自定义机器人接入）→ Ch17（机械臂 staged reward/DiffIK）** | §6.2 两条方向的精读入口（Isaac Lab 系，Q1 起步路线） |
+| RL×规控混合接口 | 04 规控 **Ch13**（RL-保证两难 / 接口三原则 / CBF-QP / residual 安全下界 / 三范式选型） | **§6.0 大基调与 §6.2 三种挂法的出处** |
+| MPPI 理论纵深 | 04 规控 MPPI 专精线（Feynman-Kac 推导 / 七变体 / CEM-Tsallis 统一视角 / Nav2 critic 调优案例） | §5.7ter 方案①（调 critic 权重）与 §5.4 MPPI 选型的理论支撑（待逐条对照） |
+| 足式 RL 训练栈 | 05 运动控制（训练栈 / 混合范式 DTC/MPC-Net/VWBC）+ 06 具身 Ch01-28（Go1 48 维 obs / 13 奖励项同源） | 姊妹篇 motion-control-roadmap 的素材源（Go2/G1 已有资产） |
+| Sim2Real 部署 | 06 具身 **Ch23**（normalizer 烘焙 / metadata 关节比对 / 延迟四段 D0-D6） | 用户 Go2/G1 ONNX 一致性流程 = 同款（已自证）；R2 数字孪生按此验收 |
+| 开源项目（可直接复现） | network-open-source：RC_WheelLeg（轮足 + ROS2 + RL）/ rl-mpc-locomotion（高层 RL + 低层 MPC）/ LeggedSkillDeploy（多策略切换部署）/ HIMLoco-for-Go2W / RoboGauge Go2 冠军方案 | §6.7 复现路线的第一批目标池（各项目简介见 network-open-source/README.md） |
+
+**遗留疑点（浏览级，精读时处理）**：05 笔记一处「85% vs 41%」数据未对原文复查（未采信）；DTC「谁出参考
+谁跟踪」库内两章矛盾已查 [arXiv:2309.15462](https://arxiv.org/abs/2309.15462) 原文定案（TAMOLS 出参考、RL 跟踪）；
+**STM32/MCLM 技术栈在教程六层体系无对应主线**（教程面向 x86+ROS2+高端执行器）——嵌入式到教程需要自建
+「翻译层」，是后续扩展 roadmap 时值得处理的点。
+
+### 6.9 来源（2026-09-02 本地 LocoWiki 学习核实）
+
+- [LocoWiki 展示站 · open-source 索引](https://locowiki.github.io/open-source.html)（用户指定入口；页面为 SPA 壳，正文实际在内容仓库）
+- 本地内容仓库：`~/locowiki_ws/LocoWiki/`（wiki/ 教程 ~442 文件、network-open-source/ 开源索引 31 项 + 硬件/算法补充、competition-rules/ 等）
+- 学习笔记（本次浏览产物，可回查）：`~/locowiki_ws/learn/00-全站知识地图.md` 及 5 份分节笔记（§6.8 列出；代理精读均对本地原文核实，标注速览级/深读级）
+- 精读溯源示例：DTC 方向矛盾 → [arXiv:2309.15462](https://arxiv.org/abs/2309.15462)（TAMOLS：出参考、RL 跟踪）
+- **未实测项标注**：§6.7 五步法为方法流程（首次全站浏览已实践一遍；步骤 4「复现部署」对各开源项目均未执行）；
+  表内「支撑 / 对照」映射系学习产物初步对照，未逐条对本文方案验证
+
 ---
 
 ## 相关
@@ -397,3 +466,4 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 - [standards.md](standards.md) §1.11（调研/选型文档附来源规范——本文格式依据）｜[07-handover.md](07-handover.md)（运行状态与参数快照）
 - [ros2-ops.md](ros2-ops.md)（ROS 操作规范）｜[ros2-qos-dds.md](ros2-qos-dds.md)（QoS/DDS 问题手册）
 - [retrospect/2026-08-18_fastlio_laser_map_debug.md](retrospect/2026-08-18_fastlio_laser_map_debug.md)（FAST-LIO 排障全记录）
+- LocoWiki 学习笔记：`~/locowiki_ws/learn/00-全站知识地图.md`（2026-09-02 全站浏览；本文 §6.7/6.8 素材源）
