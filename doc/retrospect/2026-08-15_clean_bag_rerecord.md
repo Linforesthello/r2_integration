@@ -41,7 +41,7 @@
 
 ## 四、工具与结果
 
-新工具 `~/Lin_workspace/bags/analysis/filter_person_blobs.py`：
+新工具 `~/Lin_workspace/r2_integration/bags/analysis/filter_person_blobs.py`：
 对 cum_100_900 + layer_900_1400 占用格的 2~16 格连通块，判据 = z 跨度 ≥0.8m 且点密度 <100/格
 → 判定人形块，删除其全部点 → 输出 clean ply → 重跑 layer_map.py。
 

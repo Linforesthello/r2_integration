@@ -132,7 +132,7 @@ ros2 launch r2_bringup nav2.launch.py \
   rviz:=true
 
 或者vmware
-ros2 launch r2_bringup nav2.launch.py   map:=/home/lin/Lin_workspace/bags/maps/d4/map_0815_clean.yaml   params_file:=/home/lin/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml   rviz:=true
+ros2 launch r2_bringup nav2.launch.py   map:=/home/lin/Lin_workspace/r2_integration/bags/maps/d4/map_0815_clean.yaml   params_file:=/home/lin/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml   rviz:=true
 ```
 
 
@@ -235,7 +235,7 @@ Add → By display type → Imu（需已装 `ros-humble-rviz-imu-plugin`）→ T
 4. **N97 单机跑全套是性能瓶颈**：EKF 降频 + KISS 吞帧同源，CPU 余量优先于功能扩展
 
 **资源状态**：VM 与 N97 代码同步基线 = 提交 fc778da（main，08-17，Nav2 膨胀参数 0.30）；
-bag 分析副本在 VM `~/Lin_workspace/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 /
+bag 分析副本在 VM `~/Lin_workspace/r2_integration/bags/raw/`（ekf_pure_0809_2013 / ekf_yaw_test_0809 /
 map_run_0809_2133 / **map_run_0811_1925** / **ekf_yaw_v2_0812** / **stage_0812_2111** /
 **map_run_20260815_165547** 干净包 / **map_run_20260815_170058** KISS 漂移失败样本 /
 **nav2_first_loop** 首次闭环 bag，分析脚本 `bags/analysis/analyze_nav2_first_loop.py`）；截图

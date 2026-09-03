@@ -79,7 +79,7 @@ map ←[AMCL]→ odom ←[EKF]→ base_link ←[静态]→ velodyne / imu_link
 
 ### 3.3 数据与资产
 
-- bag `~/Lin_workspace/bags/raw/nav2_first_loop/`（32.7 MiB，10 话题）
+- bag `~/Lin_workspace/r2_integration/bags/raw/nav2_first_loop/`（32.7 MiB，10 话题）
 - 截图 `bags/rviz_nav2_first_loop.png` / `_2.png`
 - 分析脚本 `bags/analysis/analyze_nav2_first_loop.py`
 
@@ -149,11 +149,11 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/nav2_cont_$(date +%m%d_%H
 线/角速度均 < 0.01 持续 ≥2s）时的实际位姿取最近一帧 `/amcl_pose`（map 系，AMCL 定位输出）；
 误差 = 2D 欧氏距离 + 归一化航向差。注意 AMCL 静止不发布（D3-3），停稳后取前后最近帧。
 
-**脚本**（权威版 `~/Lin_workspace/bags/analysis/analyze_nav2_goal_error.py`，官方 rosbag2_py 零依赖，
+**脚本**（权威版 `~/Lin_workspace/r2_integration/bags/analysis/analyze_nav2_goal_error.py`，官方 rosbag2_py 零依赖，
 已在 VM 用 nav2_first_loop 验证读取逻辑；该旧 bag 无 /goal_pose 输出提示，N97 新录 bag 含即可计算）：
 
 ```bash
-python3 ~/Lin_workspace/bags/analysis/analyze_nav2_goal_error.py <bag_dir>
+python3 ~/Lin_workspace/r2_integration/bags/analysis/analyze_nav2_goal_error.py <bag_dir>
 ```
 
 输出示例：

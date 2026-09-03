@@ -99,18 +99,18 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M
 
 ### 2.2 离线累积脚本（方案B：逐帧位姿变换累积，标准 LiDAR 建图法）
 
-> 脚本: `~/Lin_workspace/bags/analysis/build_map.py`（官方 rosbag2_py，零依赖）
+> 脚本: `~/Lin_workspace/r2_integration/bags/analysis/build_map.py`（官方 rosbag2_py，零依赖）
 > 原理: 每帧 `/kiss/frame`（velodyne 系全分辨率）× `/kiss/odometry` 位姿（时间对齐）
 >       → 变换到 odom_lidar 世界系 → 逐帧累积
 > 注意: 不用 `/kiss/local_map`（KISS 局部滑动窗口 + voxel 0.2m 过稀）
 
 ```bash
-python3 ~/Lin_workspace/bags/analysis/build_map.py <bag_dir> <输出.ply> [抽稀间隔=5]
+python3 ~/Lin_workspace/r2_integration/bags/analysis/build_map.py <bag_dir> <输出.ply> [抽稀间隔=5]
 ```
 ### 2.3 高度滤波 + 2D 占用网格（D2 也用到，一起固化）
 
 ```bash
-# 脚本位置: ~/Lin_workspace/bags/analysis/pcd_to_map.py
+# 脚本位置: ~/Lin_workspace/r2_integration/bags/analysis/pcd_to_map.py
 ```
 
 ```python
@@ -120,7 +120,7 @@ python3 ~/Lin_workspace/bags/analysis/build_map.py <bag_dir> <输出.ply> [抽�
 注: z_min 默认 0.3（2026-08-13 修正）：雷达装高 0.56m，z<0.3 为下射环地面点，
     投影产生"地面雾"（0811 地图 28% 占用格来自地面）；⚠️ 08-24 雷达抬高至 0.655m，
     下射环地面点整体上移 ~0.1m，z_min 0.3 是否需同步上调待下次建图验证；
-    脚本权威版 ~/Lin_workspace/bags/analysis/pcd_to_map.py
+    脚本权威版 ~/Lin_workspace/r2_integration/bags/analysis/pcd_to_map.py
 """
 import sys, struct
 import numpy as np
@@ -188,10 +188,10 @@ free_thresh: 0.25
 
 ```bash
 # 1. bag → 累积点云
-python3 ~/Lin_workspace/bags/analysis/build_map.py ~/bags/xxx.map_run_*.bag ~/bags/map_raw.ply
+python3 ~/Lin_workspace/r2_integration/bags/analysis/build_map.py ~/bags/xxx.map_run_*.bag ~/bags/map_raw.ply
 
 # 2. 滤波 + 投影 → 占用网格
-python3 ~/Lin_workspace/bags/analysis/pcd_to_map.py ~/bags/map_raw.ply ~/bags/map.pgm
+python3 ~/Lin_workspace/r2_integration/bags/analysis/pcd_to_map.py ~/bags/map_raw.ply ~/bags/map.pgm
 
 # 3. 可视化验证（rviz 加载 /map）
 ros2 run nav2_map_server map_server map.yaml   # 需要先跑 lifecycle 或
@@ -243,8 +243,8 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_final_$(date +%m%d_%H
 5. **出图（修正参数）**：
 
 ```bash
-python3 ~/Lin_workspace/bags/analysis/build_map.py <bag_segN> raw_segN.ply
-python3 ~/Lin_workspace/bags/analysis/pcd_to_map.py raw_segN.ply map_segN.pgm   # z_min 默认 0.3
+python3 ~/Lin_workspace/r2_integration/bags/analysis/build_map.py <bag_segN> raw_segN.ply
+python3 ~/Lin_workspace/r2_integration/bags/analysis/pcd_to_map.py raw_segN.ply map_segN.pgm   # z_min 默认 0.3
 ```
 
 6. **验收**：单段出图检查——墙段连续（目标 ≥10m）、无重影双线、**无地面雾**（z_min 0.3 已滤）、

@@ -59,7 +59,7 @@ odom_lidar → velodyne（KISS 独立树）
 
 ## 六、定量基线（2026-08-08 录 bag：sys_audit_0808_2036，132.5s）
 
-> 分析脚本: `~/Lin_workspace/bags/analysis/analyze_audit.py`（官方 rosbag2_py）
+> 分析脚本: `~/Lin_workspace/r2_integration/bags/analysis/analyze_audit.py`（官方 rosbag2_py）
 
 | 指标 | 结果 | 判定 |
 |:---|:---|:---|

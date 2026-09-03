@@ -28,7 +28,7 @@
 6. **AMCL 静止不发布 /amcl_pose 与 /particle_cloud**：Nav2 AMCL 设计行为——`update_min_d: 0.25`/`update_min_a: 0.2` 阈值内不更新粒子滤波（省算力），车动起来才发布（bag 实测运动时有 64 帧 amcl_pose/63 帧粒子）。静止时误以为"AMCL 挂了"，实为正常
 7. **particle_cloud 显示**：rviz 配置已含 "Amcl Particle Swarm"（nav2_rviz_plugins/ParticleCloud，/particle_cloud）——未显示主因是第 6 条（静止无数据），车动后出现
 
-## 四、验证结果（bag `nav2_first_loop` 量化，脚本 [analyze_nav2_first_loop.py](../../../bags/analysis/analyze_nav2_first_loop.py)）
+## 四、验证结果（bag `nav2_first_loop` 量化，脚本 [analyze_nav2_first_loop.py](../../bags/analysis/analyze_nav2_first_loop.py)）
 
 | 指标 | 数值 | 结论 |
 |:---|:---|:---|
@@ -42,7 +42,7 @@
 | 到达判定 | 车停稳于目标点（用户目检，误差未测量） | 闭环成功 ✅ |
 | 碰撞 | **有擦碰（用户报告）** | 根因分析见下节，已修复参数待复测 |
 
-留档资产：bag `~/Lin_workspace/bags/raw/nav2_first_loop/`（32.7 MiB，10 话题）、截图 `bags/rviz_nav2_first_loop.png`/`_2.png`。
+留档资产：bag `~/Lin_workspace/r2_integration/bags/raw/nav2_first_loop/`（32.7 MiB，10 话题）、截图 `bags/rviz_nav2_first_loop.png`/`_2.png`。
 
 ## 五、实测发现的问题与修复（08-15 当晚复盘）
 

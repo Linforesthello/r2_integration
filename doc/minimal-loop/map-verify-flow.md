@@ -36,14 +36,14 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_final_$(date +%m%d_%H
 
 ```bash
 # N97 上
-scp -r ~/Lin_workspace/r2_integration/bags/map_final_*_segN lin@192.168.1.204:~/Lin_workspace/bags/raw/
+scp -r ~/Lin_workspace/r2_integration/bags/map_final_*_segN lin@192.168.1.204:~/Lin_workspace/r2_integration/bags/raw/
 ```
 
 ## 3. bag 统计（帧率 / 空窗）
 
 ```bash
 # 完整统计（点数/车速/帧间隔/空窗）
-python3 ~/Lin_workspace/bags/analysis/stats_map_run.py <bag_dir>
+python3 ~/Lin_workspace/r2_integration/bags/analysis/stats_map_run.py <bag_dir>
 ```
 
 **验收门槛**：KISS ≥7Hz、无 >0.5s 空窗（有 → 录制条件问题：CPU 争抢/性能模式未切，重录）。
@@ -52,7 +52,7 @@ python3 ~/Lin_workspace/bags/analysis/stats_map_run.py <bag_dir>
 
 ```bash
 # EKF(IMU+轮速) 为可信基准，KISS 为纯激光估计；起点对齐后逐帧对比位置偏差
-python3 ~/Lin_workspace/bags/analysis/analyze_kiss_vs_ekf.py <bag_dir>
+python3 ~/Lin_workspace/r2_integration/bags/analysis/analyze_kiss_vs_ekf.py <bag_dir>
 ```
 
 输出：逐帧表（偏差大帧全列）+ 每 4s 段偏差 + 自动结论。
@@ -69,12 +69,12 @@ python3 ~/Lin_workspace/bags/analysis/analyze_kiss_vs_ekf.py <bag_dir>
 
 ```bash
 # bag → 3D 点云（抽稀 5）
-python3 ~/Lin_workspace/bags/analysis/build_map.py <bag_dir> <输出>.ply 5
+python3 ~/Lin_workspace/r2_integration/bags/analysis/build_map.py <bag_dir> <输出>.ply 5
 # 3D → 2D 占用网格（z_min 默认 0.3，勿改回 0.1：地面雾 28% 占用格）
-python3 ~/Lin_workspace/bags/analysis/pcd_to_map.py <输出>.ply <输出>.pgm
+python3 ~/Lin_workspace/r2_integration/bags/analysis/pcd_to_map.py <输出>.ply <输出>.pgm
 ```
 
-产物整理规范：raw/ 只放 bag；ply/pgm/预览图归位 `maps/<地图名>/`，对比图 `maps/<地图名>/compare_*.png`（见 [bags README](../../../Lin_workspace/bags/README.md)）。
+产物整理规范：raw/ 只放 bag；ply/pgm/预览图归位 `maps/<地图名>/`，对比图 `maps/<地图名>/compare_*.png`（见 [bags README](../../bags/README.md)）。
 
 ## 6. 判断是否合理（验收）
 
@@ -127,4 +127,4 @@ EOF
 
 - 录制/启动手册：[w1-operation.md](w1-operation.md)（D1-D5 + D3b 正式长录纪律）
 - 排查留档：[retrospect/2026-08-13_map_chain_investigation.md](../retrospect/2026-08-13_map_chain_investigation.md)
-- 脚本：[stats_map_run.py](../../../Lin_workspace/bags/analysis/stats_map_run.py)、[analyze_kiss_vs_ekf.py](../../../Lin_workspace/bags/analysis/analyze_kiss_vs_ekf.py)、[build_map.py](../../../Lin_workspace/bags/analysis/build_map.py)、[pcd_to_map.py](../../../Lin_workspace/bags/analysis/pcd_to_map.py)
+- 脚本：[stats_map_run.py](../../bags/analysis/stats_map_run.py)、[analyze_kiss_vs_ekf.py](../../bags/analysis/analyze_kiss_vs_ekf.py)、[build_map.py](../../bags/analysis/build_map.py)、[pcd_to_map.py](../../bags/analysis/pcd_to_map.py)

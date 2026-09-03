@@ -162,7 +162,7 @@ ros2 topic echo /Laser_map --qos-reliability reliable --field header.stamp
 
 ## 六、成果物清单
 
-位置：`~/Lin_workspace/bags/raw/`
+位置：`~/Lin_workspace/r2_integration/bags/raw/`
 
 | 文件 | 大小 | 说明 |
 |:---|:---|:---|

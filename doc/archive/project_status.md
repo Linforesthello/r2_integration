@@ -117,7 +117,7 @@ N97 (机器人电脑):
 
 | 项 | 位置 | 说明 |
 |:---|:-----|:-----|
-| bag 仓库 | `~/Lin_workspace/bags/`（VM） | raw（07-30 修复前 / 08-06 修复后 / IMU 测试）+ csv 全帧导出 + analysis 脚本（官方 rosbag2_py） |
+| bag 仓库 | `~/Lin_workspace/r2_integration/bags/`（VM） | raw（07-30 修复前 / 08-06 修复后 / IMU 测试）+ csv 全帧导出 + analysis 脚本（官方 rosbag2_py） |
 | 原始 bag | N97 `r2_integration/bags/` | 采集机保留 |
 | 文档权威源 | `~/Lin_workspace/r2_integration/doc/` | 规范见 standards.md |
 | Obsidian 镜像 | `~/Lin_note/.../R2_Integration/doc/` | 单向 cp + git 提交 |

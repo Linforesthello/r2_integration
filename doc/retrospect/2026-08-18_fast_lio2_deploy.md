@@ -131,7 +131,7 @@ ros2 launch fast_lio mapping.launch.py config_file:=velodyne.yaml rviz:=false
 
 ### 9.2 bag 重放链路验证（第 2~3 步）
 
-**数据源（现成，无需 N97 新录）**：`~/Lin_workspace/bags/raw/stage_0812_2111`（231s，08-12 yaw 验证
+**数据源（现成，无需 N97 新录）**：`~/Lin_workspace/r2_integration/bags/raw/stage_0812_2111`（231s，08-12 yaw 验证
 保守录制，含 90°/190° 转弯，话题 `/imu/data` + `/velodyne_points` 与 velodyne.yaml 完全匹配）。
 > 修正：08-18 早前"现有 bag 均未录 IMU"的说法错误——实测 7 个 bag 含 `/imu/data`，
 > 其中 stage_0812_2111 / map_run_0809_2133 同时含雷达（后者 146s 可作备份）。
@@ -140,7 +140,7 @@ ros2 launch fast_lio mapping.launch.py config_file:=velodyne.yaml rviz:=false
 # 终端 1（先起，重放场景）
 ros2 launch fast_lio mapping.launch.py config_file:=velodyne.yaml rviz:=false use_sim_time:=true
 # 终端 2
-ros2 bag play ~/Lin_workspace/bags/raw/stage_0812_2111 --clock
+ros2 bag play ~/Lin_workspace/r2_integration/bags/raw/stage_0812_2111 --clock
 # 终端 3
 ros2 topic hz /Odometry
 ```

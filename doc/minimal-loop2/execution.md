@@ -52,7 +52,7 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/nav2_avoid_$(date +%m%d_%
 
 - **恢复行为 ×1**：三面围堵（两箱+墙）堵死路径。预期: 不撞、原地旋转/backup → 移箱解除 → 自主恢复到达
 - **综合演练**：3 目标序列（含 90° 转角、窄缝）+ 中途 1 次横穿。预期: 连续 3 次无人工干预
-- **验收**：bag 拷 VM → `python3 ~/Lin_workspace/bags/analysis/analyze_nav2_goal_error.py <bag_dir>` → 判据核对
+- **验收**：bag 拷 VM → `python3 ~/Lin_workspace/r2_integration/bags/analysis/analyze_nav2_goal_error.py <bag_dir>` → 判据核对
 
 **收尾留档**（达标 5/5 后当天完成）：
 - retrospect 复盘（`retrospect/YYYY-MM-DD_minimal_loop_done.md`：数据/经验/遗留）
@@ -111,7 +111,7 @@ ros2 service call /map_save std_srvs/srv/Trigger    # 服务名按核实结果�
    - 录制留档只录小话题（⚠️ 不录 /Laser_map：22MB/帧 ≈ 95.7s/1.5G，QoS 手册 §五）:
      `/imu/data /velodyne_points /Odometry /path /tf`
    - ⚠️ 禁用 `pcd_save_en: true` 跑全程——interval -1 把所有帧存进一个 PCD，内存崩溃（手册 §三 + 社区同坑）；服务保存只导出最终一张图
-4. **出图**：PCD 拷 VM → `python3 ~/Lin_workspace/bags/analysis/pcd_to_map.py <scan.pcd> <map.pgm>`
+4. **出图**：PCD 拷 VM → `python3 ~/Lin_workspace/r2_integration/bags/analysis/pcd_to_map.py <scan.pcd> <map.pgm>`
    （z_min 按雷达 0.655m 抬升量上调 ~0.1 试）→ 2D 占用网格 → 按 2.1 判据 2/3 验收
 5. 备选（调参迭代用；A2 赶进度优先路径 A）：录 bag（`/imu/data /velodyne_points`）→
    `ros2 bag play --clock` + FAST-LIO 离线重建 → 同法保存
@@ -171,4 +171,4 @@ ros2 service call /map_save std_srvs/srv/Trigger    # 服务名按核实结果�
 
 - 总计划: [plan.md](plan.md) ｜ 第一个 loop: [w3-operation.md](../minimal-loop/w3-operation.md)（本卡 A1 的详细来源）
 - 部署手册: [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)（A2 依据）｜ 验证数据: [retrospect 08-24](../retrospect/2026-08-24_fastlio2_verification.md)
-- 到达误差脚本: `~/Lin_workspace/bags/analysis/analyze_nav2_goal_error.py`
+- 到达误差脚本: `~/Lin_workspace/r2_integration/bags/analysis/analyze_nav2_goal_error.py`

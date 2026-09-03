@@ -70,7 +70,7 @@ source /opt/ros/humble/setup.bash && colcon build
 
 ### 3. 地图部署（VM→N97 免密，AI 可代跑；也可用户自己跑）
 ```bash
-scp ~/Lin_workspace/bags/maps/d4/map_0815_clean.{pgm,yaml} lin@192.168.1.210:~/maps/
+scp ~/Lin_workspace/r2_integration/bags/maps/d4/map_0815_clean.{pgm,yaml} lin@192.168.1.210:~/maps/
 ```
 预期：N97 `~/maps/` 出现 map_0815_clean.pgm/yaml（yaml 中 image 字段指向同目录 map_0815_clean.pgm，无路径问题）
 

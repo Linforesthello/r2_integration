@@ -52,4 +52,4 @@ D2 离线建图（build_map.py → pcd_to_map.py）产出地图**严重重影**�
 
 - `bags/analysis/build_map.py`、`bags/analysis/pcd_to_map.py`（D2 脚本）
 - `doc/minimal-loop/w1-operation.md`（D2 流程定义）
-- bag 存档：`Lin_workspace/bags/raw/map_run_0809_2133`（VM 分析副本）
+- bag 存档：`Lin_workspace/r2_integration/bags/raw/map_run_0809_2133`（VM 分析副本）

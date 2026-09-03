@@ -88,4 +88,4 @@ map_server 加载 map_run_0811_1925 + rviz 回显。先后踩坑（已解决）�
 - 手册：[w1-operation.md D3b](../minimal-loop/w1-operation.md)（正式长录纪律）
 - 帧率根因：[2026-08-11_kiss_frame_rate_fix.md](2026-08-11_kiss_frame_rate_fix.md)（powersave→performance）
 - 重影留档：[2026-08-09_map_double_ghost.md](2026-08-09_map_double_ghost.md)
-- 脚本：[pcd_to_map.py](~/Lin_workspace/bags/analysis/pcd_to_map.py)（z_min 默认 0.3，2026-08-13 修正）
+- 脚本：[pcd_to_map.py](../../bags/analysis/pcd_to_map.py)（z_min 默认 0.3，2026-08-13 修正）
