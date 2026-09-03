@@ -236,6 +236,7 @@ r2_integration/
 │   ├── 03-current_state.md  全局：当前状态快照
 │   ├── 07-handover.md       全局：状态交接（新会话用）
 │   ├── pending-tasks.md     全局：近期待办汇总索引（2026-09-03 起，单条一句话 + 源文档入口，不承载状态）
+│   ├── doc-engineering.md   全局：文档工程规范（整理/重构/校验/双仓同步，2026-09-03 起）
 │   │
 │   ├── minimal-loop/        最小闭环 W1/W2 执行史（plan + w1/w2/w3-operation + Nav2 bringup + 审计）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan + execution/relog/costmap 执行卡）

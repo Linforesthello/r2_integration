@@ -4,7 +4,10 @@
 > 任务：minimal-loop2 A1（W3 避障验收）——问题①"costmap 远端不刷新（黑色障碍格只在眼前出现）"的独立实验
 > 目的：区分「costmap 没 mark」（配置/感知问题）vs「costmap 有 mark 但 MPPI 不管」（前瞻问题）
 > 状态：⚠️ 有重大进展但**尚未最终定论**（远距离测试待重做）
-> 关联：planning-control-roadmap.md §5.7ter（运动模式争议点）、三 bag 分析（1357/1401/1405，`~/Lin_workspace/bags/analysis/browse_avoid_bags.py`）
+> ✅ **2026-09-03 实车复录结案**：远距离判据完成（relog_0903_2104，静止+高箱 1m/2m/4m/4.5-5m，全话题三层同框）——
+> **远端 mark 正常 → costmap 侧排除，问题①结案**；另新发现「低物高度盲区」（低于雷达水平光面的物体与距离无关地不可见，细化本实验结论③）。
+> 详见 [retrospect/2026-09-03_costmap_far_refresh_closed.md](../retrospect/2026-09-03_costmap_far_refresh_closed.md)
+> 关联：planning-control-roadmap.md §5.7ter（运动模式争议点）、三 bag 分析（1357/1401/1405，`~/Lin_workspace/r2_integration/bags/analysis/browse_avoid_bags.py`）
 
 ---
 
@@ -175,6 +178,10 @@ scan:      /tmp/pub_simple_scan.py（极简 898 点，0°±2° 共 7 点有限�
 2. **远距离 mark 测试重做**（2/3/4/5m）——问题①的最终判据：
    - 远端 mark 正常 → costmap 侧排除，问题①归入「MPPI 前瞻/显示层」，与 ②③④ 同根因链
    - 远端不 mark → 深挖距离过滤（obstacle_max_range 是否真正生效、raytrace 交互）
+
+> ✅ **#2 已关闭（2026-09-03）**：实车 relog_0903_2104 完成远距离判据——1m/2m/4m/4.5-5m 黑格全正常（场地不足 6m，5m+ 仍可作用），
+> 走"远端 mark 正常"分支 → costmap 侧排除，问题①结案。详见
+> [retrospect/2026-09-03_costmap_far_refresh_closed.md](../retrospect/2026-09-03_costmap_far_refresh_closed.md)
 3. **voxel_grid 数据垃圾**：uint32 读异常（max=0x2000FFFF≈uint8 合并），确认消息 data 字段类型（Humble VoxelGrid.msg）——不影响 mark 结论，但影响 voxel 层状态观测
 4. **实车侧验证**（N97）：`ros2 lifecycle get /local_costmap/local_costmap` 确认激活状态 + `ros2 topic echo /local_costmap/costmap --field data`（或 rviz）实测远端正值。实车 local_costmap 与实验 1:1 一致（voxel_layer 版），无插件差异；global_costmap 的 obstacle_layer+static_layer 是另一层，不参与 MPPI 避让
 

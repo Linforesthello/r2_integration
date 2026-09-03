@@ -43,7 +43,7 @@ doc/ 顶层散落 23 个文件（部署手册、路线图、过时状态档混�
 - Obsidian `[[wikilinks]]` 按 basename 解析 → 不动
 
 **未移动文件的引用方** → 仅当解析目标不存在且 basename 命中移动登记表才重写（防过度改写，
-v1 曾把合法外部链 `../../../Lin_workspace/bags/README.md` 误改 → git checkout 恢复 + 收紧规则重跑）。
+v1 曾把合法外部链 `../../../Lin_workspace/r2_integration/bags/README.md` 误改 → git checkout 恢复 + 收紧规则重跑）。
 
 **漏网类型（校验器抓出）**：裸**目录**链接 `[retrospect/](retrospect/)` 随移动失效——
 正则脚本对文件目标重写，目录目标漏掉 1 处（project_status）。
@@ -83,8 +83,35 @@ v1 曾把合法外部链 `../../../Lin_workspace/bags/README.md` 误改 → git 
 | 待办汇总 | ~50 条去重 → 6 分组入口索引 |
 | 镜像 | diff -rq 0 差异 |
 
+## 八、二轮补充：未尽经验与试错形态（2026-09-03 会话评价后补记）
+
+> 本节收录首版未入档的经验，含**试错形态**（错了几版、错在哪），不只记终版——
+> 教训的形态比结论更有教学价值。规则化版本（可直接复用）见 [doc-engineering.md](../doc-engineering.md)。
+
+1. **脚本化改文档必须幂等**（README 树重建四版教训）：
+   v1 输出漏 `├──` 前缀（树形显示错）；v2 用**固定行号**在已改文件上二次 splice → 重复块；
+   v3 脚本变量名写错但在写盘前中止（文件未受损）；v4 改**内容 marker 定位 + 整段替换**一次成功。
+   → 固定行号拼接不可重跑；大文件局部重建先设计幂等操作。
+2. **校验器 = 验收闸门，人工规则必有盲区**：两次漏网均被脚本枚举兜住——
+   ①「doc 外目标不重写」规则误伤 repo 内真实路径（`../r2_bringup/…` 需加深为 `../../`，6 处）；
+   ② 裸目录链接 `[retrospect/](retrospect/)` 不在正则重写范围（1 处）。
+   → 但脚本报 41 条残留需人工分桶 → 「机器枚举 + 人工分类」闭环才完整。
+3. **双仓提交溯源链**：Obsidian 镜像 commit body 引用权威源 commit hash
+   （`3129e4b` ← `b09c4b0`/`a4fe878`/`f745606`），权威源批次 body 互引 →
+   `git log --grep` 可双向对账；镜像侧 rename 被 git 正确识别 = 双仓历史一致。
+4. **git mv 的 stage 行为**：rename 已入 index（状态 `R`），RM 的「内容修改」只需
+   `git add` 新目录即补 stage，不必全量重加。
+5. **断点续跑**：长会话上下文压缩后，凭「计划文件 + todo 状态 + 已验事实」无损接续，
+   零返工——关键操作留盘的价值（AI 协作通用经验）。
+6. **授权节奏正向样本**：三次授权（方案 → 执行 → commit+push → 镜像侧 commit+push）
+   边界恰好覆盖动作序列 → 全程零返工；与「决策边界三原则」互为印证。
+7. **一次性工具放大**：校验器从 `/tmp` 一次性脚本入库 `scripts/check_doc_links.py`
+   （参数化仓库路径，可复用）。
+
 ## 相关
 
-- 结构变更本身：README 文件树（当前状态，权威）｜[standards.md §2.1](../../standards.md)
-- 待办索引：[pending-tasks.md](../../pending-tasks.md)
-- 文档规范：[standards.md](../../standards.md)（§1.7 维护契约 / §1.12 只增不删 / §2.5 树放置）
+- 结构变更本身：README 文件树（当前状态，权威）｜[standards.md §2.1](../standards.md)
+- 待办索引：[pending-tasks.md](../pending-tasks.md)
+- 文档规范：[standards.md](../standards.md)（§1.7 维护契约 / §1.12 只增不删 / §2.5 树放置）
+- **规则化版本**：[doc-engineering.md](../doc-engineering.md)（文档工程规范，跨项目可复用）
+- **工具**：`scripts/check_doc_links.py`（链接完整性校验器，仓库路径参数化）
