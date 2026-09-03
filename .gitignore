@@ -8,7 +8,13 @@ install/
 log/
 # 测试数据
 *.bag
-# 录制数据目录（N97 实车实验数据，不入库）
-bags/
+# 录制数据目录：整目录忽略（N97 实车数据 + VM 分析副本，不入库），白名单入库轻量资产
+# （raw/maps 等大体积数据仍忽略；analysis/csv/README/png 随 git 走）
+bags/*
+!bags/README.md
+!bags/.gitignore
+!bags/analysis/
+!bags/csv/
+!bags/*.png
 # 原始数据留档（用户粘贴的命令输出/日志/录制记录，不入库）
 doc/raw_data/

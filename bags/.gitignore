@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+
+# bag 录制数据与地图产物（大文件，不入库，本地保留）
+*.bag
+*.db3
+*.ply
+*.pgm
+maps/

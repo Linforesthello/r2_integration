@@ -28,6 +28,7 @@ r2_integration/
 │   ├── 03-current_state.md  当前完成状态
 │   ├── 07-handover.md       状态交接（新会话用）
 │   ├── pending-tasks.md     近期待办汇总索引（每条一句话+源文档入口，09-03 建）
+│   ├── doc-engineering.md   文档工程规范（整理/重构/校验/双仓同步，跨项目通用，09-03 建）
 │   │
 │   ├── minimal-loop/        最小闭环执行史（plan + w1/w2/w3-operation.md + Nav2 bringup + 审计数据）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan.md + execution/relog/costmap 执行卡）
@@ -76,7 +77,9 @@ r2_integration/
 │   │   ├── 2026-07-31_teleop_keyboard_fix.md              键盘控制修复全记录（WASD 遥控）
 │   │   ├── 2026-07-31_workspace_check_fix.md              r2_integration 工作区检查与修复
 │   │   ├── vlp16_slam_exploration.md                      VLP-16 SLAM 方案探索
-│   │   └── 2026-09-03_costmap_far_refresh_closed.md       costmap 远距离刷新验证闭环（09-03）
+│   │   ├── 2026-09-03_costmap_far_refresh_closed.md       costmap 远距离刷新验证闭环（09-03）
+│   │   ├── 2026-09-03_doc_engineering.md                  文档工程整理复盘（09-03，规则化见 doc-engineering.md）
+│   │   └── 2026-09-04_lowobstacle_breakpoint.md           低物盲区断点定位：relog 三层精分析（09-04）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）
@@ -126,11 +129,20 @@ r2_integration/
 │   ├── doc/                           G354 专题文档（completion-report/debug-log/observation-methods/test-flow）
 │   └── scripts/                       测试脚本
 │
-└── scripts/                           ← 标定工具
+├── bags/                                ← 实验数据资产（N97 采集 + VM 分析副本，09-04 入仓）
+│   ├── README.md                       数据目录导航（bag 清单/maps 产物）
+│   ├── analysis/                       分析脚本 + 输出（入库；raw/maps 不入库，白名单见 .gitignore）
+│   ├── csv/                            底盘测试全帧分析导出（入库）
+│   ├── raw/                            bag 原始录制（不入库，本地保留）
+│   ├── maps/                           建图产物（不入库，本地保留）
+│   └── rviz_nav2_first_loop*.png       Nav2 首闭环截图（入库）
+│
+└── scripts/                           ← 标定/文档工具
     ├── r2_startup.sh                 CAN + 底盘 + IMU + EKF 一键启动
     ├── measure_r2_ticks.py           编码器 ticks/圈 测量
     ├── map_chassis.py                CAN ID → 物理位置映射
-    └── calibrate_direction.py        运动方向标定（8组测试）
+    ├── calibrate_direction.py        运动方向标定（8组测试）
+    └── check_doc_links.py            文档链接完整性校验器（doc 工程闸门，见 doc-engineering.md）
 ```
 
 ---

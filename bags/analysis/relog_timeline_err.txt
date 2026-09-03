@@ -1,0 +1,1 @@
+[INFO] [1788446104.833046564] [rosbag2_storage]: Opened database '/home/lin/Lin_workspace/bags/raw/relog_0903_2104/relog_0903_2104_0.db3' for READ_ONLY.
