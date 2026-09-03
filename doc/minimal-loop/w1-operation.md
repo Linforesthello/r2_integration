@@ -8,41 +8,15 @@
 
 ## D1：TF 树工程（先于建图，避免 W2 卡）
 
-### 1.1 启动全栈（顺序与 07-handover 一致）
+### 1.1 启动全栈（命令权威见 doc/startup.md）
+
+> 启动命令唯一权威 = [startup.md](../startup.md)（建图模式 = §一 前置 + §三 终端 1/2/3/4/5/6）；本文只留 W1 建图特有注记。
 
 ```bash
-# N97，每个终端 source 后启动
-export FASTRTPS_DEFAULT_PROFILES_FILE=~/Lin_workspace/r2_integration/r2_bringup/config/dds/fastdds_wellknown.xml
-source /opt/ros/humble/setup.bash && source ~/Lin_workspace/r2_integration/install/setup.bash
-
-# ⚠️ 前置: CPU 性能模式（每次开机必做；重启恢复 powersave 后 KISS 掉 3.6Hz 重影复现，见 retrospect 08-11）
-echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor   # 检查 → performance
-
-# 终端 0: CAN 总线
-python3 ~/Lin_workspace/command/can_command.py
-
-# 终端 1: 雷达（r2_sensors velodyne.launch.py 为三节点合一，device_ip 10.18.18.6）
-ros2 launch r2_sensors velodyne.launch.py
-
-# 终端 2: KISS-ICP（⚠️ 必须先 source kiss_icp_ws；visualize:=true 才发布点云话题）
-source ~/kiss_icp_ws/install/setup.bash
-ros2 launch kiss_icp odometry.launch.py \
-  topic:=/velodyne_points base_frame:=velodyne \
-  use_sim_time:=false visualize:=true
-# ⚠️ 建图前需实机确认: /kiss/frame 是否依赖 visualize（false 时无点云话题则累积脚本无数据）
-
-# 终端 3: 底盘（EKF 场景 publish_tf:=false）
-ros2 launch r2_bringup chassis.launch.py publish_tf:=false
-
-# 终端 4: IMU（启动后静止 3s 等校准，校准期不可动）
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
-
-# 终端 5: EKF（⚠️ 必须在 IMU 校准完成后启动，否则输出 NaN；重启 IMU 必须同时重启 EKF）
-ros2 launch r2_bringup ekf.launch.py
-
-# 终端 6: 键盘遥控（08-11 P3 setup.cfg 修复后 ros2 run 可直接启动，无需 python3 直启）
-ros2 run r2_bringup teleop_keyboard
+# 建图模式注意:
+#   - KISS 终端需 source ~/kiss_icp_ws（独立工作区），visualize:=true 才发布点云话题
+#   - ⚠️ 建图前需实机确认: /kiss/frame 是否依赖 visualize（false 时无点云话题则累积脚本无数据）
+#   - VM↔N97 跨机场景需手动 DDS export（见 ros2-ops.md §1），单机不设
 ```
 
 ### 1.2 生成当前 TF 树（现状盘点）

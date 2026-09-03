@@ -32,7 +32,7 @@
 **Day 1：启动 + 静态绕行 + 人横穿**
 
 ```bash
-# ① 前置0 + 全栈（07-handover §三）：performance → CAN → 雷达 → 底盘(publish_tf:=false)
+# ① 前置0 + 全栈（startup.md §一/§三 导航模式）：performance → CAN → 雷达 → 底盘(publish_tf:=false)
 #   → IMU(静止3s校准) → EKF → Nav2:
 ros2 launch r2_bringup nav2.launch.py \
   map:=/home/lin/maps/map_0815_clean.yaml \

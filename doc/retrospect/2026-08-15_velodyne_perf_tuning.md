@@ -2,7 +2,7 @@
 
 > 事件：/velodyne_points 帧率波动且严重不达标（CPU 高时 7Hz → 1Hz，目标 10Hz）
 > 结论：① 根因一 = 雷达供电电池电压不足（硬件）；② 软件侧 = N97 转换节点 CPU 容量，经调优后稳定
-> 关联：[07-handover.md 实测 hz 表](../07-handover.md) ｜ commit `a0fb3bb`
+> 关联：[startup.md §四 验证基线](../startup.md)（实测 hz 表）｜ commit `a0fb3bb`
 
 ---
 
@@ -57,5 +57,5 @@
 ## 五、相关
 
 - commit：`a0fb3bb R2|velodyne转换性能调优：organize_cloud关、max_range 40m、暂停laserscan`（同日 `f2e9a38` 抽包 r2_sensors，改动随包迁移）
-- 实测 hz 现状表：[07-handover.md §二 2.2](../07-handover.md)
+- 实测 hz 现状表：[startup.md §四 验证基线](../startup.md)
 - 上游源码：`ros-drivers/velodyne` tag `2.5.1`（VM `/tmp/velodyne-src-251/`）

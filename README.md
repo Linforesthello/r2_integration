@@ -27,6 +27,7 @@ r2_integration/
 │   ├── 02-progress.md       全局进度一览（各Phase完成度）
 │   ├── 03-current_state.md  当前完成状态
 │   ├── 07-handover.md       状态交接（新会话用）
+│   ├── startup.md           R2 启动手册（全栈启动命令唯一权威，09-04 从 07 §三 拆出）
 │   ├── pending-tasks.md     近期待办汇总索引（每条一句话+源文档入口，09-03 建）
 │   ├── doc-engineering.md   文档工程规范（整理/重构/校验/双仓同步，跨项目通用，09-03 建）
 │   │
@@ -45,7 +46,8 @@ r2_integration/
 │   │   ├── ekf-yaw-plan.md                        EKF yaw 融合预案（08-12 方案①已实施验证）
 │   │   └── 2026-08-04_ekf-verification-result.md  EKF 验证结果记录
 │   │
-│   ├── retrospect/  ← 事件记录（按日期排序）
+│   ├── retrospect/  ← 事件记录（按日期排序；索引见目录内 README）
+│   │   ├── README.md                      目录索引（结论速查，09-04 建，从 07 §五/§八 拆出）
 │   │   ├── 2026-08-24_n97_fan_control.md                  N97 风扇调速（ACPI 空壳死路→IT8613E force_id=0x8622 突破，sysfs pwm2 即刻调速可撤销）
 │   │   ├── 2026-08-23_doc_source_traceback.md             文档真实性回溯：roadmap 全篇来源规范化（1.11 落地案例 + 可复用检查清单）
 │   │   ├── 2026-08-18_fast_lio2_deploy.md                 FAST-LIO2 部署首记录（N97 编译坑：PATH 前置 /usr/bin）

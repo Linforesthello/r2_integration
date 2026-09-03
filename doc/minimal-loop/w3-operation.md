@@ -34,7 +34,7 @@
 
 ### 1.2 实车确认（操作）
 
-1. 全栈启动（07-handover §三，Nav2 用 `nav2_params_low.yaml`）
+1. 全栈启动（[startup.md](../startup.md) §三 导航模式，Nav2 用 `nav2_params_low.yaml`）
 2. 设初始位姿（w2-operation §4.3 纪律）→ 发一个近处 goal（3~5m）
 3. **costmap 实时刷新验证**：车旁站人，缓慢走近/走远，rviz 观察 local_costmap 膨胀圈
    随人体移动实时更新（08-15 已见现象，此处正式记录）
@@ -131,4 +131,4 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/nav2_avoid_$(date +%m%d_%
 
 - 计划: [plan.md](plan.md)（W3 + 验收标准）｜ W1: [w1-operation.md](w1-operation.md) ｜ W2: [w2-operation.md](w2-operation.md)
 - 排障根源: [retrospect 08-15](../retrospect/2026-08-15_nav2_bringup.md) ｜ [retrospect 08-17](../retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
-- 启动命令: [07-handover](../07-handover.md) §三
+- 启动命令: [startup.md](../startup.md) §三

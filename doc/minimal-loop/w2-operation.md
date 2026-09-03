@@ -65,7 +65,7 @@ map ←[AMCL]→ odom ←[EKF]→ base_link ←[静态]→ velodyne / imu_link
 ### 3.1 启动顺序（N97，分终端）
 
 见 [nav2-bringup.md](nav2-bringup.md) §二-4 表（CAN → 雷达 → 底盘 → IMU → EKF → Nav2），
-**KISS 不启动**；前置：`performance` governor（每次开机必做，见 07-handover §三）。
+**KISS 不启动**；前置：`performance` governor（每次开机必做，见 [startup.md §一](../startup.md)）。
 
 ### 3.2 操作要点（08-15 实车验证）
 
@@ -171,4 +171,4 @@ goal#  goal 时间              误差(m)  航向差(deg) 达标(<0.5m)
 - 计划: [plan.md](plan.md) ｜ W1: [w1-operation.md](w1-operation.md) ｜ W3: [w3-operation.md](w3-operation.md)
 - Nav2 bringup 操作记录: [nav2-bringup.md](nav2-bringup.md)
 - 排障根源: [retrospect 08-15](../retrospect/2026-08-15_nav2_bringup.md) ｜ [retrospect 08-17](../retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
-- 启动命令: [07-handover](../07-handover.md) §三
+- 启动命令: [startup.md](../startup.md) §三

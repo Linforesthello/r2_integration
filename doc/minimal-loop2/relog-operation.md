@@ -10,7 +10,7 @@
 
 ---
 
-## 0. 前置（07-handover §三顺序）
+## 0. 前置（[startup.md](../startup.md) §一/§三 顺序）
 
 ```bash
 # 0.1 CPU performance（每次开机必做）

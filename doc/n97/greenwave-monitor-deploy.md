@@ -1,7 +1,7 @@
 # Greenwave Monitor 部署手册（N97）
 
 > 日期：2026-08-25
-> 用途：R2 全栈话题自主化监测——多话题 hz + 预期频率管理 + Diagnostics 上报，替代手动 `ros2 topic hz` 逐条盯（2026-08-25 用户选定方案 B，背景见 [07-handover.md §六 待办](../07-handover.md)）
+> 用途：R2 全栈话题自主化监测——多话题 hz + 预期频率管理 + Diagnostics 上报，替代手动 `ros2 topic hz` 逐条盯（2026-08-25 用户选定方案 B，背景见 [pending-tasks.md §④](../pending-tasks.md)）
 > 执行机：N97（192.168.1.210）；关联：[relog-operation.md](../minimal-loop2/relog-operation.md)（重录操作卡，录制时用本监测盯盘）
 > 来源 = [官方仓库 README](https://github.com/NVIDIA-ISAAC-ROS/greenwave_monitor)（2026-08-25 WebSearch 核实）+ [Open Robotics Discourse 介绍帖](https://discourse.openrobotics.org/t/nvidias-greenwave-monitor-a-tool-for-high-performance-topic-monitoring-and-diagnostics/50477)；launch 参数名等细节标注「待 N97 以 clone 后 README 为准」
 
@@ -23,7 +23,7 @@ mkdir -p ~/greenwave_ws/src && cd ~/greenwave_ws/src
 git clone https://github.com/NVIDIA-ISAAC-ROS/greenwave_monitor.git
 
 # 2.2 编译（⚠️ 沿用 FAST-LIO 教训：PATH 前置 /usr/bin 绕过 ~/.local/bin/cmake 4.4 坑，
-#     见 07-handover §五 08-24；greenwave 是 C++ 包，同坑预防）
+#     见 fastlio2-n97-deploy.md §二（CMake 4.4 坑）；greenwave 是 C++ 包，同坑预防）
 source /opt/ros/humble/setup.bash
 PATH=/usr/bin:$PATH colcon build --packages-up-to greenwave_monitor
 # 预期：greenwave_monitor 与 greenwave_monitor_interfaces 两个包 build 成功，无报错
