@@ -5,7 +5,7 @@
 > 核心思想: **串行快速闭环**（2026-08-24 用户定稿）——不是「一个没做完就开另一个」（多线浅尝 = 设备收藏者反模式），而是「每一步脚步加快、做完整再走」；新架构/新方法/平替/技术升级（RL 方向部署）放在主线「基本做完」后逐个尝试
 > 来源: 外部评价画像第 11 条「执行偏差」教训 + 全局「先端到端，再优化」｜ 时间窗参照外部评价画像 12.5（08-26 后回归个人计划）
 
-> ⚠️ 2026-09-02 排期语义变更：全局排期由 [recruitment-learning-plan.md](../recruitment-learning-plan.md)
+> ⚠️ 2026-09-02 排期语义变更：全局排期由 [recruitment-learning-plan.md](../roadmaps/recruitment-learning-plan.md)
 > （求职与学习三阶段总纲）接管——09-10 由「全局硬截止」改为**阶段一内 R2 补数收手线**（A1 完整验收，
 > 判据未满即记录缺口收手）；A2（FAST-LIO2 TF 桥）后置三阶段总纲阶段二。本文件的 A1/A2 执行序列、
 > 执行卡与收尾纪律仍为执行细节的唯一来源（三阶段总纲 §4.1/§5.1 引用）。
@@ -74,13 +74,13 @@
 | [w3-operation.md](../minimal-loop/w3-operation.md) | D1~D7 七天计划压缩为 A1 两天最快路径（配置已就绪：costmap/footprint/inflation 均为已验证参数，直接复用） |
 | [01-plan.md §8.2 ②](../01-plan.md#82-当前状态--目标) | 感知升级从"评估中"→"已验证（08-24）+ 落地待办（本计划 A2） |
 | [03-current_state.md](../03-current_state.md) | 落后于 08-24 事实（SLAM 探索表仍写 FAST-LIO2 ❌ 编译失败）——**待修** |
-| [planning-control-roadmap.md §2.2](../planning-control-roadmap.md#22-r2-分阶段落点) | "FAST-LIO2 vs KISS 决策点"已到（08-24 数据齐：旋转 <2° / 平移 0.5%）——决策倾向替代，落地见 A2 |
+| [planning-control-roadmap.md §2.2](../roadmaps/planning-control-roadmap.md#22-r2-分阶段落点) | "FAST-LIO2 vs KISS 决策点"已到（08-24 数据齐：旋转 <2° / 平移 0.5%）——决策倾向替代，落地见 A2 |
 
 ---
 
 ## 六、相关文档
 
 - 第一个闭环: [minimal-loop/plan.md](../minimal-loop/plan.md) ｜ [w3-operation.md](../minimal-loop/w3-operation.md)
-- 部署与验证: [fastlio2-n97-deploy.md](../fastlio2-n97-deploy.md) ｜ [retrospect/2026-08-24_fastlio2_verification.md](../retrospect/2026-08-24_fastlio2_verification.md)
-- 路线: [planning-control-roadmap.md](../planning-control-roadmap.md) ｜ 总纲: [01-plan.md](../01-plan.md)
+- 部署与验证: [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md) ｜ [retrospect/2026-08-24_fastlio2_verification.md](../retrospect/2026-08-24_fastlio2_verification.md)
+- 路线: [planning-control-roadmap.md](../roadmaps/planning-control-roadmap.md) ｜ 总纲: [01-plan.md](../01-plan.md)
 - 个人计划: `Lin_note/.../gpt阶段性总结/个人成长计划_求职导向_2026Q3.md` ｜ 外部评价: `Lin_note/.../外部评价一体化✨.md`（12.5 时间窗建议）

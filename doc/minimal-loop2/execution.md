@@ -72,7 +72,7 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/nav2_avoid_$(date +%m%d_%
 
 ## A2：FAST-LIO2 落地（08-24 ~ 08-26，A1 之后，0.5~1 天）
 
-> 前置事实: 08-24 实车验证全项通过（旋转 <2° / 平移 0.5%）；部署手册 [fastlio2-n97-deploy.md](../fastlio2-n97-deploy.md) §五 TF 方案已定案
+> 前置事实: 08-24 实车验证全项通过（旋转 <2° / 平移 0.5%）；部署手册 [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md) §五 TF 方案已定案
 > 两个子任务: ②a TF 桥接入 R2 TF 树 ｜ ②b 建图源切换（FAST-LIO2 替代 KISS 重建图）
 
 ### 2.1 评价标准（判据核对表）
@@ -170,5 +170,5 @@ ros2 service call /map_save std_srvs/srv/Trigger    # 服务名按核实结果�
 ## 相关
 
 - 总计划: [plan.md](plan.md) ｜ 第一个 loop: [w3-operation.md](../minimal-loop/w3-operation.md)（本卡 A1 的详细来源）
-- 部署手册: [fastlio2-n97-deploy.md](../fastlio2-n97-deploy.md)（A2 依据）｜ 验证数据: [retrospect 08-24](../retrospect/2026-08-24_fastlio2_verification.md)
+- 部署手册: [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)（A2 依据）｜ 验证数据: [retrospect 08-24](../retrospect/2026-08-24_fastlio2_verification.md)
 - 到达误差脚本: `~/Lin_workspace/bags/analysis/analyze_nav2_goal_error.py`

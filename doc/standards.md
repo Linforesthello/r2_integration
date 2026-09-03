@@ -183,7 +183,7 @@ R2|G354轴映射与两处符号修正，传感器安装定义留档
 ### 1.11 调研/选型文档必须附"来源"小节（2026-08-23 用户要求）
 
 调研类文档（选型对比、方案决策、技术探索结论）的结论**必须有来源可回查**，
-防止"看着像结论、实际是 AI 编的"。参考范式：`planning-control-roadmap.md §5.9`。
+防止"看着像结论、实际是 AI 编的"。参考范式：[planning-control-roadmap.md §5.9](roadmaps/planning-control-roadmap.md)（2026-09-03 归入 `roadmaps/`）。
 
 | 要素 | 要求 | 示例 |
 |:---|:---|:---|
@@ -225,34 +225,28 @@ R2|G354轴映射与两处符号修正，传感器安装定义留档
 r2_integration/
 ├── README.md                ← 入口导航（唯一完整文件树）
 │
-├── doc/                     ← 所有文档
-│   ├── standards.md         ← 本文件（文档规范本身）
-│   ├── obsidian-tags.md     ← Obsidian 标签体系习惯
-│   ├── 01-plan.md           ← 全局：集成计划总纲
-│   ├── 02-deploy-checklist.md ← 全局：N97 部署清单（部署手册）
-│   ├── 02-progress.md       ← 全局：进度看板
-│   ├── 03-current_state.md  ← 全局：当前状态快照
-│   ├── 07-handover.md       ← 全局：状态交接（新会话用）
+├── doc/                     ← 文档（第一层次划分：顶层只放规范 + 阅读主线 + 待办索引，完整树见 README）
+│   ├── standards.md         本文件（文档规范本身）· 先看
+│   ├── obsidian-tags.md     Obsidian 标签体系习惯
+│   ├── ros2-ops.md          ROS/ROS2 操作规范
+│   ├── ros2-qos-dds.md      QoS/DDS 问题手册
+│   ├── obsidian-sync.md     Obsidian 镜像同步规范
+│   ├── 01-plan.md           全局：集成计划总纲
+│   ├── 02-progress.md       全局：进度看板
+│   ├── 03-current_state.md  全局：当前状态快照
+│   ├── 07-handover.md       全局：状态交接（新会话用）
+│   ├── pending-tasks.md     全局：近期待办汇总索引（2026-09-03 起，单条一句话 + 源文档入口，不承载状态）
 │   │
-│   ├── phase0/              ← Phase 0 专题
-│   │   ├── chassis_definition.md
-│   │   ├── completion_report.md
-│   │   └── debug_log.md
-│   │
-│   ├── phase1/              ← Phase 1 专题
-│   │   ├── g354-wiring.md   G354 接线/配置
-│   │   ├── ekf-config.md    (待建)
-│   │   └── test-report.md   (待建)
-│   │
-│   ├── phase2/              ← Phase 2 专题
-│   ├── phase3/              ← Phase 3 专题
-│   ├── phase4/              ← Phase 4 专题
-│   ├── phase5/              ← Phase 5 专题
-│   │
-│   └── retrospect/          ← 事件记录（日期前缀，按时间排序）
-│       ├── 2026-07-31_chassis_launch_fix.md
-│       ├── 2026-07-31_workspace_check_fix.md
-│       └── vlp16_slam_exploration.md
+│   ├── minimal-loop/        最小闭环 W1/W2 执行史（plan + w1/w2/w3-operation + Nav2 bringup + 审计）
+│   ├── minimal-loop2/       最小闭环 2·现行（plan + execution/relog/costmap 执行卡）
+│   ├── phase0/              ← Phase 0 专题（chassis_definition/sensor-mount/completion_report/debug_log）
+│   ├── phase1/              ← Phase 1 专题（g354-wiring/ekf-verification/ekf-yaw-plan/08-04 验证结果）
+│   ├── phase2/ … phase5/    后续 Phase 专题（按需新建，见 2.6）
+│   ├── retrospect/          ← 事件记录（YYYY-MM-DD_主题.md，按日期排序）
+│   ├── n97/                 ← N97 部署/运维手册（部署清单/VNC/风扇速查/FAST-LIO2/监测部署/patch）
+│   ├── roadmaps/            ← 路线/学习计划（规划控制/运动控制/求职总纲+评审/Nav2 知识树）
+│   ├── archive/             ← 过时状态档（已过时，状态以 07-handover.md 为准）
+│   └── raw_data/            ← 原始数据留档（raw_<话题>_<日期>，不入 git）
 │
 ├── r2_bringup/              ← ROS2 包（Phase 0 产物）
 ├── g354_driver/             ← ROS2 包（Phase 1 产物）*
@@ -270,10 +264,11 @@ r2_integration/
 |:-----|:------|:-------|
 | `README.md` | 入口导航、文件树、快速启动、阅读路线 | 项目负责人 |
 | `01-plan.md` | 五阶段路线图、技术方案、步骤详情 | 项目负责人 |
-| `02-deploy-checklist.md` | N97 部署手册（已完成部署，保留作操作指南） | 项目负责人 |
+| `n97/02-deploy-checklist.md` | N97 部署手册（已完成部署，保留作操作指南） | 项目负责人 |
 | `02-progress.md` | 各 Phase 完成度百分比、依赖关系图、风险跟踪 | 项目负责人 |
 | `03-current_state.md` | 当前完成状态细节（最近完成 Phase 的详细记录） | 当前 Phase 负责人 |
 | `07-handover.md` | 新会话/新成员接手时阅读的上下文总结 | 最近修改者 |
+| `pending-tasks.md` | 近期待办汇总索引（单条一句话 + 源文档入口；状态只在源文档更新） | 项目负责人 |
 
 **更新触发条件**：
 

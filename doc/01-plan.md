@@ -325,9 +325,9 @@ Phase 0: 底盘 CAN 控制 ──────────────── 前�
 ### 4.5 规划控制与视觉集成路线（08-18 调研定稿）
 
 后续 Phase 的规划控制选型与视觉集成时机见
-[planning-control-roadmap.md](planning-control-roadmap.md)（离线先验地图 vs 实时建图导航两大阵营
+[planning-control-roadmap.md](roadmaps/planning-control-roadmap.md)（离线先验地图 vs 实时建图导航两大阵营
 + 视觉-雷达标定工具线 + 各 Phase 落点）；FAST-LIO2 部署细节见
-[fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)。
+[fastlio2-n97-deploy.md](n97/fastlio2-n97-deploy.md)。
 
 ---
 
@@ -623,7 +623,7 @@ ros2 launch r2_bringup ekf.launch.py
 
 **这是整个系统的核心出活点**。VLP-16 提供 360° 三维点云，KISS-ICP（LiDAR-only ICP 里程计）实车已跑通，输出 odom 与注册点云，为 Phase 3 导航提供定位与建图基础。
 
-> **历史注记**：曾尝试 FAST-LIO2/MID70 方案，当时 FAST-LIO2 的 ROS2 分支硬依赖 Livox 消息类型与回调、对 VLP-16 需近乎重写而编译失败，故先走 VLP-16 + KISS-ICP；08-18 起 FAST-LIO2 已在 VLP-16 平台全链路验证通过（见 [fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)），MID-70 纳入传感器选型 A/B（见 [planning-control-roadmap.md](planning-control-roadmap.md) §三）；完整探索记录见 `retrospect/vlp16_slam_exploration.md`。
+> **历史注记**：曾尝试 FAST-LIO2/MID70 方案，当时 FAST-LIO2 的 ROS2 分支硬依赖 Livox 消息类型与回调、对 VLP-16 需近乎重写而编译失败，故先走 VLP-16 + KISS-ICP；08-18 起 FAST-LIO2 已在 VLP-16 平台全链路验证通过（见 [fastlio2-n97-deploy.md](n97/fastlio2-n97-deploy.md)），MID-70 纳入传感器选型 A/B（见 [planning-control-roadmap.md](roadmaps/planning-control-roadmap.md) §三）；完整探索记录见 `retrospect/vlp16_slam_exploration.md`。
 
 ### 7.2 当前状态 → 目标
 
@@ -877,7 +877,7 @@ local_costmap:
 | D435 + Jetson 视觉 | Phase 4 规划中 | 视觉引导导航（detection → TF → goal） |
 | 气动 3_Diacifa_t1 | Phase 5 规划（CAN 0x141/0x341） | 任务执行机构 |
 | 舵机机械臂 3_SteeringArm_t1 | 2.1 提及（R2 可选） | 抓取/操作 |
-| MID-70 | 闲置、**计划内**（FAST-LIO 原生适配，传感器选型 A/B 候选，见 [planning-control-roadmap.md](planning-control-roadmap.md) §三） | FAST-LIO2 实车阶段 A/B 定夺（a 换装 / b 双雷达 / c VLP16+D435） |
+| MID-70 | 闲置、**计划内**（FAST-LIO 原生适配，传感器选型 A/B 候选，见 [planning-control-roadmap.md](roadmaps/planning-control-roadmap.md) §三） | FAST-LIO2 实车阶段 A/B 定夺（a 换装 / b 双雷达 / c VLP16+D435） |
 | 超声波/TOF 近距补盲 | STM32 侧有 VL53L0 等外设库 | 补 min_range 0.5m 内盲区 |
 | RTK/室外定位 | 未评估 | 室外比赛场景（待评估） |
 
@@ -890,11 +890,11 @@ local_costmap:
 | Smac 2D vs NavFn | 全向轮全局规划对比 | 路径质量/规划成功率 |
 | BehaviorTree.CPP | Phase 5 任务编排正式化 | 状态机 → 行为树迁移 |
 | ros2_control | plan.md 决策表"正式化"项 | 底盘接口正式化 |
-| MBD 状态机（MATLAB/Simulink Stateflow） | 上层车体控制正规化（见 [roadmap §5.7bis](planning-control-roadmap.md#57bis-上层车体控制mbd-状态机--车体部署2026-08-23-用户规划方向)） | 建模 → 仿真验证 → 部署车体 |
+| MBD 状态机（MATLAB/Simulink Stateflow） | 上层车体控制正规化（见 [roadmap §5.7bis](roadmaps/planning-control-roadmap.md#57bis-上层车体控制mbd-状态机--车体部署2026-08-23-用户规划方向)） | 建模 → 仿真验证 → 部署车体 |
 | voxel_layer 3D costmap | 立体感知（低悬障碍） | 悬空障碍测试 |
-| RL 局部避障/倒车入库（Isaac Lab/Gym、UniLab 训练） | 规划层 RL 化（方向确认、实施未定，见 [roadmap §六](planning-control-roadmap.md#六rl-增强方向规划控制的-rl化2026-08-23-用户规划)） | 仿真训练 → 与 MPPI 实车对比（倒车入库/窄位泊车） |
+| RL 局部避障/倒车入库（Isaac Lab/Gym、UniLab 训练） | 规划层 RL 化（方向确认、实施未定，见 [roadmap §六](roadmaps/planning-control-roadmap.md#六rl-增强方向规划控制的-rl化2026-08-23-用户规划)） | 仿真训练 → 与 MPPI 实车对比（倒车入库/窄位泊车） |
 | 足式越障/过地形（Isaac Lab/Gym） | 四足 RL 扩展（地形适应） | 复杂地形训练 → ONNX 部署验证 |
-| RL 多传感器融合观测（D435+IMU+里程计+LiDAR → Isaac Lab 训练） | RL 局部避障观测设计（搜索核实可行，见 [roadmap §六 6.5](planning-control-roadmap.md#65-多传感器融合-rl-观测d435--imu--里程计--lidar-融合导入训练)） | 数字孪生 → 混合观测训练（skrl/rl-games）→ Nav2 插件集成 |
+| RL 多传感器融合观测（D435+IMU+里程计+LiDAR → Isaac Lab 训练） | RL 局部避障观测设计（搜索核实可行，见 [roadmap §六 6.5](roadmaps/planning-control-roadmap.md#65-多传感器融合-rl-观测d435--imu--里程计--lidar-融合导入训练)） | 数字孪生 → 混合观测训练（skrl/rl-games）→ Nav2 插件集成 |
 
 #### 可做验证
 

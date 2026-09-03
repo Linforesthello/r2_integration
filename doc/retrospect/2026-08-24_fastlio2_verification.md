@@ -1,7 +1,7 @@
 # 2026-08-24 FAST-LIO2 实车验证数据留档（旋转 + 平移）
 
 > 事件: N97 实车完成 FAST-LIO2 部署验证全部验收项（旋转 08-24 上午 + 直线平移 08-24 下午）
-> 关联: [fastlio2-n97-deploy.md](../fastlio2-n97-deploy.md)（部署手册，验收表已同步本节结论）
+> 关联: [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)（部署手册，验收表已同步本节结论）
 > 前提: 场地地面不平（车真爬坡/过坎）——量测精度受限 ±1% 级；Z 变化按真实地形响应处理
 
 ---
@@ -97,12 +97,12 @@ position: (1.7000, 0.1101, 0.0699)   orientation: z=0.0391  w=0.9992
 ## 五、遗留项
 
 - [ ] 平整场地（大厅/停车场）高精度复测——可选，当前场地不平限制量测精度 ±1% 级
-- [ ] TF 桥集成（验证期不接，方案已定，见 [fastlio2-n97-deploy.md](../fastlio2-n97-deploy.md) §五）
+- [ ] TF 桥集成（验证期不接，方案已定，见 [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md) §五）
 
 ---
 
 ## 相关
 
-- 部署手册: [fastlio2-n97-deploy.md](../fastlio2-n97-deploy.md)（CMake 4.4 坑/外参/验收表）
+- 部署手册: [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)（CMake 4.4 坑/外参/验收表）
 - KISS 漂移基线: [2026-08-15_kiss_drift_170058.md](2026-08-15_kiss_drift_170058.md)
 - EKF z 漂移修复: [2026-08-09_ekf_z_drift_fix.md](2026-08-09_ekf_z_drift_fix.md)

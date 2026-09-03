@@ -166,6 +166,6 @@ map ←[桥: 临时KISS映射 / 正式:AMCL]→ odom ←[EKF]→ base_link ←[�
 ## 九、相关文档
 
 - 长期路线: [01-plan.md](../01-plan.md)（第八章 Phase 3 + 8.4 候选池）
-- 进度: [02-progress.md](../02-progress.md) ｜ 现状: [project_status.md](../project_status.md)
+- 进度: [02-progress.md](../02-progress.md) ｜ 现状: [project_status.md](../archive/project_status.md)
 - 个人成长: `Lin_note/.../gpt阶段性总结/个人成长计划_求职导向_2026Q3.md`
 - 原则来源: 全局 CLAUDE.md「项目推进原则：先端到端，再优化」

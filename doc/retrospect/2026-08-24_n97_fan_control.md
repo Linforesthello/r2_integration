@@ -4,7 +4,7 @@
 > 环境：N97 迷你主机（Intel N97 / AMI BIOS 5.27 白牌机，Ubuntu 22.04 + 内核 6.8.0-136-generic）
 > 结论：**N97 风扇挂在 ITE IT8613E SuperIO 芯片的 fan2 通道**，`it87` 驱动加 `force_id=0x8622` 可接管，
 > 通过 sysfs `pwm2` 即刻调速（0-255），恢复自动/重启均可撤销。
-> 原始命令记录：本会话所有在 N97 上敲的命令与输出，见 [n97info.md](../n97info.md)。
+> 原始命令记录：本会话所有在 N97 上敲的命令与输出，见 [n97info.md](../n97/n97info.md)。
 
 ---
 
@@ -213,5 +213,5 @@ cat /sys/class/hwmon/hwmon4/pwm2_enable              # 模式（1=手动 2=自�
 
 ## 相关文件
 
-- 原始命令/输出记录（用户持续维护）：[n97info.md](../n97info.md)
+- 原始命令/输出记录（用户持续维护）：[n97info.md](../n97/n97info.md)
 - 本文档为本次排障的单一事实来源；本机状态以 `sensors` 与 `/sys/class/hwmon/hwmon4/` 实测为准

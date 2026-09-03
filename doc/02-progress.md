@@ -56,7 +56,7 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 
 ### Phase 2：VLP-16 + KISS-ICP SLAM ✅ 已完成
 
-> 注：现役 VLP-16 + KISS-ICP。FAST-LIO2 曾因 ROS2 分支硬依赖 Livox 编译失败而搁置（探索记录见 [vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md)），08-18 起已在 VLP-16 全链路验证通过（感知升级候选）；MID-70 闲置、**计划内**（传感器选型 A/B，见 [planning-control-roadmap.md](planning-control-roadmap.md) §三）
+> 注：现役 VLP-16 + KISS-ICP。FAST-LIO2 曾因 ROS2 分支硬依赖 Livox 编译失败而搁置（探索记录见 [vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md)），08-18 起已在 VLP-16 全链路验证通过（感知升级候选）；MID-70 闲置、**计划内**（传感器选型 A/B，见 [planning-control-roadmap.md](roadmaps/planning-control-roadmap.md) §三）
 
 | 模块 | 状态 | 备注 |
 |:-----|:----:|:------|

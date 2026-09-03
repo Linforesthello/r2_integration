@@ -1,7 +1,7 @@
 # VLP-16 交换机接入方案（2026-08-02）
 
 > 本次方案：雷达经交换机接到 Windows 宿主机，再桥接进 VMware 虚拟机，取代之前的 10.10.3.x 直连方案。
-> 注：当前定型拓扑（雷达经交换机直转 N97 enp1s0 10.18.18.20）见 [project_status.md §四](../project_status.md)，本文档为方案演进过程记录。
+> 注：当前定型拓扑（雷达经交换机直转 N97 enp1s0 10.18.18.20）见 [project_status.md §四](../archive/project_status.md)，本文档为方案演进过程记录。
 
 ## 链路拓扑
 
@@ -58,4 +58,4 @@ sudo tcpdump -i ens37 udp port 2368 -n -c 10   # 确认链路通
 ## 相关文档
 
 - [vlp16_slam_exploration.md](vlp16_slam_exploration.md) — SLAM 方案对比（KISS-ICP 可用）
-- [project_status.md §四](../project_status.md) — 现役网络拓扑
+- [project_status.md §四](../archive/project_status.md) — 现役网络拓扑

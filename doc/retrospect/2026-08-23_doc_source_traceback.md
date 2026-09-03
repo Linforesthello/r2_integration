@@ -1,7 +1,7 @@
 # 2026-08-23 文档真实性回溯：roadmap 全篇来源规范化
 
 > 事件：按 [standards §1.11](../standards.md)（2026-08-23 新增）对
-> [planning-control-roadmap.md](../planning-control-roadmap.md) 全篇做来源真实性回溯
+> [planning-control-roadmap.md](../roadmaps/planning-control-roadmap.md) 全篇做来源真实性回溯
 > 触发：用户要求"对 roadmap 全篇进行搜索，并按照最新格式要求进行规范化整理"；
 >       并确认保留本次回溯过程为独立文档，作为**后续重申手段**
 > 状态：完成（遗留项见 §五）
@@ -77,7 +77,7 @@ grep -nE "结论|推荐|首选|落点|优势|坑" <doc>.md
 
 ## 六、二次执行：motion-control-roadmap 三大方向扩展（同日）
 
-按 §四 清单对 [motion-control-roadmap.md](../motion-control-roadmap.md) 做第二轮扩展执行
+按 §四 清单对 [motion-control-roadmap.md](../roadmaps/motion-control-roadmap.md) 做第二轮扩展执行
 （用户要求打开运控方向：四足/机械臂/全车协调 + LeRobot 等开源生态）：
 
 1. **执行范围**：新增 §二 三大方向地图、§三 四足方向、§五 全车协调、§4.4 开源数据生态；
@@ -98,5 +98,5 @@ grep -nE "结论|推荐|首选|落点|优势|坑" <doc>.md
 ## 相关
 
 - [standards.md §1.11](../standards.md)（格式规范来源）
-- [planning-control-roadmap.md](../planning-control-roadmap.md)（本次回溯对象）
+- [planning-control-roadmap.md](../roadmaps/planning-control-roadmap.md)（本次回溯对象）
 - [ros2-qos-dds.md](../ros2-qos-dds.md)（同类"来源 + 相关"结构范例）
