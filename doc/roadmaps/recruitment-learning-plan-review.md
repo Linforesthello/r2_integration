@@ -50,7 +50,7 @@
 
 | 实际情形 | 影响 | 动作 |
 |:---|:---|:---|
-| 重录/部分 Day2 已跑（N97 有 bag 未拷） | A1 只需补缺项，阶段一实车窗口缩短 | 用户拷 bag → 按 [execution.md](minimal-loop2/execution.md) 判据核对缺口 → 改 §二/§四 |
+| 重录/部分 Day2 已跑（N97 有 bag 未拷） | A1 只需补缺项，阶段一实车窗口缩短 | 用户拷 bag → 按 [execution.md](../minimal-loop2/execution.md) 判据核对缺口 → 改 §二/§四 |
 | 判据实际已满（仅未复盘） | A1 直接关闭，A2 提前回阶段一可选 | 按 execution.md 收尾流程补复盘留档即可 |
 
 ### 3.4 待用户确认
@@ -64,13 +64,13 @@
 
 | # | 问题 | 当时定下的解决方向（留档处） | 执行状态 |
 |:--|:---|:---|:---|
-| ① | costmap 远端不刷新（黑色格只在眼前） | VM 独立实验收尾：查 `/tmp/pub_dist.log`（RCLError publisher's context is invalid）→ 修 pub_simple_scan 退出 1 → 重跑远距离 2/3/4/5m mark 测试定论；实车侧：全话题重录卡 [relog-operation.md](minimal-loop2/relog-operation.md)（2/4/6m 三段式 + 三层断点表） | 未执行 |
+| ① | costmap 远端不刷新（黑色格只在眼前） | VM 独立实验收尾：查 `/tmp/pub_dist.log`（RCLError publisher's context is invalid）→ 修 pub_simple_scan 退出 1 → 重跑远距离 2/3/4/5m mark 测试定论；实车侧：全话题重录卡 [relog-operation.md](../minimal-loop2/relog-operation.md)（2/4/6m 三段式 + 三层断点表） | 未执行 |
 | ② | 避让不及时（MPPI 决策晚） | 根因定论 = MPPI 空间前瞻 ≈0.38m（1.92s×0.2m/s）+ footprint 前缘 0.42m → critical 0.5~0.8m 触发，感知无责；修改方向 = 运动模式方案① 调 critic 权重（[planning-control-roadmap.md §5.7ter](planning-control-roadmap.md)，本地 M 未提交） | 未执行 |
 | ③ | 低矮障碍扫不到 | 根因定论 = VLP-16 物理几何盲区（雷达高 0.655m + −15° 下环落地 2.44m + min_range 0.5），**无参数可改**；原计划 bag 内专门验证一次（未做） | 无修改计划 |
 | ④ | footprint 边缘碰撞 | 根因实锤 = 0.08m 间隙（1401 倒车贴后方 0.5m 障，footprint 后缘 0.42m）；urdf 0.8×0.6 vs footprint 0.84×0.66 覆盖已核对无问题 → 修改方向依附 ②（运动模式修正后少倒车贴障绕行） | 未执行 |
-| 附 | 用户 08-25 19:01 追加两问 | ① 车体健康检查清单（参数核对 + hz 基线表，会话内已给 N97 执行卡）；② 自主监测程序 —— **09-02 用户补充修订：未自写 r2_monitor，实际选定方案 B greenwave_monitor，已部署并打开操作过**（**09-02 用户确证：操作日期 = 2026-08-25 晚间**，同一会话线程内 19:31~20:52 完成选型/部署/demo/机制验证，部署手册 [greenwave-monitor-deploy.md](greenwave-monitor-deploy.md) 08-25 20:52 落盘收尾） | 方案 B ✅ 已部署操作；自写 A 未做 |
+| 附 | 用户 08-25 19:01 追加两问 | ① 车体健康检查清单（参数核对 + hz 基线表，会话内已给 N97 执行卡）；② 自主监测程序 —— **09-02 用户补充修订：未自写 r2_monitor，实际选定方案 B greenwave_monitor，已部署并打开操作过**（**09-02 用户确证：操作日期 = 2026-08-25 晚间**，同一会话线程内 19:31~20:52 完成选型/部署/demo/机制验证，部署手册 [greenwave-monitor-deploy.md](../n97/greenwave-monitor-deploy.md) 08-25 20:52 落盘收尾） | 方案 B ✅ 已部署操作；自写 A 未做 |
 
-> 来源：会话记录 `175b95ff…`（08-25 全时段）+ [costmap_experiment.md](minimal-loop2/costmap_experiment.md) §五 + [relog-operation.md](minimal-loop2/relog-operation.md) + [planning-control-roadmap.md §5.7ter](planning-control-roadmap.md)（2026-09-02 核实）。
+> 来源：会话记录 `175b95ff…`（08-25 全时段）+ [costmap_experiment.md](../minimal-loop2/costmap_experiment.md) §五 + [relog-operation.md](../minimal-loop2/relog-operation.md) + [planning-control-roadmap.md §5.7ter](planning-control-roadmap.md)（2026-09-02 核实）。
 > 含义：A1 验收前没有「待执行的修改」存量——阶段一实车窗口从「重录 → 判据核对」开始，方案① 是否加跑是阶段一的唯一修改决策（判断 2）。
 
 ---
@@ -135,10 +135,10 @@
 | # | 风险 | 说明 | 缓解/建议 |
 |:--|:---|:---|:---|
 | W1 | **阶段二负荷估算缺失** | 5 个月（10→02）装：双线各一深交付 + LocoWiki 两轮 + 题库 + 秋招笔试残留——未做工作量估算，若双线都选开拓型大概率超载 | 交付候选保留"收尾型优先"排序；里程碑卡点（§5.4）超时即砍开拓项 |
-| W2 | **A1 验收前置条件未列** | 重录需 N97 现场；「与 08-25 同参数」是假设——08-25 后参数/固件是否有改动未核对 | 执行前先做 [execution.md](minimal-loop2/execution.md) 1.2 参数盘点核对（卡已列 ✅，落实在实车排期时） |
+| W2 | **A1 验收前置条件未列** | 重录需 N97 现场；「与 08-25 同参数」是假设——08-25 后参数/固件是否有改动未核对 | 执行前先做 [execution.md](../minimal-loop2/execution.md) 1.2 参数盘点核对（卡已列 ✅，落实在实车排期时） |
 | W3 | **简历 v2 素材缺口未清单化** | 信息池（08-23）未并入 08-24 LIO 验证 / 08-25 避障 bag / RL 图——总纲 §4.2 只说"并入"，未列素材来源清单 | 建议把素材来源（retrospect 08-24 + nav2_avoid_0825 bag + Go2/G1 曲线文件）列成清单逐项核对 |
 | W4 | **阶段一缺结束验收清单** | 只有"09-30 窗口"，没有"阶段一结束时必须有什么"的核对表（投了几家/简历 v2 完成度/深挖稿篇数） | 建议补一张阶段一 exit 清单（可并入 §四 或 execution 式卡） |
-| W5 | 判据双处引用一致性 | 总纲 §四 引用 [execution.md](minimal-loop2/execution.md) A1 判据 | 处理正确 ✅（已声明 execution.md 为唯一来源，总纲不复制判据） |
+| W5 | 判据双处引用一致性 | 总纲 §四 引用 [execution.md](../minimal-loop2/execution.md) A1 判据 | 处理正确 ✅（已声明 execution.md 为唯一来源，总纲不复制判据） |
 
 > W1~W4 是评审发现，**不是事实错误**——是否处置由用户定；处置方式回写总纲或本文件 §七。
 > **09-02 用户定**：W1~W4 处置**延后**——判断 1~5 决策文档更新完成后，再开始分析总纲自身风险。

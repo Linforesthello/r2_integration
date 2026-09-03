@@ -1,8 +1,8 @@
 # Nav2 知识树（R2 实战版）
 
 > 围绕 Nav2 全量知识点树状展开，逐层遍历到叶子；参数均来自 R2 实机配置
-> （[nav2_params.yaml](../r2_bringup/config/nav2_params.yaml)、[nav2.launch.py](../r2_bringup/launch/nav2.launch.py)），
-> 实机现象来自 [retrospect/2026-08-15_nav2_bringup.md](retrospect/2026-08-15_nav2_bringup.md)。
+> （[nav2_params.yaml](../../r2_bringup/config/nav2_params.yaml)、[nav2.launch.py](../../r2_bringup/launch/nav2.launch.py)），
+> 实机现象来自 [retrospect/2026-08-15_nav2_bringup.md](../retrospect/2026-08-15_nav2_bringup.md)。
 > 阅读顺序：先看 §0 全景树，再按路径深入。
 
 ---
@@ -419,9 +419,9 @@ Nav2 知识树
 
 | 内容 | 位置 |
 |:---|:---|
-| Nav2 参数（全速/降额） | [nav2_params.yaml](../r2_bringup/config/nav2_params.yaml)、[nav2_params_low.yaml](../r2_bringup/config/nav2_params_low.yaml) |
-| Nav2 启动文件 | [nav2.launch.py](../r2_bringup/launch/nav2.launch.py) |
-| RViz 配置 | [nav2.rviz](../r2_bringup/config/nav2.rviz) |
-| 首闭环留档 | [retrospect/2026-08-15_nav2_bringup.md](retrospect/2026-08-15_nav2_bringup.md) |
-| 建图链路 | [retrospect/2026-08-13_layer_map_3d2d.md](retrospect/2026-08-13_layer_map_3d2d.md) |
-| 启动手册 | [minimal-loop/w1-operation.md](minimal-loop/w1-operation.md) |
+| Nav2 参数（全速/降额） | [nav2_params.yaml](../../r2_bringup/config/nav2_params.yaml)、[nav2_params_low.yaml](../../r2_bringup/config/nav2_params_low.yaml) |
+| Nav2 启动文件 | [nav2.launch.py](../../r2_bringup/launch/nav2.launch.py) |
+| RViz 配置 | [nav2.rviz](../../r2_bringup/config/nav2.rviz) |
+| 首闭环留档 | [retrospect/2026-08-15_nav2_bringup.md](../retrospect/2026-08-15_nav2_bringup.md) |
+| 建图链路 | [retrospect/2026-08-13_layer_map_3d2d.md](../retrospect/2026-08-13_layer_map_3d2d.md) |
+| 启动手册 | [minimal-loop/w1-operation.md](../minimal-loop/w1-operation.md) |

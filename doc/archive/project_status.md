@@ -1,5 +1,7 @@
 # R2 全项目现状总结
 
+> ⚠️ **已过时（归档 2026-09-03）**：状态以 [07-handover.md](../07-handover.md) 为准，进度看板见 [02-progress.md](../02-progress.md)。本文件为 08-06 时代的历史快照，仅作回溯保留。
+
 > 生成日期: 2026-08-06（08-11 更新：D2 重影消除；08-12 更新：yaw 方案①实施验证通过）
 > 基线: r2_integration `main` = 5c46c58
 > 内容: 全项目现状快照（进度/架构/子系统/环境/待办/下一步）
@@ -9,7 +11,7 @@
 ## 一、项目概况
 
 R2 全向轮底盘从"串口键盘遥控"升级为"ROS2 自主导航 + 感知 + AI"的完整机器人系统。
-五阶段路线图（见 [01-plan.md](01-plan.md)）。
+五阶段路线图（见 [01-plan.md](../01-plan.md)）。
 
 | Phase | 内容 | 进度 | 状态 |
 |:------|:-----|:----:|:----:|
@@ -56,7 +58,7 @@ N97 (机器人电脑):
 - 运动学：正解/逆解已验证；90° 坐标变换实测校准
 - **08-06 修复**：omega 单位多除轮半径（放大 13.2×）+ 非全向积分模型
   - 实车验证（bag 对比）：yaw 偏差 179°→4-14°，方形闭环 1.8m→0.27m（KISS 交叉验证一致）
-  - 详见 [chassis_ekf_debug](retrospect/2026-08-05_chassis_ekf_debug.md)
+  - 详见 [chassis_ekf_debug](../retrospect/2026-08-05_chassis_ekf_debug.md)
 - 安全机制：0.5s 无指令自动停、限幅、堵转检测
 
 ### 3.2 IMU / EKF（Phase 1，85%）
@@ -66,16 +68,16 @@ N97 (机器人电脑):
 - **08-05 修复**：EKF `process_noise_covariance` 必须用**完整 225 值矩阵**
   （robot_localization 3.5.4 的 15 值对角格式加载 bug → 启动即 NaN），z/vz=1e-6 防漂
 - 验证：EKF z 漂移 85m → 亚米级；**遗留：slip 场景剧烈加减速 z 漂 +2.5m**（08-12 复测：转弯/直行全程 z 恒 0，仅剧烈加减速动作未严格复测）
-- **08-12 yaw 方案①**：odom0_config yaw=false→true（轮速开放 yaw），起点偏置 6~10°→0.00°、运动峰值 14°→0.07°（含 90°/190° 转弯段），见 [ekf-yaw-plan.md](phase1/ekf-yaw-plan.md)
-- 详见 [imu_covariance_ekf_nan](retrospect/2026-08-05_imu_covariance_ekf_nan.md)
+- **08-12 yaw 方案①**：odom0_config yaw=false→true（轮速开放 yaw），起点偏置 6~10°→0.00°、运动峰值 14°→0.07°（含 90°/190° 转弯段），见 [ekf-yaw-plan.md](../phase1/ekf-yaw-plan.md)
+- 详见 [imu_covariance_ekf_nan](../retrospect/2026-08-05_imu_covariance_ekf_nan.md)
 
 ### 3.3 雷达 / SLAM（Phase 2）
 
 - VLP-16 驱动 ✅，KISS-ICP 建图/里程计 ✅
-- slam_toolbox 已否决（不适合 VLP-16，见 [vlp16_slam_exploration](retrospect/vlp16_slam_exploration.md)）
+- slam_toolbox 已否决（不适合 VLP-16，见 [vlp16_slam_exploration](../retrospect/vlp16_slam_exploration.md)）
 - **缺口**：Phase 3 建图方案落地中——D2 离线流程（KISS PCD 累积 → 2D 占用网格）已跑通，
   重影已消除（08-11：KISS 帧率 3.6Hz→9.5Hz，根因 N97 CPU powersave 低频，切 performance 修复），
-  地图结构清晰；详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](retrospect/2026-08-11_kiss_frame_rate_fix.md)；
+  地图结构清晰；详见 [retrospect/2026-08-11_kiss_frame_rate_fix.md](../retrospect/2026-08-11_kiss_frame_rate_fix.md)；
   待 D4 地图复用验证 + Nav2 启动
 
 ---
@@ -90,7 +92,7 @@ N97 (机器人电脑):
 
 **硬件接线（文档事实）**：
 - CAN 总线：**CANable2 USB-CAN 适配器**（ttyACM0，slcan 协议）→ can0（1M），非主板集成 CAN
-- G354 IMU：经 **JLink OB Mini**（VCP 串口，ttyACM1，460800 8N1）直连 N97，**JLink 不供电，需独立 5V**（接线见 [g354-wiring.md](phase1/g354-wiring.md)）
+- G354 IMU：经 **JLink OB Mini**（VCP 串口，ttyACM1，460800 8N1）直连 N97，**JLink 不供电，需独立 5V**（接线见 [g354-wiring.md](../phase1/g354-wiring.md)）
 - VLP-16：PoE 供电，以太网**经交换机**转接 N97（enp1s0），同网段还有 VMware 宿主（VM ens37）
 
 - **跨机 DDS**：FastDDS 固定端口 7410（N97 需带 `FASTRTPS_DEFAULT_PROFILES_FILE=~/Lin_workspace/r2_integration/r2_bringup/config/dds/fastdds_wellknown.xml` 启动）
@@ -106,7 +108,7 @@ N97 (机器人电脑):
 | 方案 | 状态 | 说明 |
 |:-----|:-----|:-----|
 | TigerVNC | ✅ 使用中 | :2/5902，xfce4 虚拟会话；**未配开机自启**（重启需手动 `tigervncserver :2 ...`） |
-| NoMachine / RealVNC | ❌ 弃用 | 商业授权墙（详见 [n97_remote_desktop](retrospect/2026-08-05_n97_remote_desktop.md)） |
+| NoMachine / RealVNC | ❌ 弃用 | 商业授权墙（详见 [n97_remote_desktop](../retrospect/2026-08-05_n97_remote_desktop.md)） |
 | 操作手册 | ✅ | `STM32_Now/doc/02-deploy/n97_remote_desktop.md` |
 
 ---
@@ -149,8 +151,8 @@ N97 (机器人电脑):
 
 ## 九、相关文档索引
 
-- 计划总纲：[01-plan.md](01-plan.md) ｜ 进度看板：[02-progress.md](02-progress.md)
-- 当前状态：[03-current_state.md](03-current_state.md) ｜ 交接：[07-handover.md](07-handover.md)
-- 底盘定义：[phase0/chassis_definition.md](phase0/chassis_definition.md)
-- 排障记录：[retrospect/](retrospect/)（08-05 底盘/EKF、08-05 IMU 协方差、08-06 Git 教训等）
-- 文档规范：[standards.md](standards.md)
+- 计划总纲：[01-plan.md](../01-plan.md) ｜ 进度看板：[02-progress.md](../02-progress.md)
+- 当前状态：[03-current_state.md](../03-current_state.md) ｜ 交接：[07-handover.md](../07-handover.md)
+- 底盘定义：[phase0/chassis_definition.md](../phase0/chassis_definition.md)
+- 排障记录：[retrospect/](../retrospect/)（08-05 底盘/EKF、08-05 IMU 协方差、08-06 Git 教训等）
+- 文档规范：[standards.md](../standards.md)

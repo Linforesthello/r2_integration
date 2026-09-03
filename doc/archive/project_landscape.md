@@ -1,5 +1,7 @@
 # R2 项目全景（与更大系统的关系）
 
+> ⚠️ **已过时（归档 2026-09-03）**：状态以 [07-handover.md](../07-handover.md) 为准。本文件为 08-06 时代的系统全景快照，仅作回溯保留。
+
 > 生成日期: 2026-08-06
 > 职责: 讲清 R2 在 Robocon 系统全景中的位置、项目谱系、依赖的底层
 > 现状快照见 [project_status.md](project_status.md)（R2 聚焦）；本文件只讲"关系"
@@ -51,7 +53,7 @@ MCLM 电机 ×4（每电机内置 STM32 控制节点，FreeRTOS + PID + 编码�
 | 参考 | 操作手顺 `STM32_Now/doc/02-deploy/raspi_r1_control.md` | 本仓库 |
 
 > 长期记录（gpt阶段性总结 07-29）中"舵轮运动学"指 R1；R2 全向轮运动学
-> 已完成并实车验证（见 [chassis_definition.md](phase0/chassis_definition.md)）。
+> 已完成并实车验证（见 [chassis_definition.md](../phase0/chassis_definition.md)）。
 
 ---
 
@@ -83,7 +85,7 @@ MCLM 电机 ×4（每电机内置 STM32 控制节点，FreeRTOS + PID + 编码�
 | VLP-16（10.18.18.6，经交换机） | R2 | ✅ 建图/里程计 |
 | Epson G354 IMU（JLink OB Mini 直连） | R2 | ✅ 融合 |
 | Intel RealSense D435/D430、Astra Pro | 视觉项目 | 待 Phase 4 |
-| Livox MID-70 | 闲置、计划内 | 传感器选型 A/B 候选（FAST-LIO 原生适配），见 [planning-control-roadmap.md](planning-control-roadmap.md) §三 |
+| Livox MID-70 | 闲置、计划内 | 传感器选型 A/B 候选（FAST-LIO 原生适配），见 [planning-control-roadmap.md](../roadmaps/planning-control-roadmap.md) §三 |
 
 ---
 
@@ -91,4 +93,4 @@ MCLM 电机 ×4（每电机内置 STM32 控制节点，FreeRTOS + PID + 编码�
 
 - 长期脉络（非现状依据，07-29 生成，含较多已过时"待办"）：
   `~/Lin_note/Open-Notes-Library/01-开发日志/个人发展与学习丨20250910/gpt阶段性总结/`
-- 项目路线图：[01-plan.md](01-plan.md)
+- 项目路线图：[01-plan.md](../01-plan.md)

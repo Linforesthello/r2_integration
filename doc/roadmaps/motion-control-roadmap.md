@@ -3,7 +3,7 @@
 > 状态：调研结论初稿（2026-08-23 WebSearch 核实）；与 [planning-control-roadmap.md](planning-control-roadmap.md)（规划控制路线）互为姊妹篇——
 > 规划控制偏"感知→规划→执行"体系，本文偏"关节协调/上层电机控制/仿真/具身学习"执行层
 > 来源 = 官方仓库/论文页 + WebSearch 社区核实，未实测项标注；按 standards §1.11 每条结论可回查
-> 关联：[planning-control-roadmap.md](planning-control-roadmap.md)（规划控制路线，§六 RL 增强方向的本体深化）｜[standards.md](standards.md) §1.11（来源留档规范）
+> 关联：[planning-control-roadmap.md](planning-control-roadmap.md)（规划控制路线，§六 RL 增强方向的本体深化）｜[standards.md](../standards.md) §1.11（来源留档规范）
 
 ---
 
@@ -319,6 +319,6 @@ R2 = 四全向轮底盘 + RS00/M8010-6 机械臂，**正是移动操作平台的
 ## 相关
 
 - [planning-control-roadmap.md](planning-control-roadmap.md)（规划控制路线，§六 RL 增强方向 = 本文的上层）
-- [standards.md](standards.md) §1.11（调研/选型文档附来源规范）
-- [07-handover.md](07-handover.md)（运行状态与参数快照）
-- [retrospect/2026-08-23_doc_source_traceback.md](retrospect/2026-08-23_doc_source_traceback.md)（本次调研的来源回溯过程）
+- [standards.md](../standards.md) §1.11（调研/选型文档附来源规范）
+- [07-handover.md](../07-handover.md)（运行状态与参数快照）
+- [retrospect/2026-08-23_doc_source_traceback.md](../retrospect/2026-08-23_doc_source_traceback.md)（本次调研的来源回溯过程）

@@ -1,11 +1,11 @@
 # R2 求职与学习三阶段总纲（2026-09-02 定稿）
 
 > 状态：阶段总纲定稿（2026-09-02）；执行细节一律引用既有文档，本文件只做排期与接口（单一事实来源，
-> [standards.md §1.1](standards.md)）。秋招/春招窗口日期为惯例估计（**未核实**，以实际 JD 为准），其余事实均有出处。
+> [standards.md §1.1](../standards.md)）。秋招/春招窗口日期为惯例估计（**未核实**，以实际 JD 为准），其余事实均有出处。
 > 定位：2027 届求职（秋招 + 春招）与 LocoWiki 体系学习的**统一排期总纲**——接管
-> [minimal-loop2/plan.md](minimal-loop2/plan.md) 的全局排期语义；规划控制 / 运动控制两条业务路线仍以
+> [minimal-loop2/plan.md](../minimal-loop2/plan.md) 的全局排期语义；规划控制 / 运动控制两条业务路线仍以
 > [planning-control-roadmap.md](planning-control-roadmap.md) / [motion-control-roadmap.md](motion-control-roadmap.md) 为准。
-> 关联：[minimal-loop2/plan.md](minimal-loop2/plan.md)（R2 执行序列来源）｜[07-handover.md](07-handover.md)（状态快照）｜[01-plan.md](01-plan.md)（集成总纲）
+> 关联：[minimal-loop2/plan.md](../minimal-loop2/plan.md)（R2 执行序列来源）｜[07-handover.md](../07-handover.md)（状态快照）｜[01-plan.md](../01-plan.md)（集成总纲）
 
 ---
 
@@ -13,7 +13,7 @@
 
 **结论：原计划不足以在秋招达成全部目标，需要阶段延长**，三条账：
 
-1. **时间账**：[minimal-loop2/plan.md](minimal-loop2/plan.md)（08-24）串行序列 = A1/A2（08-24~08-26）→ B1/B2（08-26~08-31）→ C1 秋招冲刺（09-01~09-10 硬截止）。实际执行：A1 只在 08-25 跑了一轮 Day1（判据未满，见 §二），A/B 窗口整体过期，C1 开始时（09-01）A1 仍开着——**实车不确定性再次挤穿串行窗口**（08-24 制定时已预判此风险并设 09-10 硬线，但 10 天冲刺段装不下"R2 收尾 + RL 复现 + 作品集 + 面试"全部目标）
+1. **时间账**：[minimal-loop2/plan.md](../minimal-loop2/plan.md)（08-24）串行序列 = A1/A2（08-24~08-26）→ B1/B2（08-26~08-31）→ C1 秋招冲刺（09-01~09-10 硬截止）。实际执行：A1 只在 08-25 跑了一轮 Day1（判据未满，见 §二），A/B 窗口整体过期，C1 开始时（09-01）A1 仍开着——**实车不确定性再次挤穿串行窗口**（08-24 制定时已预判此风险并设 09-10 硬线，但 10 天冲刺段装不下"R2 收尾 + RL 复现 + 作品集 + 面试"全部目标）
 2. **范围账**：2026-09-02 引入 [LocoWiki](https://locowiki.github.io/) 全站学习后（442 文件 / 49MB，六层体系 + 开源社区整理，Quick-Start 官方周数 12~60 周），"秋招前达成全部目标"在范围上不再成立——体系学习是**长跑道资产**，不该与求职窗口抢 10 天
 3. **收益账**：秋招窗口内回报最高的是**把已有成果（R2 导航闭环 + FAST-LIO2 验证 + RL 训练资产 + 08-23 简历双版）打磨投出**；LocoWiki 多轮扫读与开源复现的高产出期在秋招之后的长跑道，正好对接**全力春招**
 
@@ -28,8 +28,8 @@
 | 简历双版（规划控制 / 运动控制） | `~/Lin_note/Open-Notes-Library/01-开发日志/个人发展与学习丨20250910/个人简历/`（`李泽林_机器人规划控制工程师_20260823.{md,pdf}` / `李泽林_机器人运动控制工程师_20260823.{md,pdf}`） | ✅ 08-23 第一轮成稿 |
 | 信息池（项目素材全量 + 新旧对比 + 基准规范） | 同上目录 `信息池_简历作品集素材.{md,pdf}` | ✅ 08-23（22KB） |
 | 简历导出流水线 | 同上 `简历导出指南.md` + `resume.css` | ✅ |
-| R2 实车/排障证据 | 08-24 FAST-LIO2 验证（旋转<2°/平移0.5%）｜08-25 避障一轮 + 三 bag（1357/1401/1405）+ 排障深挖（MPPI 决策晚 / 低矮盲区 / footprint 边缘）｜costmap 独立实验 | ✅ 素材足（细节见 [07-handover.md](07-handover.md) + 会话记录 §八） |
-| R2 执行卡（判据/流程/命令） | [minimal-loop2/execution.md](minimal-loop2/execution.md)（A1 核对表 5/5）｜[relog-operation.md](minimal-loop2/relog-operation.md)（重录卡） | ✅ 08-24/08-25 成稿，未执行完 |
+| R2 实车/排障证据 | 08-24 FAST-LIO2 验证（旋转<2°/平移0.5%）｜08-25 避障一轮 + 三 bag（1357/1401/1405）+ 排障深挖（MPPI 决策晚 / 低矮盲区 / footprint 边缘）｜costmap 独立实验 | ✅ 素材足（细节见 [07-handover.md](../07-handover.md) + 会话记录 §八） |
+| R2 执行卡（判据/流程/命令） | [minimal-loop2/execution.md](../minimal-loop2/execution.md)（A1 核对表 5/5）｜[relog-operation.md](../minimal-loop2/relog-operation.md)（重录卡） | ✅ 08-24/08-25 成稿，未执行完 |
 | RL 资产 | Go2 APPO 512 并行（UniLab）｜G1 FastSAC 2048（MuJoCo）｜ONNX 一致性流程（= LocoWiki Ch23 同款） | ✅ 已有 |
 | LocoWiki 学习产物 | `~/locowiki_ws/learn/`（`00-全站知识地图.md` + 5 分节笔记，2026-09-02） | ✅ 知识地图第一遍完成 |
 
@@ -53,15 +53,15 @@
 
 ### 4.1 线 1：R2 补数 —— A1 完整验收（串行，09-10 收手）
 
-- **执行源**：[minimal-loop2/execution.md](minimal-loop2/execution.md) A1 执行卡（判据 5/5：静态绕行 3/3 + 人横穿 ≥2 + 恢复行为 ≥1 + 到达误差 <0.5m + 综合演练 3 连）
+- **执行源**：[minimal-loop2/execution.md](../minimal-loop2/execution.md) A1 执行卡（判据 5/5：静态绕行 3/3 + 人横穿 ≥2 + 恢复行为 ≥1 + 到达误差 <0.5m + 综合演练 3 连）
 - **顺序**（每步有判据，达标即走）：
   0. **前置：08-25 四问题解决方向全景核对**（对照清单 + 本阶段处置，全景表见 [recruitment-learning-plan-review.md §3.5](recruitment-learning-plan-review.md)，含来源）：
      - ① costmap 远端不刷新 → 由下方第 1 步**重录**判定（2/4/6m 三层链路）；VM 远距 mark 实验收尾非阻塞
      - ② 避让不及时（根因已定论：MPPI 空间前瞻 ≈0.38m，感知无责）→ 同 08-25 基线跑 A1；**方案① 调权 = 验收达标后同日加跑**（第 5 步；基线内不测，保与 08-25 对比干净）
      - ③ 低矮障碍扫不到（VLP-16 物理几何盲区，无参数可改）→ 测试障碍统一用**高箱**规避干扰
      - ④ footprint 边缘碰撞（0.08m 间隙实锤，依附②）→ A1 中观察是否复现，复现则记入缺口收手清单
-     - 参照物：执行卡 [execution.md](minimal-loop2/execution.md) 1.2 参数盘点（同参零改动为基线前提）
-  1. **重录**（补 points/costmap 三层链路，卡见 [relog-operation.md](minimal-loop2/relog-operation.md)，~2 分钟场景三段式 2/4/6m）→ 判据归因
+     - 参照物：执行卡 [execution.md](../minimal-loop2/execution.md) 1.2 参数盘点（同参零改动为基线前提）
+  1. **重录**（补 points/costmap 三层链路，卡见 [relog-operation.md](../minimal-loop2/relog-operation.md)，~2 分钟场景三段式 2/4/6m）→ 判据归因
   2. **静态绕行 ×3**（同 08-25 参数，不新增变量——[5.7ter 方案① critic 权重调节](planning-control-roadmap.md)是**参数变更**，会污染与 08-25 基线的对比，本步不测；同日加跑见第 5 步）
   3. **人横穿 ≥2** ｜ **恢复行为 ≥1**（三面围堵）｜ **综合演练 3 目标序列 ×3 次**
   4. **验收**：bag 拷 VM → `analyze_nav2_goal_error.py` <0.5m → 判据核对 → retrospect 复盘 + 留档（02-progress/03-current_state/07-handover 更新）
@@ -72,7 +72,7 @@
 ### 4.2 线 2：简历 / 投递 / 练兵（持续，随线 1 空隙推进）
 
 1. **双版简历增量更新**（08-23 版 → v2）：动笔前先过本节末**素材清单卡**逐项勾并并入信息池，再按目标 JD 双线分别微调（数字一律以来源文件为准，不凭记忆）
-2. **作品集项目页 ×2**（执行卡 [minimal-loop2/execution.md](minimal-loop2/execution.md) C1）：R2 导航闭环（08-25 视频/数据）+ FAST-LIO2 部署验证 + 深挖稿（每项目 5 分钟技术深挖：流程/数据/坑/指标）
+2. **作品集项目页 ×2**（执行卡 [minimal-loop2/execution.md](../minimal-loop2/execution.md) C1）：R2 导航闭环（08-25 视频/数据）+ FAST-LIO2 部署验证 + 深挖稿（每项目 5 分钟技术深挖：流程/数据/坑/指标）
 3. **投递**：双线并行投（用户 09-02 定）；以 08-23 版简历即可先投，v2 后补投或更新附件
 4. **笔试面试练兵**：每场复盘回写信息池（`信息池_简历作品集素材.md`）；数学/C++ 每日穿插见 `~/Lin_note/.../个人成长计划✨_求职导向_2026Q3.md`（不重复展开）
 5. LocoWiki 在阶段一**只做面试高频点按需查**（不系统学习）
@@ -81,8 +81,8 @@
 
 | 勾 | 素材 | 来源文件 |
 |:--:|:---|:---|
-| ☐ | 08-24 FAST-LIO2 实车验证（部署 + 量化结果） | [retrospect/2026-08-24_fastlio2_verification.md](retrospect/2026-08-24_fastlio2_verification.md) + [fastlio2-n97-deploy.md](fastlio2-n97-deploy.md) |
-| ☐ | 08-25 避障一轮 + 4 问题排障深度（MPPI 前瞻根因 / 三层链路） | nav2_avoid_0825_* bag + [costmap_experiment.md](minimal-loop2/costmap_experiment.md) + [relog-operation.md](minimal-loop2/relog-operation.md) |
+| ☐ | 08-24 FAST-LIO2 实车验证（部署 + 量化结果） | [retrospect/2026-08-24_fastlio2_verification.md](../retrospect/2026-08-24_fastlio2_verification.md) + [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md) |
+| ☐ | 08-25 避障一轮 + 4 问题排障深度（MPPI 前瞻根因 / 三层链路） | nav2_avoid_0825_* bag + [costmap_experiment.md](../minimal-loop2/costmap_experiment.md) + [relog-operation.md](../minimal-loop2/relog-operation.md) |
 | ☐ | RL 训练资产曲线（Go2 APPO 512 / G1 FastSAC 2048 / ONNX 一致性） | UniLab / MuJoCo 训练产物 |
 | ☐ | 运行视频 + rviz 截图（阶段一产物） | 线 1 录制（§4.1 第 4/5 步） |
 | ☐ | LocoWiki 体系化学习（简历可提时） | ~/locowiki_ws/learn/00-全站知识地图.md |
@@ -114,7 +114,7 @@
 
 | 线 | 交付候选（择一深化） | 依据 |
 |:---|:---|:---|
-| **规划控制线** | **主交付 = RL 局部避障 v1**（Isaac Lab + R2 实车 A/B vs MPPI，素材见 [planning-control-roadmap.md](planning-control-roadmap.md) §6.0/6.2/6.8）；**基础传统先行补足、两者分时**：A2（FAST-LIO2 TF 桥 + 建图源，卡见 [execution.md](minimal-loop2/execution.md) A2）→ 方案①（仅当阶段一未同日加跑）→ RL v1 主攻（用户 09-02 定：主投 RL 方向） | [planning-control-roadmap.md](planning-control-roadmap.md) §6 |
+| **规划控制线** | **主交付 = RL 局部避障 v1**（Isaac Lab + R2 实车 A/B vs MPPI，素材见 [planning-control-roadmap.md](planning-control-roadmap.md) §6.0/6.2/6.8）；**基础传统先行补足、两者分时**：A2（FAST-LIO2 TF 桥 + 建图源，卡见 [execution.md](../minimal-loop2/execution.md) A2）→ 方案①（仅当阶段一未同日加跑）→ RL v1 主攻（用户 09-02 定：主投 RL 方向） | [planning-control-roadmap.md](planning-control-roadmap.md) §6 |
 | **运动控制线** | **Go2 地形扩展**（域随机化 → 蒸馏完整复现曲线；训练资产已通 UniLab/MuJoCo）——**SO-101 / 机械臂方向暂不考虑**（用户 09-02 定） | [motion-control-roadmap.md](motion-control-roadmap.md) §七（秋招后项） |
 
 > 双线防浅尝纪律（呼应全局反"多线浅尝"）：**周粒度单主线**（一周内只切一次线，不日内混切）；每项 1~2 周一个小闭环（复现出曲线/出视频/出数据）；沿用 minimal-loop2「判据卡 + 达标即走」。
@@ -125,7 +125,7 @@
 
 - **第一轮 · 整体流程（10~11 月）**：不逐章精读——挑 1 条与双线交付重合的 Quick-Start 项目向路线（足式工程师 18 周 / MPPI 专精 12 周等，见 `~/locowiki_ws/learn/00-全站知识地图.md`），按 **AI 五步法**（定位场景 → 索引池选型 → AI 批量消化 → 快速复现部署 → 留档对照，[planning-control-roadmap.md §6.7](planning-control-roadmap.md)）跑通 1~2 个开源项目（候选池：RC_WheelLeg / rl-mpc-locomotion / LeggedSkillDeploy / HIMLoco-for-Go2W 等，见 network-open-source/）
 - **第二轮 · 基本知识点（12~2027-01）**：对照六层知识地图（数学/控制/RL/ROS2 工程）扫高频面试知识点，**多遍滚动**（每遍只加深不重读）；产物回写信息池
-- 阶段二产出必须**量化可验收**（曲线/视频/数据，禁"效果良好"空话，承 [standards.md §2.4](standards.md) 之外的全局验收偏好）
+- 阶段二产出必须**量化可验收**（曲线/视频/数据，禁"效果良好"空话，承 [standards.md §2.4](../standards.md) 之外的全局验收偏好）
 
 ### 5.3 日常结构（建议，可调）
 
@@ -154,7 +154,7 @@
 
 ## 七、验收原则与风险
 
-**验收原则**（沿用 [minimal-loop2/plan.md §三](minimal-loop2/plan.md)）：全面（每方向有量化数据）但阈值（达标即过，不追精度）。
+**验收原则**（沿用 [minimal-loop2/plan.md §三](../minimal-loop2/plan.md)）：全面（每方向有量化数据）但阈值（达标即过，不追精度）。
 
 | 风险 | 预案 |
 |:---|:---|
@@ -170,7 +170,7 @@
 ## 八、事实与来源（2026-09-02 核实）
 
 - 本总纲依据（均有出处，未凭记忆）：
-  - [minimal-loop2/plan.md](minimal-loop2/plan.md) + [execution.md](minimal-loop2/execution.md)（08-24 计划与执行卡，A1 判据/收尾纪律）
+  - [minimal-loop2/plan.md](../minimal-loop2/plan.md) + [execution.md](../minimal-loop2/execution.md)（08-24 计划与执行卡，A1 判据/收尾纪律）
   - 08-25 会话记录（`175b95ff…`，08-24~08-25：A1 Day1 实车 4 问题、三 bag 排障、补偿 vs 重录决策、relog 卡定稿；Day2/重录/A2 无后续留档 —— 该结论由 08-25 19:27 后无任何执行留档佐证：r2_integration 无新提交、minimal-loop2 无新记录、无新 bag）
   - 简历存量：`~/Lin_note/Open-Notes-Library/01-开发日志/个人发展与学习丨20250910/个人简历/`（08-23 双版简历 + 信息池 + 导出指南，文件时间戳核实）
   - LocoWiki 学习：`~/locowiki_ws/learn/00-全站知识地图.md`（09-02）+ 分节笔记
@@ -180,7 +180,7 @@
 
 ## 相关
 
-- [minimal-loop2/plan.md](minimal-loop2/plan.md)（R2 执行序列与执行卡，本总纲的 A1/A2 细节来源）｜[07-handover.md](07-handover.md)（运行状态快照）
+- [minimal-loop2/plan.md](../minimal-loop2/plan.md)（R2 执行序列与执行卡，本总纲的 A1/A2 细节来源）｜[07-handover.md](../07-handover.md)（运行状态快照）
 - [planning-control-roadmap.md](planning-control-roadmap.md)（规划控制路线 + 6.0 大基调/6.7 复现五步法）｜[motion-control-roadmap.md](motion-control-roadmap.md)（运动控制路线）
 - 个人侧：`~/Lin_note/Open-Notes-Library/01-开发日志/个人发展与学习丨20250910/个人简历/`（简历/信息池）｜`gpt阶段性总结/个人成长计划✨_求职导向_2026Q3.md`（每日穿插细则）
 - LocoWiki：`~/locowiki_ws/learn/00-全站知识地图.md`（学习产物）｜[locowiki.github.io](https://locowiki.github.io/open-source.html)

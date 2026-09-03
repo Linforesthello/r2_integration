@@ -1,8 +1,8 @@
 # R2 规划控制与视觉集成路线（08-18 调研）
 
-> 状态：调研结论定稿（2026-08-18）；§五「全流程替代方案全景」与 §六「RL 增强方向」2026-08-23 补充（WebSearch 核实）；2026-08-23 按 [standards.md §1.11](standards.md) 规范化（补 §3.2 规格来源 / §5.5-5.6 仓库链接 + §6.6 来源小节 + 相关索引）；2026-09-02 状态同步至 **08-25 基线**（FAST-LIO2 已于 08-24 实车验证全项通过，见 [07-handover.md](07-handover.md)）+ §六补 6.0 大基调「全局传统、局部 RL」/ 6.7 AI 快速复现开源总体路线 / 6.8 LocoWiki RL 素材地图（来源 = LocoWiki 全站浏览学习，2026-09-02，见 §6.9）；来源 = 官方仓库/README + WebSearch 社区核实 + 本地 LocoWiki 学习，未实测项标注
+> 状态：调研结论定稿（2026-08-18）；§五「全流程替代方案全景」与 §六「RL 增强方向」2026-08-23 补充（WebSearch 核实）；2026-08-23 按 [standards.md §1.11](../standards.md) 规范化（补 §3.2 规格来源 / §5.5-5.6 仓库链接 + §6.6 来源小节 + 相关索引）；2026-09-02 状态同步至 **08-25 基线**（FAST-LIO2 已于 08-24 实车验证全项通过，见 [07-handover.md](../07-handover.md)）+ §六补 6.0 大基调「全局传统、局部 RL」/ 6.7 AI 快速复现开源总体路线 / 6.8 LocoWiki RL 素材地图（来源 = LocoWiki 全站浏览学习，2026-09-02，见 §6.9）；来源 = 官方仓库/README + WebSearch 社区核实 + 本地 LocoWiki 学习，未实测项标注
 > 定位：01-plan 第四章（集成路线图）的补充引用，视觉/规划控制的选型依据
-> 关联：[01-plan.md](01-plan.md)｜[fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)（FAST-LIO2 部署）｜[motion-control-roadmap.md](motion-control-roadmap.md)（RL 运动控制姊妹篇，§六 6.0 大基调同适用）
+> 关联：[01-plan.md](../01-plan.md)｜[fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)（FAST-LIO2 部署）｜[motion-control-roadmap.md](motion-control-roadmap.md)（RL 运动控制姊妹篇，§六 6.0 大基调同适用）
 
 ---
 
@@ -112,7 +112,7 @@ Phase 5（编排）:     waypoint 任务队列（已有待办）+ 气动 + 异�
 4. **避障实测**：2D scan 表现
 
 半天成本，数据定夺方案 a/b/c。触发点（**FAST-LIO2 实车验证阶段**）已于 08-24 满足——FAST-LIO2 验证全项
-通过（见 [fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)）；**A/B 对比本身尚未做**，现属 Phase 3 收尾
+通过（见 [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)）；**A/B 对比本身尚未做**，现属 Phase 3 收尾
 可选项，随时可发起，不必等"质量不达标"才做。
 
 ---
@@ -130,7 +130,7 @@ FAST-Calib）都是**离线批处理**：容器里读 bag、输出 yaml，**无�
 
 **坑（社区实测）**：
 - [ros1_bridge /rosout 桥在 Humble 损坏](https://github.com/ros2/ros1_bridge/issues/391)（Log 消息无法映射）；不支持 actions；自定义消息需同工作区编译
-- 容器间 DDS 走 UDP（共享内存不跨容器）——复用 R2 既有跨机 FASTRTPS 经验（N97↔VM，见 [ros2-ops.md](ros2-ops.md) §1）
+- 容器间 DDS 走 UDP（共享内存不跨容器）——复用 R2 既有跨机 FASTRTPS 经验（N97↔VM，见 [ros2-ops.md](../ros2-ops.md) §1）
 - 容器访问硬件（如 D435）需 `--device` 或 `--privileged` 透传 USB
 
 **R2 落地**：标定走"离线容器"（唯一刚需）；在线融合（R3LIVE/LVISAM 等 ROS1）在 N97 CPU 瓶颈下性价比低，
@@ -157,7 +157,7 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 | SLAM Toolbox | 2D | ✅ 图优化 | 可选 | ✅ 原生 | 轻量、易调试；2025 实测 ATE 0.13m（Cartographer 0.21m）、CPU 70% |
 | Cartographer | 2D/3D | ✅ 最强 | ✅ | ⚠️ 社区移植 | 大场景/长廊/仓库强，回环消累积误差，但对参数调优敏感、资源重 |
 | KISS-ICP（现役） | 3D | ❌ | ❌ | ✅ 原生 | 纯激光、极简；无 IMU 旋转漂移（R2 163° 教训） |
-| FAST-LIO2 | 3D | ❌ | ✅ | ✅ 原生 | LIO 紧耦合，运动预测强、退化场景稳；VLP-16 已原生支持；**08-24 实车验证 ✅ 旋转误差<2°、平移 0.5%**（由候选转实测通过，见 [fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)） |
+| FAST-LIO2 | 3D | ❌ | ✅ | ✅ 原生 | LIO 紧耦合，运动预测强、退化场景稳；VLP-16 已原生支持；**08-24 实车验证 ✅ 旋转误差<2°、平移 0.5%**（由候选转实测通过，见 [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)） |
 | LIO-SAM | 3D | ✅ 因子图 | ✅ | ⚠️ 社区 | 系统完整、回环强，但重、调参成本高 |
 | Point-LIO | 3D | ❌ | ✅ | ✅ | Livox 固态雷达主场 |
 
@@ -425,7 +425,7 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
    （数学/C++/SLAM → 规控 → 方向线 → 横切专题，见知识地图 `~/locowiki_ws/learn/00-全站知识地图.md`）
 3. **AI 批量消化**：全站浏览 → 分层笔记落盘（骨架地图 + 分节精华，粒度可按"大纲 / 重点深读 / 全文"调节）
 4. **快速复现部署**：目标仓库 clone → build / 训练 → 对照原文档验收（部署范式参照 fastlio2-n97-deploy）
-5. **留档对照**：复现结论回写 roadmap / retrospect，**必须带来源链接**（[standards.md §1.11](standards.md)）
+5. **留档对照**：复现结论回写 roadmap / retrospect，**必须带来源链接**（[standards.md §1.11](../standards.md)）
 
 > 首次全站浏览（2026-09-02，约 442 文件 / 49MB，用户定「大纲 + 重点深度浏览」）产物 = 知识地图 + 5 份分节笔记（§6.8）。
 
@@ -462,8 +462,8 @@ B 实时建图导航: 实时SLAM → 探索决策 → 规划(同 Nav2) → 任�
 
 ## 相关
 
-- [01-plan.md](01-plan.md)（集成计划总纲，第四章路线图）｜[fastlio2-n97-deploy.md](fastlio2-n97-deploy.md)（FAST-LIO2 部署手册）
-- [standards.md](standards.md) §1.11（调研/选型文档附来源规范——本文格式依据）｜[07-handover.md](07-handover.md)（运行状态与参数快照）
-- [ros2-ops.md](ros2-ops.md)（ROS 操作规范）｜[ros2-qos-dds.md](ros2-qos-dds.md)（QoS/DDS 问题手册）
-- [retrospect/2026-08-18_fastlio_laser_map_debug.md](retrospect/2026-08-18_fastlio_laser_map_debug.md)（FAST-LIO 排障全记录）
+- [01-plan.md](../01-plan.md)（集成计划总纲，第四章路线图）｜[fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)（FAST-LIO2 部署手册）
+- [standards.md](../standards.md) §1.11（调研/选型文档附来源规范——本文格式依据）｜[07-handover.md](../07-handover.md)（运行状态与参数快照）
+- [ros2-ops.md](../ros2-ops.md)（ROS 操作规范）｜[ros2-qos-dds.md](../ros2-qos-dds.md)（QoS/DDS 问题手册）
+- [retrospect/2026-08-18_fastlio_laser_map_debug.md](../retrospect/2026-08-18_fastlio_laser_map_debug.md)（FAST-LIO 排障全记录）
 - LocoWiki 学习笔记：`~/locowiki_ws/learn/00-全站知识地图.md`（2026-09-02 全站浏览；本文 §6.7/6.8 素材源）

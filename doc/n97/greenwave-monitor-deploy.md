@@ -1,8 +1,8 @@
 # Greenwave Monitor 部署手册（N97）
 
 > 日期：2026-08-25
-> 用途：R2 全栈话题自主化监测——多话题 hz + 预期频率管理 + Diagnostics 上报，替代手动 `ros2 topic hz` 逐条盯（2026-08-25 用户选定方案 B，背景见 [07-handover.md §六 待办](07-handover.md)）
-> 执行机：N97（192.168.1.210）；关联：[relog-operation.md](minimal-loop2/relog-operation.md)（重录操作卡，录制时用本监测盯盘）
+> 用途：R2 全栈话题自主化监测——多话题 hz + 预期频率管理 + Diagnostics 上报，替代手动 `ros2 topic hz` 逐条盯（2026-08-25 用户选定方案 B，背景见 [07-handover.md §六 待办](../07-handover.md)）
+> 执行机：N97（192.168.1.210）；关联：[relog-operation.md](../minimal-loop2/relog-operation.md)（重录操作卡，录制时用本监测盯盘）
 > 来源 = [官方仓库 README](https://github.com/NVIDIA-ISAAC-ROS/greenwave_monitor)（2026-08-25 WebSearch 核实）+ [Open Robotics Discourse 介绍帖](https://discourse.openrobotics.org/t/nvidias-greenwave-monitor-a-tool-for-high-performance-topic-monitoring-and-diagnostics/50477)；launch 参数名等细节标注「待 N97 以 clone 后 README 为准」
 
 ---
@@ -39,7 +39,7 @@ ros2 launch greenwave_monitor hz.launch.py \
   gw_monitored_topics:='["/imu/data", "/odom_wheels", "/odometry/filtered", "/velodyne_points", "/scan", "/cmd_vel_smoothed", "/local_costmap/costmap_raw", "/global_costmap/costmap"]'
 ```
 
-### 3.2 预期频率表（来自 2026-08-25 健康检查实测，见 [raw_data](raw_data/raw_imu_hz_ekf_update_rate_2026-08-25_1919.txt)）
+### 3.2 预期频率表（来自 2026-08-25 健康检查实测，见 [raw_data](../raw_data/raw_imu_hz_ekf_update_rate_2026-08-25_1919.txt)）
 
 > ⚠️ **关键经验（08-25 实测教训）：预期频率设「实测正常值」，不设标称值**。
 > 例：IMU 标称 100Hz 但实测稳定 94Hz——设 100 则永久 ERROR（狼来了，报警信号贬值）；
@@ -94,7 +94,7 @@ rqt --standalone RobotMonitor
 
 - [ ] launch 参数确切名（`gw_monitored_topics` 拼写与格式）与预期频率参数名
 - [ ] /diagnostics 话题名与 rqt_robot_monitor 订阅适配
-- [ ] 大消息话题（/velodyne_points）订阅 QoS 是否兼容（reliable 发布方；hz 假阴性教训见 [ros2-qos-dds.md](ros2-qos-dds.md)）
+- [ ] 大消息话题（/velodyne_points）订阅 QoS 是否兼容（reliable 发布方；hz 假阴性教训见 [ros2-qos-dds.md](../ros2-qos-dds.md)）
 - [ ] 无 nav 指令时 /cmd_vel_smoothed 是否长期 STALE 刷屏（预期行为确认）
 
 ## 7. 来源（2026-08-25 WebSearch 核实）

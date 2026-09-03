@@ -1,11 +1,11 @@
 # FAST-LIO2 N97 实车部署手册
 
 > 状态：✅ N97 已部署并实车验证通过（2026-08-24；旋转 90° 误差 <2°，对比 KISS 基线 163°）
-> VM 侧验证记录：[2026-08-18_fast_lio2_deploy.md](retrospect/2026-08-18_fast_lio2_deploy.md)
+> VM 侧验证记录：[2026-08-18_fast_lio2_deploy.md](../retrospect/2026-08-18_fast_lio2_deploy.md)
 > 目标：N97 实车跑通 FAST-LIO2，对比 EKF 里程计，为「FAST-LIO2 vs KISS-ICP+EKF」决策提供数据
-> 关联：[vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md)（方案对比）｜
-> [2026-08-18_fastlio_laser_map_debug.md](retrospect/2026-08-18_fastlio_laser_map_debug.md)（排障经验）｜
-> [ros2-qos-dds.md](ros2-qos-dds.md)（大消息验证方法）
+> 关联：[vlp16_slam_exploration.md](../retrospect/vlp16_slam_exploration.md)（方案对比）｜
+> [2026-08-18_fastlio_laser_map_debug.md](../retrospect/2026-08-18_fastlio_laser_map_debug.md)（排障经验）｜
+> [ros2-qos-dds.md](../ros2-qos-dds.md)（大消息验证方法）
 
 ---
 
@@ -144,7 +144,7 @@ ros2 topic echo /odometry/filtered --field pose.pose   # EKF（若对比场景�
 |:---|:---|:---|
 | IMU 接入 | `IMU Initial Done`，无同步告警 | ✅ |
 | /Odometry | 连续 8Hz+（雷达 10Hz），pose 随推车移动 | ✅ 连续发布；推车/转弯 pose 真实跟踪 |
-| 平移漂移 | 直线段位移误差 vs 尺子实测（目标 <5%） | ✅ 前进 169cm（尺子，沿地面量）→ FAST-LIO 位移（起点/终点各取多帧均值，Δx 1.6985m / Δy 0.0206m / Δz +0.0638m）。⚠️ 场地地面不平（车真爬坡/过坎），z 变化 +6.4cm 为真实地形响应非漂移（FAST-LIO 3D 里程计，与 EKF two_d_mode 锁 z 的 2D 设计不冲突）；故双口径对比：**2D 平面 169.86cm（+0.86cm ≈ 0.51%）/ 3D 空间 169.98cm（+0.98cm ≈ 0.58%）**，均 <5% 达标；yaw 变化 ~3.4°（含地面不平真实偏转，非纯累积）。原始数据见 [2026-08-24_fastlio2_verification.md](retrospect/2026-08-24_fastlio2_verification.md) |
+| 平移漂移 | 直线段位移误差 vs 尺子实测（目标 <5%） | ✅ 前进 169cm（尺子，沿地面量）→ FAST-LIO 位移（起点/终点各取多帧均值，Δx 1.6985m / Δy 0.0206m / Δz +0.0638m）。⚠️ 场地地面不平（车真爬坡/过坎），z 变化 +6.4cm 为真实地形响应非漂移（FAST-LIO 3D 里程计，与 EKF two_d_mode 锁 z 的 2D 设计不冲突）；故双口径对比：**2D 平面 169.86cm（+0.86cm ≈ 0.51%）/ 3D 空间 169.98cm（+0.98cm ≈ 0.58%）**，均 <5% 达标；yaw 变化 ~3.4°（含地面不平真实偏转，非纯累积）。原始数据见 [2026-08-24_fastlio2_verification.md](../retrospect/2026-08-24_fastlio2_verification.md) |
 | 旋转漂移 | 90° 转弯后 yaw 误差（对比 KISS 基线 163°/38 空窗教训） | ✅ 左转 91.9°（误差 1.9°）/ 右转 −89.4°（误差 0.6°），z 稳定 ±4cm |
 | 对比结论 | FAST-LIO2 vs KISS-ICP+EKF：建图质量/旋转表现 → 决策 | 旋转表现远优于 KISS（163°→<2°），决策建议见 §六 后 |
 
@@ -177,7 +177,7 @@ ros2 topic echo /odometry/filtered --field pose.pose   # EKF（若对比场景�
 
 ## 相关
 
-- VM 部署验证：[2026-08-18_fast_lio2_deploy.md](retrospect/2026-08-18_fast_lio2_deploy.md)
-- 排障全记录：[2026-08-18_fastlio_laser_map_debug.md](retrospect/2026-08-18_fastlio_laser_map_debug.md)
-- QoS/DDS 手册：[ros2-qos-dds.md](ros2-qos-dds.md)
-- 方案对比：[vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md)
+- VM 部署验证：[2026-08-18_fast_lio2_deploy.md](../retrospect/2026-08-18_fast_lio2_deploy.md)
+- 排障全记录：[2026-08-18_fastlio_laser_map_debug.md](../retrospect/2026-08-18_fastlio_laser_map_debug.md)
+- QoS/DDS 手册：[ros2-qos-dds.md](../ros2-qos-dds.md)
+- 方案对比：[vlp16_slam_exploration.md](../retrospect/vlp16_slam_exploration.md)

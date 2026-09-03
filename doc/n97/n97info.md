@@ -1,7 +1,7 @@
 # N97 硬件信息 · 风扇调速排查记录
 
 > 说明：本文件为 N97 迷你主机（Intel N97 / AMI BIOS 5.27 白牌机，Ubuntu 22.04 + 内核 6.8）风扇调速排查的**原始命令记录**（2026-08-24）
-> 完整结论 / 排查链条 / 来源 / 教训：**[retrospect/2026-08-24_n97_fan_control.md](retrospect/2026-08-24_n97_fan_control.md)**（单一事实来源）
+> 完整结论 / 排查链条 / 来源 / 教训：**[retrospect/2026-08-24_n97_fan_control.md](../retrospect/2026-08-24_n97_fan_control.md)**（单一事实来源）
 > 本文件只做原始输出留档 + 速查，细节以 retrospect 为准。
 
 ---
@@ -1361,4 +1361,4 @@ lin@lin-Default-string:~$ cat /sys/class/hwmon/hwmon4/fan2_input
 | 255 | 3534 | 满速 |
 | 300/280/260 | — | 越界，内核拒绝（范围 0-255） |
 
-> 完整排障回顾（7 条路径 + 来源 + 教训）：[retrospect/2026-08-24_n97_fan_control.md](retrospect/2026-08-24_n97_fan_control.md)
+> 完整排障回顾（7 条路径 + 来源 + 教训）：[retrospect/2026-08-24_n97_fan_control.md](../retrospect/2026-08-24_n97_fan_control.md)
