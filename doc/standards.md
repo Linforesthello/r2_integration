@@ -248,6 +248,7 @@ r2_integration/
 │   ├── retrospect/          ← 事件记录（YYYY-MM-DD_主题.md，按日期排序）
 │   ├── n97/                 ← N97 部署/运维手册（部署清单/VNC/风扇速查/FAST-LIO2/监测部署/patch）
 │   ├── roadmaps/            ← 路线/学习计划（规划控制/运动控制/求职总纲+评审/Nav2 知识树）
+│   ├── profiles/            ← 对象档案层（实体为中心横切视图：spec v0.1 试行 + 各对象档，2026-09-04 建）
 │   ├── archive/             ← 过时状态档（已过时，状态以 07-handover.md 为准）
 │   └── raw_data/            ← 原始数据留档（raw_<话题>_<日期>，不入 git）
 │

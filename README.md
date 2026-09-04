@@ -101,6 +101,10 @@ r2_integration/
 │   │   ├── recruitment-learning-plan-review.md  三阶段总纲评审稿（判断 1-3 + W1-W4 决策记录）
 │   │   └── nav2-knowledge-tree.md               Nav2 知识树（R2 实战版）
 │   │
+│   ├── profiles/  ← 对象档案层（实体为中心横切视图：spec v0.1 + README，09-04 建）
+│   │   ├── spec.md              对象档案规范（建档门槛/模板/纪律，v0.1 试行）
+│   │   └── README.md            对象档案目录与整体介绍
+│   │
 │   ├── archive/  ← 过时状态档（已过时，状态以 07-handover 为准）
 │   │   ├── project_status.md     全项目现状总结（08-06/08-12，已过时）
 │   │   └── project_landscape.md  项目全景·R2 在更大系统中的位置（08-06，已过时）

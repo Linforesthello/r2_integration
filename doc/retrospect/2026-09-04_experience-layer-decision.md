@@ -50,7 +50,20 @@
   整合动作待用户另行发起（整合 = 提炼入 doc-engineering，本档留作来源，参照 doc-engineering
   自身的 09-03 提炼先例）
 
+## 五、后续执行（09-04 晚）：实体档案横切视图层落地
+
+用户进一步提出「对单一对象（技术/学科/厂商器件）外加独立描述——哪里有问题/哪里难学/什么工况不适用」，
+概念评估 = 条件化知识（conditionalized knowledge，Bransford 2000）+ FMEA + validity domain 的文档外化，
+与四层制正交（按对象 vs 按时间/主题），故定稿为**横切视图层**（非第五层，不改变原四层结构）：
+
+- **落地**：`doc/profiles/`（[README.md](../profiles/README.md) 整体介绍 + [spec.md](../profiles/spec.md) v0.1 试行规范）——
+  决定**独立成目录**而非补入现有文档（理由：未成熟概念不入定稿/规范层，结构件需独立成型后再提炼）
+- **关键纪律**：档案 = 聚合视图非事实源（事实回指事件，standards 1.1）；评价署名+日期+阶段；只增不删
+- **试行与整合**：按 spec §2 门槛试建 1~2 个真实对象档案 → 结论并入 **09-10 A1 收口盘点**：
+  有效 → 提炼入 doc-engineering；无效 → 归档留否决原因
+
 ## 相关文件
 
 - draft 层载体：[analysis-methods.md](../analysis-methods.md)（主题 A bag 分析 ×5 / 主题 B 对账收口 ×3 + 抽取状态表）
 - 被回滚的直写：ros2-ops.md §5.1/5.2（09-04 已 restore，内容母本在 analysis-methods.md）
+- 实体档案层：doc/profiles/README.md + spec.md（09-04 晚建，v0.1 试行）
