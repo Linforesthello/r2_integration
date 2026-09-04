@@ -1,6 +1,6 @@
 # R2 外设集成 · 全局进度总览
 
-> 最后更新: 2026-08-18
+> 最后更新: 2026-09-04
 > 内容: 全项目进度一览，每个 Phase 的完成度、依赖关系、下一步
 
 ---
@@ -11,7 +11,7 @@
 Phase 0 底盘CAN控制 ━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
 Phase 1 IMU+EKF融合 ━━━━━━━━━━━━━━━━○○  95%  ◆ 实车对比验证（08-06）+ yaw 方案①通过（08-12）
 Phase 2 VLP16+KISS-ICP ━━━━━━━━━━━━━━━━━━━━ 100% ✅
-Phase 3 Nav2导航     ━━━○○○○○○○○  25%  ◆ 首闭环（08-15）+ 降额过缝验证（08-17）；W2 收尾中（到达误差测量/连续导航测试）；全速验证暂缓
+Phase 3 Nav2导航     ━━━○○○○○○○○  25%  ◆ 首闭环（08-15）+ 降额过缝验证（08-17）；A1 避障实测进行中（08-25 首轮 + 低物盲区断点 09-04 已定位待重测）；全速验证暂缓
 Phase 4 视觉AI       ━○○○○○○○○○  0%  ⏳
 Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
                     ─────────────
@@ -38,7 +38,7 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 | 里程计积分修复（08-06） | ✅ | omega 单位 13.2× + 全向轮积分，见 [chassis_ekf_debug](retrospect/2026-08-05_chassis_ekf_debug.md) |
 | 文档 | ✅ | 4 份 .md 同步到 Obsidian |
 
-### Phase 1：IMU + 里程计 EKF 融合 ◆ 85%
+### Phase 1：IMU + 里程计 EKF 融合 ◆ 95%
 
 | 模块 | 状态 | 备注 |
 |:-----|:----:|:------|
@@ -52,17 +52,17 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 | 对比测试: 纯轮速 vs EKF | ✅ **完成（08-06）** | bag 对比: yaw 偏差 179°→4-14°，方形闭环 1.8m→0.27m（KISS 交叉验证一致） |
 | EKF 过程噪声修复（08-06） | ✅ | 225 值矩阵（3.5.4 的 15 值格式加载 bug 致启动 NaN），见 [chassis_ekf_debug](retrospect/2026-08-05_chassis_ekf_debug.md) |
 
-**下一步：z 漂移 slip 场景 +2.5m 跟进（剧烈加减速时数值积累）→ Phase 3 Nav2**
+**下一步：slip 场景 z 漂移严格复测（08-05 遗留，[pending-tasks.md §⑤](pending-tasks.md)）——不再阻塞 Nav2（08-15 首闭环已跑）**
 
 ### Phase 2：VLP-16 + KISS-ICP SLAM ✅ 已完成
 
-> 注：现役 VLP-16 + KISS-ICP。FAST-LIO2 曾因 ROS2 分支硬依赖 Livox 编译失败而搁置（探索记录见 [vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md)），08-18 起已在 VLP-16 全链路验证通过（感知升级候选）；MID-70 闲置、**计划内**（传感器选型 A/B，见 [planning-control-roadmap.md](roadmaps/planning-control-roadmap.md) §三）
+> 注：现役 VLP-16 + KISS-ICP。FAST-LIO2 曾因 ROS2 分支硬依赖 Livox 编译失败而搁置（探索记录见 [vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md)），**08-24 已在 VLP-16 实车验证通过**（旋转误差 <2° / 平移 0.5%，部署手册 [fastlio2-n97-deploy.md](n97/fastlio2-n97-deploy.md)）——A2 主线（见 [07-handover.md](07-handover.md) 下一阶段）；MID-70 闲置、**计划内**（传感器选型 A/B，见 [planning-control-roadmap.md §3.4](roadmaps/planning-control-roadmap.md)）
 
 | 模块 | 状态 | 备注 |
 |:-----|:----:|:------|
 | VLP-16 驱动 | ✅ 已安装 | velodyne_driver，设备 IP 10.18.18.6 |
 | G354 IMU | ✅ 已就绪 | 已接入 EKF（见 Phase 1） |
-| TF 标定 | ✅ 已完成 | base_footprint→velodyne，z=0.77m（⚠️ 与实述 65cm 冲突，基准待确认，见 [sensor-mount.md](phase0/sensor-mount.md)） |
+| TF 标定 | ✅ 已完成（08-24 复测定案） | base_link→velodyne **z=0.655m**（光学中心离地 77~78cm − base_link 12cm；base_footprint 已删，65/77cm 冲突解决），见 [sensor-mount.md](phase0/sensor-mount.md) |
 | KISS-ICP 建图 | ✅ 已跑通 | /velodyne_points → odom |
 
 ### Phase 3：VLP16 + Nav2 导航 ⏳
@@ -74,7 +74,9 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 | KISS-ICP | ✅ 已跑通 | 属于 Phase 2；/velodyne_points → odom |
 | slam_toolbox 建图 | ❌ 已否决 | 不适合 VLP-16，见 [vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md) |
 | Nav2 配置 | ✅ 首闭环（08-15）+ 降额过缝验证（08-17） | AMCL 定位 + MPPI 跟踪 + velocity_smoother；降额参数（0.2/0.15/0.4）实车闭环成功，见 [retrospect 08-15](retrospect/2026-08-15_nav2_bringup.md)；08-17 inflation 0.30 过缝验证通过（无碰撞），见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)；全速验证暂缓 |
-| W2 收尾（08-18 起） | 🟡 进行中 | 到达误差测量（方案+脚本见 [w2-operation.md](minimal-loop/w2-operation.md) D7）、连续导航测试（D5-6）、rviz 显示项确认；全速验证**暂缓**（切 nav2_params.yaml 前须先同步其膨胀参数仍 0.55） |
+| A1 避障实测（08-25 起现行主线） | 🟡 进行中 | 08-25 首轮 + 漏录重录决策；**09-04 低物盲区断点已定位待重测**；判据 5/5、09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md)；执行卡 [execution.md A1](minimal-loop2/execution.md)、重录卡 [relog-operation.md](minimal-loop2/relog-operation.md) |
+| W2 收尾核对 | 🟡 待核 | D5-6 连续导航 / D7 到达误差是否已随 A1 覆盖（[pending-tasks.md §⑤](pending-tasks.md)、[w2-operation.md](minimal-loop/w2-operation.md)） |
+| 全速版 Nav2 验证 | ⏸️ 暂缓（08-17 决策） | 切回 nav2_params.yaml 前须先同步膨胀参数 0.55→0.30（见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)） |
 
 ### Phase 4：D435 + Jetson 视觉 AI ⏳
 
