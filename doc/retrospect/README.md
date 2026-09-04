@@ -46,6 +46,7 @@
 | [2026-09-03_doc_engineering.md](2026-09-03_doc_engineering.md) | 文档工程整理复盘（规则化见 [doc-engineering.md](../doc-engineering.md)） |
 | [2026-09-04_bags_migration.md](2026-09-04_bags_migration.md) | 数据资产目录跨仓迁移复盘（bags 入仓 09-04；规则化见 doc-engineering §八） |
 | [2026-09-04_lowobstacle_breakpoint.md](2026-09-04_lowobstacle_breakpoint.md) | 低物盲区断点定位：relog 三层精分析（断点 = velodyne→scan 转换层） |
+| [2026-09-04_experience-layer-decision.md](2026-09-04_experience-layer-decision.md) | 经验四层制（事件/draft/规则/索引）定稿 + 抽取盘点方案 A（阶段收尾即盘点，首个 09-10 A1 收口） |
 
 ## 专题（无日期前缀）
 

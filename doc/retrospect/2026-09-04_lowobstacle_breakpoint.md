@@ -9,7 +9,7 @@
 > [relog-operation.md §5](../minimal-loop2/relog-operation.md)（三层断点判定表）、
 > [raw_relog_0903_observations_2026-09-03_2120.txt](../raw_data/raw_relog_0903_observations_2026-09-03_2120.txt)（现场原始记录）
 > 收尾（09-04 晚）：§六 遗留五项已全部处理收口（证据/回写见 §10.5 与 §六 表下补注）——本复盘闭环；
-> 经验方法沉淀落 [ros2-ops.md §5.1/5.2](../ros2-ops.md)
+> 经验方法以 draft 形态沉淀落 [doc/analysis-methods.md](../analysis-methods.md)（未成熟不直接入规范）
 
 ---
 
