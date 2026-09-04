@@ -238,6 +238,7 @@ r2_integration/
 │   ├── startup.md           全局：R2 启动手册（全栈启动命令唯一权威，2026-09-04 从 07 §三 拆出）
 │   ├── pending-tasks.md     全局：近期待办汇总索引（2026-09-03 起，单条一句话 + 源文档入口，不承载状态）
 │   ├── doc-engineering.md   全局：文档工程规范（整理/重构/校验/双仓同步，2026-09-03 起）
+│   ├── analysis-methods.md  数据分析方法经验长文档（draft 层：新经验先落此，成熟后抽取入规范，2026-09-04 起）
 │   │
 │   ├── minimal-loop/        最小闭环 W1/W2 执行史（plan + w1/w2/w3-operation + Nav2 bringup + 审计）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan + execution/relog/costmap 执行卡）
