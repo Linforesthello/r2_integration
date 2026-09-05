@@ -1,6 +1,6 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-09-04（状态刷新 + Phase 0 细节指针化）
+> 最后更新: 2026-09-05（低物盲区修法 B VM 验收 PASS + 必备两节规则化入近期完成）
 > 内容: 当前完成状态快照——Phase 进度、近期完成、现役技术状态。
 > 交接总览 → [07-handover.md](07-handover.md)；事件详细索引 → [retrospect/README.md](retrospect/README.md)；待办 → [pending-tasks.md](pending-tasks.md)
 
@@ -17,8 +17,10 @@
 | FAST-LIO2 实车验证（08-24） | N97 部署 + VLP-16 全链路验证通过：**旋转误差 <2° / 平移 0.5%**（部署手册 [fastlio2-n97-deploy.md](n97/fastlio2-n97-deploy.md)）；08-18 前 ROS2 分支 Livox 硬依赖编译失败已解决，列为 A2 主线 |
 | A1 避障首轮 + 重录决策（08-25） | W3 首轮 3 bag 漏录 /velodyne_points 与 costmap 系列 → 按 [ros2-ops.md §9](ros2-ops.md) 判**重录**；Greenwave 方案 B 选定（[greenwave-monitor-deploy.md](n97/greenwave-monitor-deploy.md)） |
 | costmap 远刷闭环 + doc 整理（09-03） | costmap 远距离刷新验证闭环（[retrospect 09-03](retrospect/2026-09-03_costmap_far_refresh_closed.md)）；doc 第一层次职能拆分规则化（[retrospect 09-03](retrospect/2026-09-03_doc_engineering.md)） |
-| 低物盲区断点 + bags 入仓（09-04） | relog 三层精分析**定位低物盲区断点（待重测）**（[retrospect 09-04](retrospect/2026-09-04_lowobstacle_breakpoint.md)）；bags 数据资产跨仓迁移入仓（[retrospect 09-04](retrospect/2026-09-04_bags_migration.md)） |
+| 低物盲区断点 + bags 入仓（09-04） | relog 三层精分析**定位低物盲区断点**（→ 09-05 修法 B 验收，见下行；[retrospect 09-04](retrospect/2026-09-04_lowobstacle_breakpoint.md)）；bags 数据资产跨仓迁移入仓（[retrospect 09-04](retrospect/2026-09-04_bags_migration.md)） |
 | 07-handover 职能拆分（09-04） | 启动命令 → [startup.md](startup.md)（全栈唯一权威）；事件索引 → [retrospect/README.md](retrospect/README.md)；07 瘦身 258→76 行（本文件为拆分后同步刷新） |
+| 低物盲区修法 B VM 验收 PASS（09-05） | local voxel_layer 增 velodyne_low 低带源 [0, 0.40]（[nav2_params_low.yaml](../r2_bringup/config/nav2_params_low.yaml)，commit 7b746ef）；**bag 抽帧重发法验收**：W1/W2 判据 254 格命中、89 帧证据（scan 同方位开阔排除旧源）；剩余 = N97 实车检查单 — [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md) |
+| retrospect 必备两节规则化（09-05） | [standards.md](standards.md) §1.14/§2.8：复盘/结案/排障长记录**必备 方法模板节 + 经验点层次标注节**（范本 = 09-05 档）；四层制决策档同步 — [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md) |
 
 ---
 
@@ -53,7 +55,7 @@
 |:------|:-----|:------|:------|
 | **1** | G354 IMU + 轮速 → EKF 融合 | Phase 0 | ✅ 95% 实车验证完成（08-06）；yaw 方案①通过（08-12）；仅剩 slip 剧烈加减速 z 漂移严格复测（[pending-tasks.md §⑤](pending-tasks.md)，非阻塞） |
 | **2** | 3D LiDAR SLAM (VLP16 + KISS-ICP) | Phase 0 | ✅ 100% 驱动+里程计+键盘建图全跑通（现役 KISS；FAST-LIO2 已实车验证可替代，见上表 08-24） |
-| **3** | VLP16 + Nav2 导航 | Phase 1+2 | ⏳ 25% 首闭环（08-15）+ 降额过缝验证（08-17，无碰撞）；**A1 避障实测进行中**——08-25 首轮 + 09-04 低物盲区断点已定位待重测；全速验证暂缓（08-17 决策）；09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md) |
+| **3** | VLP16 + Nav2 导航 | Phase 1+2 | ⏳ 25% 首闭环（08-15）+ 降额过缝验证（08-17，无碰撞）；**A1 避障实测进行中**——08-25 首轮 + 低物盲区断点定位（09-04）→ 修法 B VM 验收 PASS（09-05，实车验证待 N97 检查单）；全速验证暂缓（08-17 决策）；09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md) |
 | **4** | D435 + Jetson YOLO 视觉 | Phase 0 | ⏳ 0% |
 | **5** | 气动+异常处理+Robocon编排 | 全部 | ⏳ 0% |
 
