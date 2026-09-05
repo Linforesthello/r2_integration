@@ -101,6 +101,9 @@ r2_integration/
 │   │   ├── recruitment-learning-plan-review.md  三阶段总纲评审稿（判断 1-3 + W1-W4 决策记录）
 │   │   └── nav2-knowledge-tree.md               Nav2 知识树（R2 实战版）
 │   │
+│   ├── surveys/  ← 调研/选型留档区（问题导向调研清单，跟项目走，2026-09-05 建）
+│   │   └── 3d-lidar-2d-navigation-survey.md     低矮障碍感知手段调研（3D→2D 转换层选环，09-05 核实，全站链接可回查）
+│   │
 │   ├── profiles/  ← 对象档案层（实体为中心横切视图：spec v0.1 + README，09-04 建）
 │   │   ├── spec.md              对象档案规范（建档门槛/模板/纪律，v0.1 试行）
 │   │   └── README.md            对象档案目录与整体介绍
