@@ -57,6 +57,8 @@
 - 可选：VLP-16 vs MID-70 实机 A/B（触发条件已满足，未做）— [planning-control-roadmap.md §3.4](roadmaps/planning-control-roadmap.md)
 - 可选：MPPI batch 调优（视 N97 CPU 实测）— [nav2-bringup.md](minimal-loop/nav2-bringup.md)
 - 遗留现象（算法本底非故障）：KISS 抖动/旋转点云滞后 → 长期方案已由 FAST-LIO2 承接 — [07-handover.md §三](07-handover.md)
+- **handover 措辞统一**：07-handover/02-progress/03-current_state「低物盲区…待重测」过时 → A1 收尾时刷新为「断点已定位（velodyne→scan 转换层单环 +1°，复盘 09-04），修法后置」 — [07-handover.md §一](07-handover.md)、[复盘 09-04](retrospect/2026-09-04_lowobstacle_breakpoint.md)
+- **09-10 收口盘点（方案 A 首轮）**：以 retrospect/README 过新增事件 → 筛跨事件可复用 → 归入规范（只增不删）+ analysis-methods 抽取状态表更新；**profiles v0.1 试行评估**（试建 1~2 档结论 → 提炼入 doc-engineering 或归档）— [decision 09-04 §三/§五](retrospect/2026-09-04_experience-layer-decision.md)、[profiles/spec.md §5](profiles/spec.md)
 
 ## ⑥ 远期池（阶段二+ / 计划态，仅入口备查，不排期）
 
