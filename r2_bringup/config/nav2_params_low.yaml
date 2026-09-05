@@ -247,7 +247,7 @@ local_costmap:
         z_voxels: 16
         max_obstacle_height: 2.0
         mark_threshold: 0
-        observation_sources: scan
+        observation_sources: "scan velodyne_low"   # humble 版 string 型，空格分隔多源（list 型会在 configure 报类型错）
         scan:
           topic: /scan
           max_obstacle_height: 2.0
@@ -258,6 +258,25 @@ local_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 8.0
           obstacle_min_range: 0.0
+        # 低带 points 源（09-05 实施，低物盲区修法 B——local 先行，全局 A 待 B VM 验收后开启）
+        # 作用: /velodyne_points 全环点云按高度带 [0, 0.40] 截取，让低环(rings 0~6 下俯环)命中
+        #   的 0.3m 矮物进入 local costmap（修 /scan 单环 +1° 上仰的结构性盲区，复盘 09-04 §10.4）。
+        # 几何: VLP-16 光学中心距地 0.775m；地面 z≈-0.12（odom，EKF z 锁 0）→ 窗底 0 起已滤地；
+        #   0.3m 矮物顶 ≈ odom z 0.18 ∈ 带内；ring 8(+1°) 光束最低 z≈0.66 永不进带。
+        # 语义: voxel 3D raycast 清空自洽（射线自高处越过矮物，不清矮物单元）；本源不同时清 scan 的墙。
+        # 初值待调: 带顶 0.40（调大→吃更高侧壁/噪声；调小→漏 0.3m 物顶）；N97 实机用 publish_voxel_map 验证。
+        velodyne_low:
+          topic: /velodyne_points
+          data_type: "PointCloud2"
+          min_obstacle_height: 0.0
+          max_obstacle_height: 0.40
+          marking: True
+          clearing: True
+          raytrace_max_range: 8.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 8.0
+          obstacle_min_range: 0.0
+          expected_update_rate: 10.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
