@@ -47,6 +47,8 @@
 
 ## ⑤ 排障/技术遗留（非主线，随手收）
 
+- **低物盲区修法 B（已 VM 验收 PASS，09-05）**：local voxel_layer 增 velodyne_low 源（/velodyne_points 高度带 [0, 0.40]），nav2_params_low.yaml 已改 + VM install 已同步；验收 = bag 抽帧重发法（wall+静态 tf，W1/W2 判据 254 格命中，89 帧证据）— [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md)、[surveys/3d-lidar-2d-navigation-survey.md §二 ②](surveys/3d-lidar-2d-navigation-survey.md)、[复盘 09-04 §五](retrospect/2026-09-04_lowobstacle_breakpoint.md)
+- **低物盲区修法 A（待启）**：global+local 全面开启（global obstacle_layer 增同源）；前置 = B VM 验收通过 + 当前文档整理完（09-05 用户决策）— [surveys/3d-lidar-2d-navigation-survey.md §二 ②](surveys/3d-lidar-2d-navigation-survey.md)
 - **z 漂移回归项**：slip 场景剧烈加减速 z 漂 +2.5m 严格复测 — [07-handover.md §四](07-handover.md)、[02-progress.md](02-progress.md)
 - **AMCL 多次设初始位姿 → map 重叠**：待 N97 确认日志是否 "Ignoring initial pose"，必要时 `always_reset_initial_pose: true`（注意边界：仅指导航运行中反复设位姿）— [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)、[07-handover.md §四](07-handover.md)
 - **costmap 实验收尾**：修 pub_simple_scan.py 退出 1（查 /tmp/pub_dist.log）；远距离 2/3/4/5m mark 重测（判据未满）；N97 侧 lifecycle 激活态 + 远端实测 — [costmap_experiment.md §四/§五](minimal-loop2/costmap_experiment.md)
@@ -59,6 +61,7 @@
 - 遗留现象（算法本底非故障）：KISS 抖动/旋转点云滞后 → 长期方案已由 FAST-LIO2 承接 — [07-handover.md §三](07-handover.md)
 - **handover 措辞统一**：07-handover/02-progress/03-current_state「低物盲区…待重测」过时 → A1 收尾时刷新为「断点已定位（velodyne→scan 转换层单环 +1°，复盘 09-04），修法后置」 — [07-handover.md §一](07-handover.md)、[复盘 09-04](retrospect/2026-09-04_lowobstacle_breakpoint.md)
 - **09-10 收口盘点（方案 A 首轮）**：以 retrospect/README 过新增事件 → 筛跨事件可复用 → 归入规范（只增不删）+ analysis-methods 抽取状态表更新；**profiles v0.1 试行评估**（试建 1~2 档结论 → 提炼入 doc-engineering 或归档）— [decision 09-04 §三/§五](retrospect/2026-09-04_experience-layer-decision.md)、[profiles/spec.md §5](profiles/spec.md)
+- **R2 会话/工作区迁出 STM32_Now**（09-05 记，待做）：R2 的 Claude 会话与 VSCode 工作区错挂在 `STM32_Now` 下（仓促期遗留，会话/文件夹层级不属于 R2 层）→ 在 `~/Lin_workspace/r2_integration` 新起文件夹 + code-workspace，之后选择性迁移 R2 相关会话到新项目哈希（含本会话 d057f710-6942-4a9f-9685-f10264432c5e）— 哈希算法/迁移步骤见 `~/ProjectRequirement/MCU/Lin_STM32/STM32_F103C8T6/STM32_Now/doc/claude_conversation_migration.md`（跨仓文档，不入链）
 
 ## ⑥ 远期池（阶段二+ / 计划态，仅入口备查，不排期）
 

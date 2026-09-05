@@ -84,7 +84,8 @@ r2_integration/
 │   │   ├── 2026-09-03_doc_engineering.md                  文档工程整理复盘（09-03，规则化见 doc-engineering.md）
 │   │   ├── 2026-09-04_lowobstacle_breakpoint.md           低物盲区断点定位：relog 三层精分析（09-04）
 │   │   ├── 2026-09-04_experience-layer-decision.md        经验四层制定稿 + 抽取盘点方案 A（09-04，待整合 doc-engineering）
-│   │   └── 2026-09-04_bags_migration.md                   数据资产目录跨仓迁移复盘（bags 入仓，09-04）
+│   │   ├── 2026-09-04_bags_migration.md                   数据资产目录跨仓迁移复盘（bags 入仓，09-04）
+│   │   └── 2026-09-05_lowobstacle_fixB_vm_acceptance.md   修法 B VM 验收 PASS + bag 抽帧重发法模板 + 经验点（09-05）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）

@@ -2,6 +2,7 @@
 
 > 定位：`doc/retrospect/` 的**结论速查索引**——「某类问题当时怎么解决的」先查此表，点详情看完整排障/复盘。
 > 规则：文件命名 `YYYY-MM-DD_主题.md`（专题探索无日期前缀）；新增事件记录后，在本文登记一行，并同步根 README 文件树。
+> **必备结构（2026-09-05 起，见 standards §2.8）**：每篇须含「方法模板节」+「经验点层次标注节」再登记；范本 = [2026-09-05_lowobstacle_fixB_vm_acceptance.md](2026-09-05_lowobstacle_fixB_vm_acceptance.md)
 > 本文只承载「一句话结论」；详情一律以各文件为准（standards.md §1.1 单一事实来源）。
 > 状态类信息以 [07-handover.md](../07-handover.md)（交接）/ [pending-tasks.md](../pending-tasks.md)（待办）为准。
 
@@ -47,6 +48,7 @@
 | [2026-09-04_bags_migration.md](2026-09-04_bags_migration.md) | 数据资产目录跨仓迁移复盘（bags 入仓 09-04；规则化见 doc-engineering §八） |
 | [2026-09-04_lowobstacle_breakpoint.md](2026-09-04_lowobstacle_breakpoint.md) | 低物盲区断点定位：relog 三层精分析（断点 = velodyne→scan 转换层） |
 | [2026-09-04_experience-layer-decision.md](2026-09-04_experience-layer-decision.md) | 经验四层制（事件/draft/规则/索引）定稿 + 抽取盘点方案 A（阶段收尾即盘点，首个 09-10 A1 收口） |
+| [2026-09-05_lowobstacle_fixB_vm_acceptance.md](2026-09-05_lowobstacle_fixB_vm_acceptance.md) | 修法 B VM 验收 PASS（bag 抽帧重发法定型 + 方法模板 ①-⑥ + 经验点 E1-E8 层次标注；sim 回放 known trouble） |
 
 ## 专题（无日期前缀）
 
