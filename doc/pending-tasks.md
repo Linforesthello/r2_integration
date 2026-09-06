@@ -26,7 +26,7 @@
 - 作品集项目页 ×2 + 单项目 5 分钟深挖稿（R2 导航闭环 / FAST-LIO2 二选一等素材库决定）— §4.2
 - 双线投递启动（岗位信息来源池维护）；每场面试 24h 内复盘回写信息池 — §4.2
 - 阶段一 exit（09-30）：简历 v2 / 投递推进 / A1 收口 / 项目页 / 素材入库 / 面试复盘六项齐 — §4.4
-- 附项：车体健康检查清单执行状态确认（参数核对 + hz 基线表）— [recruitment-learning-plan-review.md §3.5](roadmaps/recruitment-learning-plan-review.md)
+- 附项：车体健康检查清单执行状态确认（参数核对 + hz 基线表；工具已入库 [topic_hz_check.py](../scripts/topic_hz_check.py) + 首测基线 09-06 [retrospect §10](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)）— [recruitment-learning-plan-review.md §3.5](roadmaps/recruitment-learning-plan-review.md)
 
 ## ③ FAST-LIO2（A2 主线，正式开工入阶段二）
 
@@ -47,8 +47,10 @@
 
 ## ⑤ 排障/技术遗留（非主线，随手收）
 
-- **低物盲区修法 B（VM 验收 PASS，09-05；剩余 = N97 实车检查单）**：local voxel_layer 增 velodyne_low 源（/velodyne_points 高度带 [0, 0.40]），nav2_params_low.yaml 已 commit（7b746ef）+ VM install 已同步；验收 = bag 抽帧重发法（wall+静态 tf，W1/W2 判据 254 格命中，89 帧证据）；**实车检查单**：install 副本同步（colcon build）/启动验证/publish_voxel_map/带顶 0.40 评估 — [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md)、[surveys/3d-lidar-2d-navigation-survey.md §二 ②](surveys/3d-lidar-2d-navigation-survey.md)、[复盘 09-04 §五](retrospect/2026-09-04_lowobstacle_breakpoint.md)
-- **低物盲区修法 A（待启，前置已满足）**：global+local 全面开启（global obstacle_layer 增同源）；前置 = B VM 验收通过 + 当前文档整理完（09-05 双满足）；启动时机用户定（可并入 N97 实车窗口，消 global/scan 消费方盲区）— [surveys/3d-lidar-2d-navigation-survey.md §二 ②](surveys/3d-lidar-2d-navigation-survey.md)
+- **低物盲区修法 B+A（实车链 09-06 阶段结论）**：修法 B（local velodyne_low，VM PASS 09-05）+ 修法 A（global 同源，commit e87a3f8）均已实车实施验证——**local/global 远距均能刷出低箱 254 黑块**（修法 A 生效）；但暴露出**近距丢黑块**新问题（下述）— 全记录 [retrospect 09-06](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)（含 VM 验收 09-05、N97 取证、hz 检测 §10）、[surveys/3d-lidar-2d-navigation-survey.md §二 ②](surveys/3d-lidar-2d-navigation-survey.md)
+- **近距丢黑块（09-06 开放，A1 静态绕行低物判据阻塞项）**：0.35m 箱距车 <~1.59m 时低带源全线掠顶（几何视锥临界 d=(0.655−0.23)/tan15°）无 mark 输入 + scan 同层 raytrace clear 持续清空 → global 254 归零 → 撞箱；**修复候选 = velodyne_low 拆独立 mark-only 层（隔离 scan clear），待设计验证** — [retrospect 09-06 §8](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)
+- **global costmap 更新节流观察项（09-06）**：名义 publish_frequency 1.0Hz 实测 0.64Hz（大图 update 节流 ~1.56s/帧）→ global 障碍反映延迟，与撞箱链相关待深究（update 耗时/分辨率/裁剪）— [scripts/topic_hz_check.py](../scripts/topic_hz_check.py)、[retrospect 09-06 §10](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)
+- **VLP-16 "3Hz"观测点未对齐（09-06 开放）**：N97 现场实测 points/scan 10.36Hz 稳定无 3Hz；疑 greenwave BEST_EFFORT 订阅 reliable 大消息有损（qos-dds §一/§三.1），高负载复核 — [retrospect 09-06 §二/§10](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)、[raw_data 0909](raw_data/raw_低带几何_VLP16频率查证_2026-09-06_0909.md)
 - **z 漂移回归项**：slip 场景剧烈加减速 z 漂 +2.5m 严格复测 — [07-handover.md §四](07-handover.md)、[02-progress.md](02-progress.md)
 - **AMCL 多次设初始位姿 → map 重叠**：待 N97 确认日志是否 "Ignoring initial pose"，必要时 `always_reset_initial_pose: true`（注意边界：仅指导航运行中反复设位姿）— [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)、[07-handover.md §四](07-handover.md)
 - **costmap 实验收尾**：修 pub_simple_scan.py 退出 1（查 /tmp/pub_dist.log）；远距离 2/3/4/5m mark 重测（判据未满）；N97 侧 lifecycle 激活态 + 远端实测 — [costmap_experiment.md §四/§五](minimal-loop2/costmap_experiment.md)
