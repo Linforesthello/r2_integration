@@ -103,7 +103,9 @@ r2_integration/
 │   │   └── nav2-knowledge-tree.md               Nav2 知识树（R2 实战版）
 │   │
 │   ├── surveys/  ← 调研/选型留档区（问题导向调研清单，跟项目走，2026-09-05 建）
-│   │   └── 3d-lidar-2d-navigation-survey.md     低矮障碍感知手段调研（3D→2D 转换层选环，09-05 核实，全站链接可回查）
+│   │   ├── 3d-lidar-2d-navigation-survey.md           低矮障碍感知手段调研（09-05；09-06 实车更新 §三B：物理边界实锤）
+│   │   ├── navigation-behavior-safety-survey.md       导航行为病×安全设计调研（Q1 灰格/Q2 转弯 margin/Q5 IMU 安全，09-06）
+│   │   └── chassis-kinematics-controller-survey.md    底盘运动学×控制器选型调研（Q3 全向轮行为/Q4 舵轮 MPPI 路线，09-06）
 │   │
 │   ├── profiles/  ← 对象档案层（实体为中心横切视图：spec v0.1 + README，09-04 建）
 │   │   ├── spec.md              对象档案规范（建档门槛/模板/纪律，v0.1 试行）
