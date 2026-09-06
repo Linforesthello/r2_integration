@@ -209,3 +209,34 @@ PointCloud2 观察源同样支持 min/max_obstacle_height 高度带过滤，过�
 | E9 | **全图 diff 判丢失会被 costmap origin/窗口变化污染**（假消失呈地图边缘整带）——判局部丢改用**定点窗口逐帧计数 vs 车距曲线** | 规则层：analysis-methods |
 | E10 | **几何视锥临界**：低带源对 h 高物的打顶临界 d=(z_光学−z_顶)/tan(最低环角)；低于临界全线掠过——低物 mark 输入是**距离函数**，非"看到就持续有" | 规则层/draft |
 | E11 | nav2 同层内 clear 无差别（scan clear 会清同层 low mark）；**mark/clear 冲突隔离 = 拆独立层**是标准做法 | draft（nav2 多层设计） |
+| E12 | 大话题 hz 检测工具约束：CLI `hz` best_effort 假阴性 → 自研 rclpy 并发测频脚本（QoS 自适应 + TL 话题处理），一次 10s 全车出表 | 规则层：ros2-qos-dds 附录 |
+
+## 十、全车话题 hz 检测（2026-09-06，N97 现场，含早间 3Hz 疑云复核）
+
+工具：`scripts/topic_hz_check.py`（并发单窗口测频，rclpy；reliable→best_effort QoS 自适应；
+transient_local 话题 TL 订阅；期望表依据本日 bag 实测推算）
+
+实测结果（nav2 全套 + velodyne 运行中，10s 窗）：
+
+| 类别 | 话题 | 实测 Hz | 期望 | 判定 |
+|:--|:--|:--|:--|:--|
+| 雷达 | /velodyne_points | 10.36 | 10 | ✅ |
+| | /scan | 10.36 | 10 | ✅ |
+| | /velodyne_packets | 10.36 | 10 | ✅ |
+| 里程计 | /odom_wheels | 50.6 | 50 | ✅ |
+| | /odometry/filtered | 30.4 | 30 | ✅ |
+| | /tf | 40.5 | 40 | ✅ |
+| IMU | /imu/data | 82.2 | 85 | ✅ |
+| costmap | /local_costmap/costmap_raw | 1.71 | 2 | ✅ |
+| | /local_costmap/voxel_grid | 5.07 | 5 | ✅ |
+| | /local_costmap/clearing_endpoints | 10.0 | 10 | ✅ |
+| | /global_costmap/costmap_raw | **0.64** | 1.0 | ❌ 观察项 |
+| 监测 | /diagnostics | 18.1 | 18 | ✅ |
+
+结论：
+- **points/scan 全程 10.36Hz 稳定达标——早间"3Hz"现象未复现**（观测点未对齐问题仍开放，greenwave
+  BEST_EFFORT 订阅 reliable 大消息风险待高负载复核，见 §二/raw_data 0909）
+- **观察项：global costmap 名义 1.0Hz 实测 0.64Hz**（大图 update 节流 ~1.56s/帧）——global 障碍反映
+  延迟与撞箱链相关（planner 用过期图），后续深究方向：global update 耗时/分辨率/裁剪
+
+经验点：E12（大话题测频工具约束与自研脚本）。
