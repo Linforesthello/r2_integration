@@ -297,7 +297,7 @@ global_costmap:
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
-        observation_sources: scan
+        observation_sources: "scan velodyne_low"   # 全局低带源（09-06 修法 A 实施，同 local 写法）
         scan:
           topic: /scan
           max_obstacle_height: 2.0
@@ -308,6 +308,22 @@ global_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 8.0
           obstacle_min_range: 0.0
+        # 低带 points 源（09-06 修法 A＝修法 B 的 global 侧：撞箱根因 = global 无低带源，planner 失明直冲）
+        # 作用: 低带 [0,0.40] 内低环命中点 2D mark → global 出 254 黑块 → planner 避障。
+        # 验证: 09-06 crashbox bag verify（local 254=316 格 / global 254=0 格）；本块加后 global 箱区应出 254。
+        # 注意: ObstacleLayer 为 2D 层，与 local VoxelLayer 3D 语义差异见 retrospect 09-06 §7.2。
+        velodyne_low:
+          topic: /velodyne_points
+          data_type: "PointCloud2"
+          min_obstacle_height: 0.0
+          max_obstacle_height: 0.40
+          marking: True
+          clearing: True
+          raytrace_max_range: 8.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 8.0
+          obstacle_min_range: 0.0
+          expected_update_rate: 10.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True

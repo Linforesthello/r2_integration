@@ -49,6 +49,7 @@
 | [2026-09-04_lowobstacle_breakpoint.md](2026-09-04_lowobstacle_breakpoint.md) | 低物盲区断点定位：relog 三层精分析（断点 = velodyne→scan 转换层） |
 | [2026-09-04_experience-layer-decision.md](2026-09-04_experience-layer-decision.md) | 经验四层制（事件/draft/规则/索引）定稿 + 抽取盘点方案 A（阶段收尾即盘点，首个 09-10 A1 收口） |
 | [2026-09-05_lowobstacle_fixB_vm_acceptance.md](2026-09-05_lowobstacle_fixB_vm_acceptance.md) | 修法 B VM 验收 PASS（bag 抽帧重发法定型 + 方法模板 ①-⑥ + 经验点 E1-E8 层次标注；sim 回放 known trouble） |
+| [2026-09-06_lowobstacle_fixB_crashbox.md](2026-09-06_lowobstacle_fixB_crashbox.md) | 修法 B 实车撞箱验证：local 有 254/global 无 254（修法 A 未启）= 撞箱根因实锤；下一步修法 A |
 
 ## 专题（无日期前缀）
 
