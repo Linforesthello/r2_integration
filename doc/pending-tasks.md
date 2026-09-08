@@ -48,7 +48,7 @@
 ## ⑤ 排障/技术遗留（非主线，随手收）
 
 - **低物盲区修法 B+A（实车链 09-06 阶段结论）**：修法 B（local velodyne_low，VM PASS 09-05）+ 修法 A（global 同源，commit e87a3f8）均已实车实施验证——**local/global 远距均能刷出低箱 254 黑块**（修法 A 生效）；但暴露出**近距丢黑块**新问题（下述）— 全记录 [retrospect 09-06](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)（含 VM 验收 09-05、N97 取证、hz 检测 §10）、[surveys/3d-lidar-2d-navigation-survey.md §二 ②](surveys/3d-lidar-2d-navigation-survey.md)
-- **近距丢黑块（09-06 开放，A1 静态绕行低物判据阻塞项）**：0.35m 箱距车 <~1.59m 时低带源全线掠顶（几何视锥临界 d=(0.655−0.23)/tan15°）无 mark 输入 + scan 同层 raytrace clear 持续清空 → global 254 归零 → 撞箱；**修复候选 = velodyne_low 拆独立 mark-only 层（隔离 scan clear），待设计验证** — [retrospect 09-06 §8](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)
+- **近距丢黑块修复（VM A/B 验收 PASS 09-08）**：0.35m 箱临界 1.59m（传感轴）几何盲区定稿；修复 = `nav2_params_low.yaml` velodyne_low 拆独立 mark-only 层（config 已改**待提交**，提交后 N97 pull + colcon build 生效）；VM 反转重放 A/B = OLD 25→2 归零（复现）vs NEW 117 保留 ✅；实车验证视 09-10 前窗口 — [retrospect 09-08 acceptance](retrospect/2026-09-08_lowobstacle_fixB_ab_acceptance.md)、[ringlaw/cleandata](retrospect/2026-09-08_lowobstacle_ringlaw_cleandata.md)、根因见 [09-06 §8](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)
 - **global costmap 更新节流观察项（09-06）**：名义 publish_frequency 1.0Hz 实测 0.64Hz（大图 update 节流 ~1.56s/帧）→ global 障碍反映延迟，与撞箱链相关待深究（update 耗时/分辨率/裁剪）— [scripts/topic_hz_check.py](../scripts/topic_hz_check.py)、[retrospect 09-06 §10](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)
 - **VLP-16 "3Hz"观测点未对齐（09-06 开放）**：N97 现场实测 points/scan 10.36Hz 稳定无 3Hz；疑 greenwave BEST_EFFORT 订阅 reliable 大消息有损（qos-dds §一/§三.1），高负载复核 — [retrospect 09-06 §二/§10](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)、[raw_data 0909](raw_data/raw_低带几何_VLP16频率查证_2026-09-06_0909.md)
 - **z 漂移回归项**：slip 场景剧烈加减速 z 漂 +2.5m 严格复测 — [07-handover.md §四](07-handover.md)、[02-progress.md](02-progress.md)
@@ -56,7 +56,7 @@
 - **costmap 实验收尾**：修 pub_simple_scan.py 退出 1（查 /tmp/pub_dist.log）；远距离 2/3/4/5m mark 重测（判据未满）；N97 侧 lifecycle 激活态 + 远端实测 — [costmap_experiment.md §四/§五](minimal-loop2/costmap_experiment.md)
 - **W2 收尾核对**：D5-6 连续导航（≥5 goal 含 90° 转角）+ D7 验收项是否已随 A1 覆盖 — [w2-operation.md](minimal-loop/w2-operation.md)
 - **waypoint 雷达闭环**：基于 /kiss/odometry 的自主行走节点（待做）— [07-handover.md §四](07-handover.md)
-- 全速版 Nav2 验证 — **暂缓（08-17 决策）**；切回前须先同步 nav2_params.yaml 膨胀 0.55→0.30 — [07-handover.md §四](07-handover.md)
+- 全速版 Nav2 验证 — **暂缓（08-17 决策）**；切回前须先同步 nav2_params.yaml 膨胀 0.55→0.30 **及 obstacle_low_layer 独立 mark-only 结构**（09-08 修复，同 07-handover 警示）— [07-handover.md §四](07-handover.md)、[retrospect 09-08](retrospect/2026-09-08_lowobstacle_fixB_ab_acceptance.md)
 - 可选：VLP-16 rpm 600→1200（20Hz）帧内畸变试验 — [07-handover.md §四](07-handover.md)
 - 可选：VLP-16 vs MID-70 实机 A/B（触发条件已满足，未做）— [planning-control-roadmap.md §3.4](roadmaps/planning-control-roadmap.md)
 - 可选：MPPI batch 调优（视 N97 CPU 实测）— [nav2-bringup.md](minimal-loop/nav2-bringup.md)
