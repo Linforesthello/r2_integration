@@ -104,17 +104,17 @@
 | mark 相接近段 | 254 产生后部分被后续扫线清 | 254 产生且留存 |
 | blind 相（<1.6m） | 254 → 0（撞击复现） | 254 持续 ≥ 消退慢（留残影，属预期 tradeoff，见遗留 #2） |
 
-**执行前置**（吸取 09-06/09-08 污染教训）：A/B 两轮间必须 `pkill` 全量 costmap 进程链 + 进程残留自查（[ros2-ops.md §10](../ros2-ops.md)）；两轮输出做**首帧字节一致性**检查防双发布者污染。rig 保留于 /tmp（vm_run_ab.sh / vm_replay_approach.py / 两版 costmap yaml / vm_read_marks.py，会话期间有效）。
+**执行前置**（吸取 09-06/09-08 污染教训）：A/B 两轮间必须 `pkill` 全量 costmap 进程链 + 进程残留自查（[ros2-ops.md §10](../ros2-ops.md)）；两轮输出做**首帧字节一致性**检查防双发布者污染。rig 已入库 `bags/analysis/box_lowband_20260908/`（两版 costmap yaml / vm_replay_sweep_rev.py / vm_run_ab_sweep.sh / vm_read_marks.py / 原始 jsonl）。
 
 ## 六、遗留与下一步
 
 | # | 项 | 入口 |
 |:---|:---|:---|
-| 1 | **VM 两相重放验收**（本文档 §五，方法卡②；数据已就绪） | 待用户批准启动 |
+| 1 | ~~VM 两相重放验收~~ → **✅ 已执行 PASS（09-08）：OLD 箱区 254 25→2 归零 vs NEW 117 保留** | [acceptance 复盘](2026-09-08_lowobstacle_fixB_ab_acceptance.md) §四 |
 | 2 | **全速版 nav2_params.yaml 同步改造**：膨胀 0.55→0.30 + 同构 obstacle_low_layer（mark-only）——07 §三警示重申 | [07-handover §三](../07-handover.md) |
 | 3 | 实车验证 = N97 install 同步（colcon build）→ 修法 B 检查单流程 | [09-05 复盘 §X](2026-09-05_lowobstacle_fixB_vm_acceptance.md) |
 | 4 | A1 避障收口（判据 5/5）在 09-10 硬切换线前视窗口补跑 | [recruitment-learning-plan.md §4.1](../roadmaps/recruitment-learning-plan.md) |
-| 5 | 本复盘 config 改动 + 文档批量提交 | 待用户授权 |
+| 5 | ~~config 改动 + 文档批量提交~~ → **✅ 已提交已推（180077c / 4de17d3 / 6cfa966）+ 镜像同步 a5c15c3** | git log |
 
 ---
 

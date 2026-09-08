@@ -168,7 +168,7 @@ box_near 包实证近距（1.0~1.7m 区）低带命中 ≈ 0：盲区本底。
 
 | # | 项 | 状态/去向 |
 |:---|:---|:---|
-| 1 | 修复 config（nav2_params_low.yaml obstacle_low_layer 拆分）**待提交** | commit 待授权；N97 pull + colcon build 后生效 |
+| 1 | 修复 config（nav2_params_low.yaml obstacle_low_layer 拆分）→ **✅ 已提交已推（180077c）**；实车生效 = N97 pull + colcon build | — |
 | 2 | 全速版 `nav2_params.yaml` 同构修复（含膨胀 0.55→0.30 同步） | 未做；切回前必须同步（07-handover 警示） |
 | 3 | 实车 N97 验证（可选窗口 09-10 前）：A/B 检查单同 09-05 §（install 同步→publish_voxel_map→带顶评估） | 视窗口 |
 | 4 | 固有盲区（<1.59m 0.35m 箱任何 ring 不可见）不因本修复消失 | 产品语义边界，文档留档即可；更深方案见 [surveys/3d-lidar-2d-navigation-survey.md](../surveys/3d-lidar-2d-navigation-survey.md) |
