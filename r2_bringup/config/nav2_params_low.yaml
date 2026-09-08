@@ -293,11 +293,11 @@ global_costmap:
       footprint: "[[-0.42, -0.33], [-0.42, 0.33], [0.42, 0.33], [0.42, -0.33]]"
       resolution: 0.05
       track_unknown_space: true
-      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      plugins: ["static_layer", "obstacle_layer", "obstacle_low_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
-        observation_sources: "scan velodyne_low"   # 全局低带源（09-06 修法 A 实施，同 local 写法）
+        observation_sources: "scan"   # 09-06 crashbox 修复：low 源拆出独立层（见 obstacle_low_layer），scan clear 只清本层
         scan:
           topic: /scan
           max_obstacle_height: 2.0
@@ -308,19 +308,25 @@ global_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 8.0
           obstacle_min_range: 0.0
-        # 低带 points 源（09-06 修法 A＝修法 B 的 global 侧：撞箱根因 = global 无低带源，planner 失明直冲）
-        # 作用: 低带 [0,0.40] 内低环命中点 2D mark → global 出 254 黑块 → planner 避障。
-        # 验证: 09-06 crashbox bag verify（local 254=316 格 / global 254=0 格）；本块加后 global 箱区应出 254。
-        # 注意: ObstacleLayer 为 2D 层，与 local VoxelLayer 3D 语义差异见 retrospect 09-06 §7.2。
+      # 低带独立 mark-only 层（09-06 crashbox 近距丢黑块修复，方向 B，见 retrospect 09-06 §8.3/§11.3）
+      # 作用: 低带 [0,0.40] 内低环命中点 2D mark → global 出 254 黑块 → planner 避障。
+      # 为何独立: 原修法 A 把 velodyne_low 与 scan 同放 obstacle_layer —— 2D 层内 clear 无差别，
+      #   scan 射线(>箱顶) raytrace clear 会清掉 low 源已 mark 的 254；车近距(<~1.59m 几何临界)时
+      #   low 源对箱完全无点(mark 输入归零) → 254 净衰减到 0 → global 失明撞箱。
+      # 为何 mark-only: 本层仅低物 mark，clear 需求由"源消失即不再 mark"+ 车移动远离后观察不到
+      #   即自然失效承担；low 源自身 clear 也会误清同层(打远处墙射线穿箱格)。
+      # 代价: 已 mark 低物在层内持久(车远离/物移走后仍残留直到 costmap 重置) = 保守安全侧。
+      obstacle_low_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: True
+        observation_sources: "velodyne_low"
         velodyne_low:
           topic: /velodyne_points
           data_type: "PointCloud2"
           min_obstacle_height: 0.0
           max_obstacle_height: 0.40
           marking: True
-          clearing: True
-          raytrace_max_range: 8.0
-          raytrace_min_range: 0.0
+          clearing: False
           obstacle_max_range: 8.0
           obstacle_min_range: 0.0
           expected_update_rate: 10.0
