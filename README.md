@@ -85,7 +85,10 @@ r2_integration/
 │   │   ├── 2026-09-04_lowobstacle_breakpoint.md           低物盲区断点定位：relog 三层精分析（09-04）
 │   │   ├── 2026-09-04_experience-layer-decision.md        经验四层制定稿 + 抽取盘点方案 A（09-04，待整合 doc-engineering）
 │   │   ├── 2026-09-04_bags_migration.md                   数据资产目录跨仓迁移复盘（bags 入仓，09-04）
-│   │   └── 2026-09-05_lowobstacle_fixB_vm_acceptance.md   修法 B VM 验收 PASS + bag 抽帧重发法模板 + 经验点（09-05）
+│   │   ├── 2026-09-05_lowobstacle_fixB_vm_acceptance.md   修法 B VM 验收 PASS + bag 抽帧重发法模板 + 经验点（09-05）
+│   │   ├── 2026-09-06_lowobstacle_fixB_crashbox.md        修法 B 实车撞箱验证：local 254 / global 无 = 根因实锤（09-06）
+│   │   ├── 2026-09-08_lowobstacle_ringlaw_cleandata.md    纯净三录 + ring 几何律：盲区边界 1.59m 实锤（09-08）
+│   │   └── 2026-09-08_lowobstacle_fixB_ab_acceptance.md   修复 VM A/B 验收 PASS：反转重放 OLD 归零 vs NEW 保留（09-08）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）
