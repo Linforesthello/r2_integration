@@ -201,7 +201,7 @@ R2 断点（复盘 09-04 钉死）：/velodyne_points **有完整低环数据**�
 ## 三B、手段实施结果与物理边界实锤（2026-09-06 实车更新）
 
 > 事实来源：09-06 实车链（修法 B/A 实施 + 三次撞箱 bag 分析），事件复盘与数据见
-> [retrospect 09-06](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)。
+> [retrospect 09-06](../retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)。
 
 ### 三B.1 手段落地状态（对照 §三 校正表）
 
