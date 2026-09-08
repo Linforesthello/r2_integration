@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""VLP-16 ring 几何律标定（09-08 纯净数据系列配套）：
+"""VLP-16 ring 几何律标定（09-07 纯净数据系列配套）：
 读本机校准文件 VLP16db.yaml 的 vert_correction → 得到 16 ring 仰角 →
 对 0.35m 低箱（顶 h_top=0.35，雷达离地 H=0.775）计算每条向下 ring 的可见距离窗
 [d_top, d_gnd]（d_top=打顶距离=(H-h)/tanθ，d_gnd=打到地面距离=H/tanθ）→ 输出理论表。
@@ -34,6 +34,6 @@ for lid, v in rows:
 
 # 关键边界：逐条 ring 打顶距离递减表（接近方向最先消失 = -15° @1.59m）
 print('\n盲区边界（低于该距离 ring 即过顶不可见）: 最近消失 ring = -15° @ 1.59m（传感轴参照）')
-print('逐帧实测验证点（TrendsParallel 20260908_1056）：face 2.10m → -15 打面 0.215 / -13 打面 0.295 / -11 顶面擦边 0.353')
+print('逐帧实测验证点（TrendsParallel 20260907_1056）：face 2.10m → -15 打面 0.215 / -13 打面 0.295 / -11 顶面擦边 0.353')
 print('  理论: -15: 0.775-2.10*tan15 = %.3f;  -13: %.3f;  -11 顶面擦边（d_top=2.19 在 [face 2.10, back 2.45] 内）'
       % (0.775-2.10*math.tan(math.radians(15)), 0.775-2.10*math.tan(math.radians(13))))

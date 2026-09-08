@@ -9,7 +9,7 @@ import numpy as np, rosbag2_py, yaml, sys, os
 from rclpy.serialization import deserialize_message
 from rosidl_runtime_py.utilities import get_message
 
-BAG = '/home/lin/Lin_workspace/r2_integration/bags/raw/box_TrendsParallel_20260908_1056'
+BAG = '/home/lin/Lin_workspace/r2_integration/bags/raw/box_TrendsParallel_20260907_1056'
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sweep_frames_out.txt')
 
 def parse_pc2(msg):

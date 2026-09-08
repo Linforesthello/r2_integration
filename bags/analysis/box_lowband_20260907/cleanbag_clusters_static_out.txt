@@ -1,5 +1,5 @@
-[INFO] [1788837496.365596841] [rosbag2_storage]: Opened database '/home/lin/Lin_workspace/r2_integration/bags/raw/box_static_20260908_1019/box_static_20260908_1019_0.db3' for READ_ONLY.
-== box_static_20260908_1019  全帧累积点 5981852（213 帧）
+[INFO] [1788837496.365596841] [rosbag2_storage]: Opened database '/home/lin/Lin_workspace/r2_integration/bags/raw/box_static_20260907_1019/box_static_20260907_1019_0.db3' for READ_ONLY.
+== box_static_20260907_1019  全帧累积点 5981852（213 帧）
   [低带(箱 0.05~0.365m)] 锥内点 111295
     格=(2.05,0.15) n=6022 z->h=[0.231,0.315]m dist=2.05m az=4.2°
     格=(2.05,-0.05) n=5997 z->h=[0.231,0.315]m dist=2.05m az=-1.4°

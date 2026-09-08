@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""09-08 纯净 bag（box_static / box_near）低带簇定位（复用 09-06 find_box_in_points 逻辑）。
+"""09-07 纯净 bag（box_static / box_near）低带簇定位（复用 09-06 find_box_in_points 逻辑）。
 用法: python3 cleanbag_clusters.py <bag路径>   全帧累积 ±16° 锥内 0.1m 格直方图 top12。
 低带 z 带 = (-0.73, -0.41)（ground=-0.775, 箱 0.05~0.365m）；全高带含对照。
 纯离线（rosbag2_py + numpy），不开 ROS。
