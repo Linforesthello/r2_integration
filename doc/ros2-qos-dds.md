@@ -43,6 +43,16 @@ ros2 topic echo <topic> --qos-reliability reliable --field header.stamp   # 轻�
 
 或 `ros2 bag record` 后查 metadata.yaml 的 `message_count`（免费、确凿、可回溯）。
 
+**latched/瞬态话题（map_server 的 /map）工具姿势**（08-13 实测）：
+- map_server 单发 `/map` = durability **transient_local**（latched）：`ros2 topic hz` 默认
+  best_effort + volatile 收不到 → "一直等"是工具限制，不是链路断
+- rviz2 的 Map display 订阅默认 volatile → 同样收不到，须手动设 Durability = **Transient Local**
+- 验证姿势：`ros2 topic echo /map --qos-durability transient_local --field info`，或确认 rviz 设置
+  （案例见 [retrospect 08-13](retrospect/2026-08-13_map_chain_investigation.md)）
+
+**自研并发测频工具**（hz best_effort 假阴性的工程替代，09-06 起）：`scripts/topic_hz_check.py`
+按 reliable 参数并发订阅多话题测频，需要时可复用（案例见 [retrospect 09-06](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md) E12）。
+
 ---
 
 ## 三、高频坑
@@ -91,9 +101,19 @@ ros2 topic echo <topic> --qos-reliability reliable --field header.stamp   # 轻�
 | 话题 | 发布者 QoS | 备注 |
 |:---|:---|:---|
 | `/Laser_map`（FAST-LIO） | reliable, KEEP_LAST 20（laserMapping.cpp L933） | 22MB/帧全量累积地图；日常关 map_en |
+| `costmap_raw`（nav2_msgs/Costmap，非 OccupancyGrid） | RELIABLE + TRANSIENT_LOCAL | 读不到先查类型不匹配/前缀（实车 `/local_costmap/*`）；读数判据见 [ros2-ops.md §11](ros2-ops.md) |
 | hz / echo 工具 | 见 §二 | — |
 
 其他话题 QoS 未逐一核验，需要时以 `ros2 topic info --verbose` 实测为准。
+
+### DDS 发现机制（FastDDS，2026-08-14 VM 单机根因实测）
+
+- **metatrafficUnicastLocatorList 只改监听**：SPDP 仍走默认组播——单播清单解决不了"组播不可靠"场景
+- **initialPeers = 主动单播清单**：只连清单内对端，且**掐死本机互发现**（VM 单机话题全空根因 =
+  bashrc 跨机 XML 的 initialPeers 残留）
+- 排查：`ros2 topic list --no-daemon` 全空 → `env | grep -iE "rmw|fastrtps|cyclone"` 看跨机配置残留；
+  单机须 unset（操作侧见 [ros2-ops.md §1/§7](ros2-ops.md)）
+（案例：[retrospect 08-14](retrospect/2026-08-14_vm_vlp16_dds_fix.md)）
 
 ---
 

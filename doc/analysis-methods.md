@@ -42,6 +42,8 @@
 
 - **规则**：1° 角带平均会把相邻驻留混成假 avg（平均距离掩盖真实边界）
 - **正确做法**：0.1m 距离档跳变 >0.3m 断段 → 得到干净稳定事件表
+- **事件表判据参数**（09-04 遮挡事件表）：带基准 = 带内全程最大距离（开阔参照）；
+  收窄 ≥0.5m 且驻留 ≥0.8s（容缺 ≤0.3s）记为事件行（[09-04 复盘](retrospect/2026-09-04_lowobstacle_breakpoint.md) §三 scan_highres.py 判据）
 - **验证**：复盘「精华总览」稳定驻留表（全景表 vs 初版 1° 带表差异）
 
 ### A5 环编号 → 仰角：实测标定，不读 db 表推断
@@ -51,6 +53,16 @@
   哪根环，用静止开阔段点云按 ring 聚合 `asin(z/R)` 中位角实测（[ring_angle_table.py](../bags/analysis/lowobstacle_0904/ring_angle_table.py)）
 - **验证**：/scan 现行光束 = ring 8 = +1.0° 上仰（源码链 + 实测仰角表双钉死，复盘 §10.1/10.2）；
   「偶数环向下」说的是发射序，不是 ring 序——曾导致方向误判
+- **泛化（09-09 盘点）**：A5 即「机制核查双钉法」特例——钉死任何"源码声明 vs 运行行为"差异需
+  **两条独立证据链交叉闭环**：源码链（declare/实现/映射处）+ 同 bag 实测（行为侧独立观测）；
+  只一条链 = 未钉死（A5 例：calibration.cpp 重映射源码 + 静止段点云按 ring 聚合实测仰角表）
+
+### A6 读消息前先 `ros2 interface show` 定字段名
+
+- **规则**：写 reader 前对消息类型 `ros2 interface show <type>` 一锤定音字段名——省掉运行时
+  AttributeError 与改判据重跑
+- **反例**：`CostmapMetaData` 字段是 `metadata`（写 `meta` 崩）；`VoxelGrid` 是 `resolutions`
+  （Vector3，不是 `resolution`），data 是 uint32[]——各踩一次（[costmap_experiment](minimal-loop2/costmap_experiment.md) §六-5）
 
 ## 主题 B：复盘遗留对账收口方法
 
@@ -101,6 +113,139 @@
 
 ---
 
+## 主题 D：VM 回放 / 对照实验法（无真车复现）
+
+> 来源事件：09-05 修法 B VM 验收（抽帧重发定型）+ 09-08 A/B（反转重放）+ 08-15 kiss 漂移（双录对照）
+> + 08-11 帧率修复（处理时长判定）+ 08-18 Laser_map 排障（插桩）+ 08-13 分层建图（IoU 验收）。
+> 候选去向：成熟子卡盘点后抽 ros2-ops §7（排障/验证纪律）或独立小节。
+
+### D1 bag 抽帧改 stamp 重发卡（VM 单机复现 costmap 行为）
+
+- **适用**：costmap/感知行为要在 VM 复现又无真车——砍掉"时间轴回放"：sim 轴根源 = 时间轴，
+  wall 时间 + 静态 tf 把变量压到最少（方向 B 取舍，[09-05 篇 §2.2](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md)）
+- ① 静态 tf：odom→base_link 恒等 + base_link→velodyne (0,0,0.655)，wall 发布
+- ② costmap：standalone nav2_costmap_2d（--params-file 目标配置）+ `use_sim_time: False`
+- ③ 抽帧：rosbag2_py 读决定性时间窗 → 等间隔采样 N 帧（points+scan 同窗成对）
+- ④ 重发：`header.stamp` 改当下 wall time；best_effort QoS；循环发布
+- ⑤ 读取：订阅 `costmap_raw`（nav2_msgs/Costmap），lethal = data 原值 254 → 世界坐标
+- ⑥ 判据：预测方位/距离容差内出现 254；同帧旧源数据在该方位开阔 → 排除旧源贡献
+- **已知坑勿绕**：sim-time 回放 + costmap 点云观察源 = Nav2 known trouble（绕行 = 重启排障，
+  09-05 E2，ros2-ops §7）
+
+### D2 反转整包重放 A/B 卡（mark→clear 竞争动态因果链）
+
+- **适用**：无真车复现"随距离演化的 mark→clear 竞争"行为差异（配置 A/B、近距丢黑、清除链问题）——
+  承接 D1 的动态变体（[09-08 A/B §七](retrospect/2026-09-08_lowobstacle_fixB_ab_acceptance.md)）
+- ① 录单方向完整渐变场景：静止车 + 已知尺寸目标物沿车头轴逐档移动（每档停 3~5s），覆盖全盲→首线→多线
+- ② 先离线定几何律（见 E5），**不拿现场目测当定论**
+- ③ 定 mark 相与 clear 相素材：同一条记录内选停驻段（mark）与盲区段（clear，天然无目标点）
+- ④ 整包反转重放：points/scan 帧逆序发（stamp 改 wall now；按需 2× 加速），A/B 各跑一遍；
+  顺带得到"衰减 onset 与盲区边界时间对齐"的因果自证
+- ⑤ 串行 + 残留守卫：先 A 后 B 绝不并发；每轮前 `pgrep` 守卫 exit 1、轮后按命令行特征 pkill + 复验
+- ⑥ 区域判据：目标物可达 x 区间 + |y| 半宽圈定 ROI 统计 raw 254 格数轨迹；OLD 终态趋 0 vs
+  NEW 终态保持 >0；背景（旁侧物/墙）同轨迹做一致性检查
+- **A/B 首帧字节一致性** = 双发布者污染信号，数据作废（09-08 ringlaw E7）
+
+### D3 双录对照隔离法：短直行 vs 长绕圈同管线
+
+- **用途**：隔离"录制内容"与"链路/环境"谁在贡献异常（[08-15 kiss 漂移](retrospect/2026-08-15_kiss_drift_170058.md) 已实践两轮）
+- 做法：同一条处理管线分别跑短直行段与长绕圈段——差异只出现在长录 = 内容问题（旋转段配准退化），
+  两录同病 = 链路/环境问题
+- 08-15 例：短录干净 vs 长绕 163° 漂移 → 漂移归因旋转/空窗内容而非链路
+
+### D4 处理时长 p50 ≈ 2× 输入周期 = 规律性隔帧丢帧
+
+- 判据：下游 p50 恰为输入周期 2 倍（如 /kiss/frame p50=202ms vs points dt 恒 101ms）=
+  **规律性隔帧丢帧**（单帧处理 ~2 周期，逐帧排队），非偶发卡顿 → CPU/算力瓶颈
+  （[08-11 帧率修复](retrospect/2026-08-11_kiss_frame_rate_fix.md) §2；p50 ≈ 2× 后直查 governor/算力）
+- 偶发卡顿表现为 p50 略升 + 长尾，不呈精确倍数
+
+### D5 源码插桩定位执行侧（注入→定位→还原三阶段）
+
+- **适用**：配置/参数看似没生效、要钉"执行侧到底跑到哪"（[08-18 Laser_map](retrospect/2026-08-18_fastlio_laser_map_debug.md)）
+- ① 注入：源码头加 `RCLCPP_INFO("[diag] …状态量")` → 重编译（--packages-select + symlink-install）
+- ② 定位：按 diag 输出裁定事实（例：en=1 = 参数已加载 / 每秒触发 = timer 正常 / 计数增长 = 主循环执行中
+  → 执行侧全通，问题只剩发布→接收或验证手段）
+- ③ 还原：删插桩 → 重编译 → 重启复验 grep 日志**不再出现 [diag]** → 原验证姿势复跑
+- 与「逐段隔离」（参数 param get → 执行 diag → 发布 echo）配合：每段一个验证动作，问题在哪段一目了然
+
+### D6 多段点云合并：IoU 一致性验收门槛
+
+- **规则**：多段合并前先对齐（旋转粗搜 ±4° 步长 0.5° + FFT 互相关平移精搜，重叠区 IoU 最大），
+  **IoU ≥0.30 才合段**（[08-13 分层建图](retrospect/2026-08-13_layer_map_3d2d.md) §一/§二）：
+  同系 seg1+seg2 IoU 0.47（最佳偏移 = 0）；seg3 旋转 1°+平移后仍仅 0.20 < 0.30 = 内容不一致 → 剔除
+- 不靠目测判"像不像同一场地"——数值门槛防拖花地图
+
+## 主题 E：点云场景测量与事件定位法
+
+> 来源事件：09-06 撞箱复盘（找箱/定点窗口/几何律）+ 09-08 ringlaw（共享背景/数值优先/脚本复用）
+> + 09-08 secondfail（单帧事件定位）+ 09-08 pivot（物理边界分离）+ w2-operation D7.2（到达误差）。
+> 候选去向：成熟子条盘点后抽 ros2-ops §5/§7 或对应专题。
+
+### E1 点云找箱法（已知障碍、未知位置）
+
+- ① 找箱（velodyne 系）：筛选高度带（离地 0.3~0.4m 平顶）→ 0.1m 密度簇 → **平顶 z 固定范围即箱体**
+- ② 定位（odom 系）：车初始位姿 + 箱相对方位/距离 → 箱子世界坐标（静止段可靠，动段需 tf 全链路）
+- ③ 验证 source 分层：箱子世界坐标 → local（odom 系）/global（map 系）costmap_raw 各自取 ±0.7m
+  窗口值直方图
+- 可复用任意"已知障碍未知位置"（[09-06 §三](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)；
+  实现 find_box_in_points.py，09-08 起为后续脚本母版）
+
+### E2 共享背景识别法（免人工辨认背景/被测物）
+
+- 同场景两包（不同被测物摆位）"远带/侧向物簇逐格等值" = 背景，差异带 = 被测物贡献
+  （[09-08 ringlaw E8](retrospect/2026-09-08_lowobstacle_ringlaw_cleandata.md)）
+- 兼作纯净数据判据：背景稳定 = 两包背景簇逐格等值；主箱签名 = 预期距离处出现且仅出现被测物的环数组合
+
+### E3 定点窗口逐帧计数（判局部事件，禁全图 diff）
+
+- **规则**：判某物"有没有/何时变"用固定 ROI（箱区 ±0.7m 窗口）逐帧统计 254 格数 → 轨迹 vs 车距；
+  **全图 diff 被环境变化淹没**（09-06 8.2：手动推车段人腿 mark + 箱格移动 → 全图 254 上涨淹没箱格信号）
+- 输出形态：远距稳定值 → 逼近逐帧降（1.9m 起 15→11→6→0）→ 归零距离（~1.4m），onset/归零与
+  几何盲区预测对齐即因果实锤
+
+### E4 costmap 单帧事件定位卡（整层清空 vs 渐次衰减）
+
+- 时间线粗后细：① 速度/goal/plan 全览锁定运动段 → ② 统一 map 系几何 → ③ 地图上下文
+  → ④ ROI 定点帧级计数 → ⑤ 同窗其他话题交叉（[09-08 secondfail](retrospect/2026-09-08_lowobstacle_secondfail_clearevent.md) §五）
+- **单帧整层清空（ClearEntirely 特征）vs 渐次衰减**判据：单帧全层归零（伴随目标格 −52%）= 清除事件；
+  逐帧降 = 观测衰减。**plan 空窗 + 清除帧与首 plan 同刻** = planner-fail → clear → replan 恢复链指纹
+  （无需 BT 日志可先钉时间窗）
+
+### E5 几何律标定卡 + 视锥临界公式
+
+- 离线定几何律：读本机 VLP16db.yaml 得 ring 角 → 目标高度 + 雷达光学中心高 → 每 ring 可见距窗与
+  临界距 **d = (z光 − z顶) / tanθ**（最下环 θ = −15°，0.35m 箱临界 1.59m 实测定稿，
+  数值唯一事实源 = [3d 感知调研 §三B](surveys/3d-lidar-2d-navigation-survey.md)）
+- 验证：逐帧高度谱反推命中 ring（h = H − d·tanθ），理论 ↔ 实测偏差 <1cm 才算对账
+  （[09-08 ringlaw E9](retrospect/2026-09-08_lowobstacle_ringlaw_cleandata.md)）；
+  未对账的"理论正确"不算数
+
+### E6 感知问题先分「物理边界 vs 工程缺陷」
+
+- 边界（几何/能量/信息论不可参数化）与缺陷（可修）**分开列证据、各自实锤**后再判收手
+  （[09-08 pivot §五-1](retrospect/2026-09-08_lowobstacle_pivot_decision.md)）——避免在几何极限上无限打补丁；
+  同一现象可双因（盲区 1.59m = 物理边界；"第二次失效" = 工程 clear 冲突），修复收益受边界封顶
+
+### E7 数值点云分析优先，勿读渲染图
+
+- 高度谱/簇直方等数值分析优先；像素级读图非 AI 擅长且不可靠，渲染仅作人工浏览辅助
+  （[09-08 ringlaw E5](retrospect/2026-09-08_lowobstacle_ringlaw_cleandata.md)）
+- 直接读渲染图下结论 = 复现"看着像"风险；数值与渲染冲突时以数值为准
+
+### E8 复用成熟脚本参数化，不每次重写
+
+- 写分析脚本前先借鉴既有成熟脚本（09-06 `find_box_in_points`/`render_frames` 为后续母版）
+  参数化复用——每次重写正确率差且低效（[09-08 ringlaw E3](retrospect/2026-09-08_lowobstacle_ringlaw_cleandata.md)）
+
+### E9 Nav2 到达误差量化法
+
+- 停稳判据：`/cmd_vel_smoothed` 线/角速度均 <0.01 持续 ≥2s；停稳时实际位姿取最近一帧
+  `/amcl_pose`（**AMCL 静止不发布**，须前后取最近帧）；误差 = 2D 欧氏距离 + 归一化航向差
+  （[w2-operation D7.2](minimal-loop/w2-operation.md)；权威脚本 `bags/analysis/analyze_nav2_goal_error.py`）
+
+---
+
 ## 抽取状态跟踪表
 
 | 条款 | 状态 | 候选去向 | 成熟条件（待满足） |
@@ -113,6 +258,24 @@
 | B1 可查证范围分治 | 沉淀 | ros2-ops §5/§9 邻域 | 复盘收口流程定型后再评 |
 | B2 四型收口 | 沉淀 | ros2-ops §5/§9 邻域 | 同上 |
 | B3 实测钉文档 | 沉淀 | ros2-ops §5/§9 邻域 | 同上 |
+| C1 transcript 北京日统计 | 沉淀 | doc-engineering（证据核验类） | 09-10 盘点复核 |
+| C2 bag metadata 交叉验证 | 沉淀 | 同上 | 同上 |
+| C3 实证修正应用判据 | 沉淀 | 同上 | 同上 |
+| D1 抽帧改 stamp 重发卡 | 沉淀 | ros2-ops §7 | 复用 2+ 次或盘点抽取 |
+| D2 反转整包 A/B 卡 | 沉淀 | 同上 | 同上 |
+| D3 双录对照隔离 | 沉淀 | 同上 | 同上 |
+| D4 处理时长 2× 判定 | 沉淀 | 同上 | 同上 |
+| D5 源码插桩三阶段 | 沉淀 | 同上 | 同上 |
+| D6 IoU 合并门槛 | 沉淀 | ros2-ops §5/§7 | 同上 |
+| E1 点云找箱法 | 沉淀 | ros2-ops §5/§7 或专题 | 同上 |
+| E2 共享背景识别 | 沉淀 | ros2-ops §5 | 同上 |
+| E3 定点窗口逐帧 | 沉淀 | ros2-ops §5 | 同上 |
+| E4 单帧事件定位卡 | 沉淀 | ros2-ops §11 邻域 | 同上 |
+| E5 几何律标定卡 | 沉淀 | 数值留 survey §三B，卡入专题 | 同上 |
+| E6 物理边界分离 | 沉淀 | ros2-ops §7 | 同上 |
+| E7 数值优先勿读图 | 沉淀 | ros2-ops §5/§7 | 同上 |
+| E8 脚本母版复用 | 沉淀 | ros2-ops §7 | 同上 |
+| E9 到达误差量化 | 沉淀 | w2/startup 验证基线位 | 同上 |
 
 > 盘点节奏：**方案 A 已定稿**（09-04，阶段收尾即盘点，首个 = 09-10 A1 收口；分层架构与决策全文见
 > [retrospect/2026-09-04_experience-layer-decision.md](retrospect/2026-09-04_experience-layer-decision.md)）——

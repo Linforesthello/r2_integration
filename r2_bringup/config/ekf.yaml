@@ -6,6 +6,11 @@
 #
 # robot_localization 文档:
 #   https://docs.ros.org/en/humble/Tutorials/Understanding-robot-localization.html
+#
+# 频率预算（2026-08-09，见 doc/retrospect/2026-08-09_ekf_z_drift_fix.md）:
+#   100Hz IMU + 50Hz odom = 150 测量/s，超过节点 50Hz 处理能力 → 持续 "Failed to meet update
+#   rate"（单次更新 26~46ms > 20ms 周期）→ 实际输出仅 22~38Hz 并测量积压；
+#   故下方 frequency 已降 30Hz 消除积压。加测量源/提速前先重算预算。
 
 ekf_filter_node:
   ros__parameters:

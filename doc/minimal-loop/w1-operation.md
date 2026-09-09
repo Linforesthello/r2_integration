@@ -67,7 +67,8 @@ odom_lidar（KISS 自身系）──→ velodyne（KISS 发布）
 # N97，开车前开始录（绕场 1-2 圈用）
 mkdir -p ~/Lin_workspace/r2_integration/bags
 ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M) \
-  /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered /tf /tf_static
+  /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered \
+  /imu/data /tf /tf_static    # /imu/data 供 KISS vs EKF yaw 对比（analyze_bags.py 依赖，08-15 教训：缺则对比项报废）
 # Ctrl-C 停止
 ```
 
@@ -181,7 +182,8 @@ ros2 run nav2_map_server map_server map.yaml   # 需要先跑 lifecycle 或
 # 2. 静态 5s 让 KISS-ICP 初始化（车不动；IMU 校准纪律同样适用）
 # 3. 开始录 bag（⚠️ 必须先确认 KISS 以 visualize:=true 启动，否则 /kiss/frame 无数据）
 ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M) \
-  /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered /tf /tf_static
+  /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered \
+  /imu/data /tf /tf_static    # /imu/data 供 KISS vs EKF yaw 对比（analyze_bags.py 依赖，08-15 教训：缺则对比项报废）
 # 4. 键盘遥控绕场 1-2 圈（缓慢、匀速、覆盖全视野），回到起点
 # 5. Ctrl-C 停止 → 离线生成地图（D2 脚本）
 
@@ -200,6 +202,10 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M
 > 另：velodyne time 字段为无条件默认填充（`timing_offsets` 不是参数），KISS deskew 一直生效，
 > 与重影无关（详见 retrospect/2026-08-13 建图链路排查）。
 
+> **健康样本参照（08-15 165547 短录，链路调优后）**：全程 **0 处 >0.5s 空窗**、帧间隔 p90 101ms、
+> 帧间位移 p50 2.6cm / **max 8.1cm**——录完按此核对（位移/空窗明显超出 = 链路不健康，
+> 先查 governor/CPU 再录；失败对照 0811：102 处空窗 + 位移 max 65.7cm → 重影，见 retrospect/2026-08-15_clean_bag_rerecord.md）
+
 ### 录制纪律（每段执行）
 
 1. **前置检查**：`performance` governor 已切（KISS 需 ~9.5Hz）；静止下 `ros2 topic hz /kiss/odometry`
@@ -210,7 +216,8 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_run_$(date +%m%d_%H%M
 
 ```bash
 ros2 bag record -o ~/Lin_workspace/r2_integration/bags/map_final_$(date +%m%d_%H%M)_seg1 \
-  /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered /tf /tf_static
+  /velodyne_points /kiss/frame /kiss/odometry /odom_wheels /odometry/filtered \
+  /imu/data /tf /tf_static    # /imu/data 供 KISS vs EKF yaw 对比（analyze_bags.py 依赖，08-15 教训：缺则对比项报废）
 ```
 
 4. **过程监控**：`ros2 topic hz /kiss/odometry` 全程盯；掉 <7Hz 立即停录排查（bag record 写盘争抢）
@@ -223,6 +230,12 @@ python3 ~/Lin_workspace/r2_integration/bags/analysis/pcd_to_map.py raw_segN.ply 
 
 6. **验收**：单段出图检查——墙段连续（目标 ≥10m）、无重影双线、**无地面雾**（z_min 0.3 已滤）、
    与场地轮廓一致；选覆盖最好的段作主地图（多段拼接暂缓，逐段验证优先）
+7. **在场纪律**（08-15 人形块教训，见 retrospect/2026-08-15_clean_bag_rerecord.md）：操作员与车
+   保持 **5~8m+**；**转弯时不要站在车侧面**（最易被扫）——人形块污染地图（2~16 格连通块，
+   filter_person_blobs.py 可按判据清洗，但能不污染就不污染）
+8. **转角纪律**（08-15 航向漂移留档教训，见 retrospect/2026-08-15_kiss_drift_170058.md）：避免
+   **原地/急转角**——帧间转角 ≥20°/帧触发 KISS 配准退化（旋转帧 101ms → max 1.5s，累积漂移
+   ~163°）；保持前进 + 缓弯
 
 ---
 

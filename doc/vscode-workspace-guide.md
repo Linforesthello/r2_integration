@@ -72,7 +72,21 @@
 
 ---
 
-## 四、待办 / 抽调跟踪
+## 四、VS Code + ROS2 头文件索引（IntelliSense，08-15 经验 09-09 归位）
+
+**C/C++ 扩展报 1696（无法打开源文件）** = includePath 未配置的索引问题，**非代码错误、不影响
+`colcon build`**：
+
+- 排障序：先查 includePath 配置，再怀疑代码/环境；能否编译看 `colcon build`，不看编辑器红波浪
+- ROS2 Humble 头文件是**双嵌套布局**（`include/<包>/<包>/...`，如
+  `/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp`）——includePath 配
+  `/opt/ros/humble/include/**`（`**` 递归命中嵌套）一条覆盖全部包
+- `c_cpp_properties.json` 完整样例（c++17/linux-gcc-x64）与 clangd 备选方案（.clangd / compile_commands.json）
+  见 [retrospect 08-15](retrospect/2026-08-15_vscode_intellisense_include_fix.md)
+
+---
+
+## 五、待办 / 抽调跟踪
 
 - [x] **本会话（32a37bbd）同步**——09-09 12:27 用户要求已提前执行（cmp 一致）；会话仍写盘中，若需完整归档可会话结束后再同步一次
 - [ ] robot.code-workspace 收敛：摘除 R2 生态挂载（Lin_workspace 整目录等），回归 STM32 本职——随 STM32 侧会话整理执行

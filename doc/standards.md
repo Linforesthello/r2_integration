@@ -177,6 +177,15 @@ R2|G354轴映射与两处符号修正，传感器安装定义留档
 5. **Co-Authored-By**：AI 辅助的提交**默认不加** `Co-Authored-By` 标记，
    仅在显式要求时添加（如"本次提交带 Co-Authored-By"）。原因：该标记会把
    AI 计入 GitHub 贡献者列表，署名与否应由提交者本人决定
+6. **破坏性 git 操作纪律**（2026-08-06/08-03 教训）：`git reset --hard` / `checkout --` 前
+   先 `git status` 确认无未提交修改；有修改先 `git stash` → 操作 → `git stash pop`
+   （08-06 reset 冲掉未提交的 standards 修改，靠 Obsidian 镜像副本侥幸恢复，无镜像即真丢，
+   [retrospect 08-06](retrospect/2026-08-06_git_ops_lessons.md)）；
+   目录级破坏性替换先改名备份（`mv <目录> <目录>_old_bak`）再动手，确认无误后再清理
+   （[retrospect 08-03](retrospect/2026-08-03_r2_repo_repair.md) 先例）
+7. **不整仓重建**：反复 `rm -rf .git` + `git init` 重建会使**全部 commit hash 改变，
+   跨机/远端无法对账**——仓库状态可疑时先确认权威源（GitHub），以 clone/定向修复收敛，
+   不重写历史（[retrospect 08-03](retrospect/2026-08-03_r2_repo_repair.md) 三端 hash 对账教训）
 
 ---
 
@@ -253,6 +262,22 @@ R2|G354轴映射与两处符号修正，传感器安装定义留档
    （draft 层 / 规则层 / 事件层留存）——支撑后续批量盘点抽取，避免经验散落
 
 细则（R2 retrospect 落地）见 [standards.md §2.8](#28-retrospect-事件记录必备结构2026-09-05-定)。
+
+---
+
+### 1.15 验收纪律：修复有效 ≠ 场景闭环（2026-09-08 定）
+
+修复/方案的验收须覆盖**完整场景链**——单场景 PASS 不构成闭环证据：
+
+1. 验收至少含「首次正常场景 + 复发/后续场景」，或明确列出被修复机制的**失效边界场景**
+   并验证其行为符合预期（会被一次事件整体重置/清空的机制尤其要查）
+2. 判据措辞区分「验证通过」与「场景闭环」：前者证明该场景有效，不证明无反向失效路径
+3. 教训（2026-09-08）：低物盲区修法 B 第一次接近停障 PASS（bag 窗 A，mark 保留 9.5s 稳定），
+   但新 goal 触发 Nav2 global 障碍层**整层清空** → 保留 mark 一票抹除、箱在 1.59m 盲区内
+   不可再观测 → 第二次接近必然失效——单场景 PASS 掩盖了「保留信息可被导航栈自身
+   clear 机制清除」的结构性冲突
+4. 来源：[secondfail 根因](retrospect/2026-09-08_lowobstacle_secondfail_clearevent.md) +
+   [pivot 决策](retrospect/2026-09-08_lowobstacle_pivot_decision.md)（两篇同点 = 高优先）
 
 ---
 

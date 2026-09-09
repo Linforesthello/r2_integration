@@ -1,6 +1,6 @@
 # R2 传感器安装定义（车体物理安装）
 
-> 最后更新: 2026-08-03
+> 最后更新: 2026-08-24（正文含 08-24 复测内容；初版 08-03）
 > 目的: 车体坐标系基准、各模块物理安装位置与朝向 —— 静态 TF 与 IMU 轴映射的依据
 > 关联: [chassis_definition.md](chassis_definition.md)（底盘运动学定义）、[g354-wiring.md](../phase1/g354-wiring.md)
 
@@ -58,6 +58,12 @@
 | 安装位置 | **(0, 0, +65.5) cm** | ✅ 实测定案（2026-08-24 更新）：光学中心距地 **77~78cm** − base_link 12cm = 65.5cm（08-06 曾定 69−13=56cm，雷达安装已抬高 ~8cm） |
 | 安装方式 | 车顶水平安装（z 轴朝上） | frame_id: velodyne |
 | 静态 TF | `robot_state_publisher` 发布 base_link→velodyne（z=0.655） | 由 velodyne.launch.py（r2_sensors 包内）启动；base_footprint 已删除（双父冲突） |
+
+**低矮障碍可见性几何**（安装高度 → 盲区边界，09-06 实锤）：VLP-16 高置光学中心 0.775m + 最低环
+−15° → 0.35m 高箱的打顶临界距 **d≈1.59m**（(0.655−0.23)/tan15°）；更近时 16 环全部掠顶、
+低带源无 mark 输入（09-06 bag 定点曲线：254 随逼近 1.9m→1.4m 单调归零）。完整几何表与实测
+曲线以 [3d-lidar-2d-navigation-survey.md §三B](../surveys/3d-lidar-2d-navigation-survey.md) 为
+数值唯一事实源。
 
 ---
 
