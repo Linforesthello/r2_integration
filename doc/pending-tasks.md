@@ -63,7 +63,7 @@
 - 可选：MPPI batch 调优（视 N97 CPU 实测）— [nav2-bringup.md](minimal-loop/nav2-bringup.md)
 - 遗留现象（算法本底非故障）：KISS 抖动/旋转点云滞后 → 长期方案已由 FAST-LIO2 承接 — [07-handover.md §三](07-handover.md)
 - **09-10 收口盘点（方案 A 首轮）**：以 retrospect/README 过新增事件 → 筛跨事件可复用 → 归入规范（只增不删）+ analysis-methods 抽取状态表更新；**profiles v0.1 试行评估**（试建 1~2 档结论 → 提炼入 doc-engineering 或归档）— [decision 09-04 §三/§五](retrospect/2026-09-04_experience-layer-decision.md)、[profiles/spec.md §5](profiles/spec.md)
-- **R2 会话/工作区迁出 STM32_Now**（09-05 记，待做）：R2 的 Claude 会话与 VSCode 工作区错挂在 `STM32_Now` 下（仓促期遗留，会话/文件夹层级不属于 R2 层）→ 在 `~/Lin_workspace/r2_integration` 新起文件夹 + code-workspace，之后选择性迁移 R2 相关会话到新项目哈希（含本会话 d057f710-6942-4a9f-9685-f10264432c5e）— 哈希算法/迁移步骤见 `~/ProjectRequirement/MCU/Lin_STM32/STM32_F103C8T6/STM32_Now/doc/claude_conversation_migration.md`（跨仓文档，不入链）
+- **~~R2 会话/工作区迁出 STM32_Now~~（09-05 记 → 09-09 完成主体）**：`r2.code-workspace` 建仓根（方案 B）+ 源哈希含 r2_integration 的 78 会话全量迁至新哈希 `-home-lin-Lin-workspace-r2-integration`（全文 grep 判据；VS Code 实测目录 + Reload 验证通过，cmp 77/79 一致）— 落地记录与后续待办（本会话补最终同步 / 旧源副本去留 / robot.code-workspace 收敛）见 [vscode-workspace-guide.md §四](vscode-workspace-guide.md)
 
 ## ⑥ 远期池（阶段二+ / 计划态，仅入口备查，不排期）
 

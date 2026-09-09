@@ -1,0 +1,25 @@
+{
+  // R2 集成 · 多根工作区（选址方案 B，2026-09-09 用户定）
+  // 放仓根 → Claude 会话哈希 = -home-lin-Lin-workspace-r2-integration（与仓对齐）
+  // 新跨仓协作需挂载时，按 doc/vscode-workspace-guide.md 流程以相对路径追加 folders
+  "folders": [
+    {
+      "name": "r2_integration",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "editor.fontSize": 14,
+    "files.exclude": {
+      "**/__pycache__": true,
+      "build": true,
+      "install": true,
+      "log": true
+    },
+    "search.exclude": {
+      "build": true,
+      "install": true,
+      "log": true
+    }
+  }
+}

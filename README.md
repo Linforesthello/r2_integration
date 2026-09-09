@@ -31,6 +31,7 @@ r2_integration/
 │   ├── pending-tasks.md     近期待办汇总索引（每条一句话+源文档入口，09-03 建）
 │   ├── doc-engineering.md   文档工程规范（整理/重构/校验/双仓同步，跨项目通用，09-03 建）
 │   ├── analysis-methods.md  数据分析方法经验长文档（draft 层：新经验先落此，成熟后抽取入规范，09-04 建）
+│   ├── vscode-workspace-guide.md  VSCode 工作区建立规范（Claude 会话归属；独立 doc 先行，盘点后抽调，09-09 建）
 │   │
 │   ├── minimal-loop/        最小闭环执行史（plan + w1/w2/w3-operation.md + Nav2 bringup + 审计数据）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan.md + execution/relog/costmap 执行卡）
@@ -124,6 +125,8 @@ r2_integration/
 │   └── raw_data/  ← 原始数据留档（不入 git）
 │   │   ├── raw_实操路线_2026-09-02_2139.txt         阶段一实操路线（AI 会话原文留档）
 │   │   └── raw_*.txt ×5                        终端输出实录（ekf_update_rate/imu_hz/nav2_launch_param/relog_0903/rosbag_record_log）
+│
+├── r2.code-workspace                  ← R2 多根工作区（方案 B：仓根入 git，09-09 建；说明见 doc/vscode-workspace-guide.md）
 │
 ├── r2_bringup/                        ← ROS2 底盘控制包
 │   ├── r2_bringup/chassis_node.py    核心节点
