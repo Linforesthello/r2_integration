@@ -240,7 +240,7 @@ ros2 launch r2_bringup nav2.launch.py map:=/home/lin/maps/map_0815_clean.yaml ..
 > **D4 状态：✅ 已通过（2026-08-15）**。Nav2 bringup 加载 **map_0815_clean**（08-15 清洗版：
 > 干净 bag 165547 + filter_person_blobs 人形块过滤产物），AMCL 设初始位姿后 map frame 出现、
 > 地图回显与场地一致（走廊通路/障碍轮廓目检吻合），并完成**首个自主导航 goal（降额 0.2m/s）**。
-> 细节见 [retrospect/2026-08-15_nav2_bringup.md](../../retrospect/2026-08-15_nav2_bringup.md)。
+> 细节见 [retrospect/2026-08-15_nav2_bringup.md](../retrospect/2026-08-15_nav2_bringup.md)。
 
 ---
 
@@ -258,5 +258,5 @@ ros2 launch r2_bringup nav2.launch.py map:=/home/lin/maps/map_0815_clean.yaml ..
 ## 相关
 
 - 计划: [plan.md](plan.md)
-- 传感器安装定义: [phase0/sensor-mount.md](phase0/sensor-mount.md)（velodyne 高度待确认项）
+- 传感器安装定义: [phase0/sensor-mount.md](../phase0/sensor-mount.md)（velodyne 高度待确认项）
 - 雷达网络: retrospect/vlp16_slam_exploration.md

@@ -139,7 +139,7 @@ PointCloud2 观察源同样支持 min/max_obstacle_height 高度带过滤，过�
 1. VM 改 → git push → N97 pull → `colcon build`（install 同步，launch 加载 install 副本）
 2. 原场景复测：放 0.35m 箱（原 odom (2.33,0.20) 位）→ rviz 确认 **global costmap 箱区出现 254 黑块**
 3. 重发 goal#2（(2.46,0.17) 距箱 0.14m 位）：预期 planner 绕行（battery: inflation 0.30 外扩）或停车，**不碰撞**
-4. 录 bag 回放验证（复用 [bags/analysis/box_lowband_20260906/verify_box_costmap.py](../../../bags/analysis/box_lowband_20260906/verify_box_costmap.py)）
+4. 录 bag 回放验证（复用 [bags/analysis/box_lowband_20260906/verify_box_costmap.py](../../bags/analysis/box_lowband_20260906/verify_box_costmap.py)）
 5. 确认 controller 行为（本次 bag `trajectories` 0 条；复测时看是否出避让轨迹）
 
 ### 7.4 同步事项（实施时一并做）

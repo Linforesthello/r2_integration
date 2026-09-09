@@ -79,7 +79,7 @@ ros2 bag record -o ~/Lin_workspace/r2_integration/bags/nav2_avoid_$(date +%m%d_%
   清空 → 254 归零 → 撞箱**（3 次导航 goal 直冲 0.35m 箱，bag `box_lowband_20260906_102944`）
 - **A1 判据现状**：判据 1（静态绕行无碰撞）在低物场景 = ❌ 未满足；高物/常规物绕行判据未重测
 - **修复候选（待设计验证）**：velodyne_low 拆独立 mark-only 层（隔离 scan clear）——设计见
-  [retrospect 09-06 §8.3](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)
+  [retrospect 09-06 §8.3](../retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)
 - 09-10 收手线约束：若修复验证未在收手线前完成 → A1 记录缺口收手（缺判据 1 低物子项），不拖期
 
 ---

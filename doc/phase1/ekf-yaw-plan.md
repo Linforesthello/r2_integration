@@ -8,7 +8,7 @@
 - **f-i 恒 ≈ 0**：`/odometry/filtered` 的 yaw 100% 跟随 IMU 纯积分 yaw（G354 无磁力计）
 - **起点偏置随机**：与 `/odom_wheels` 起点差 -6.6°（上次录制 +10.5°）→ 每次上电的零点差异，非固定安装角
 - **运动偏差**：净转角 370° 测试中峰值 -14°（左转 90° 后），终点差 -5.7°
-- 根因：[ekf.yaml](../r2_bringup/config/ekf.yaml) `odom0_config` yaw=false（原注释"轮速 yaw 打滑误差大"），
+- 根因：[ekf.yaml](../../r2_bringup/config/ekf.yaml) `odom0_config` yaw=false（原注释"轮速 yaw 打滑误差大"），
   yaw 唯一来源 = IMU 纯积分
 
 ## 目标

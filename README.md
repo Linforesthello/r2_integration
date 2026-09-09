@@ -121,7 +121,7 @@ r2_integration/
 │   │   └── project_landscape.md  项目全景·R2 在更大系统中的位置（08-06，已过时）
 │   │
 │   └── raw_data/  ← 原始数据留档（不入 git）
-│   │   ├── raw_实操路线_2026-09-02_2139.md         阶段一实操路线（AI 会话原文留档）
+│   │   ├── raw_实操路线_2026-09-02_2139.txt         阶段一实操路线（AI 会话原文留档）
 │   │   └── raw_*.txt ×5                        终端输出实录（ekf_update_rate/imu_hz/nav2_launch_param/relog_0903/rosbag_record_log）
 │
 ├── r2_bringup/                        ← ROS2 底盘控制包

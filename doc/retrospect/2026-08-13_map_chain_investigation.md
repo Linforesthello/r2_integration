@@ -54,9 +54,9 @@ map_server 加载 map_run_0811_1925 + rviz 回显。先后踩坑（已解决）�
 
 - 现象：点云带 time 字段（100% 填充，范围 [-0.0996, +0.0013]），但 `ros2 param get /velodyne_transform_node timing_offsets` → Parameter not set + 启动 WARN "Failed to get parameters: timing_offsets"
 - 源码（velodyne ros2 分支，VM `~/kiss_icp_ws/src/velodyne_src`）：
-  - [transform.cpp:59-104](../../../kiss_icp_ws/src/velodyne_src/velodyne_pointcloud/src/conversions/transform.cpp#L59-L104)：declare_parameter 仅 9 个（calibration/model/min_range/max_range/view_direction/view_width/fixed_frame/target_frame/organize_cloud），**无 timestamp/timing_offsets**
-  - [rawdata.cpp:115](../../../kiss_icp_ws/src/velodyne_src/velodyne_pointcloud/src/lib/rawdata.cpp#L115)：`timing_offsets_` = RawData **内部成员变量**（block/firing 发射时间偏移表），由 setupTimingOffsets* 系列内部计算
-  - [rawdata.cpp:329-330](../../../kiss_icp_ws/src/velodyne_src/velodyne_pointcloud/src/lib/rawdata.cpp#L329-L330)：unpack 对每点 `time = timing_offsets_[i][j] + time_diff_start_to_this_packet`，**无条件填充，无参数开关**
+  - [transform.cpp:59-104](../../../../kiss_icp_ws/src/velodyne_src/velodyne_pointcloud/src/conversions/transform.cpp#L59-L104)：declare_parameter 仅 9 个（calibration/model/min_range/max_range/view_direction/view_width/fixed_frame/target_frame/organize_cloud），**无 timestamp/timing_offsets**
+  - [rawdata.cpp:115](../../../../kiss_icp_ws/src/velodyne_src/velodyne_pointcloud/src/lib/rawdata.cpp#L115)：`timing_offsets_` = RawData **内部成员变量**（block/firing 发射时间偏移表），由 setupTimingOffsets* 系列内部计算
+  - [rawdata.cpp:329-330](../../../../kiss_icp_ws/src/velodyne_src/velodyne_pointcloud/src/lib/rawdata.cpp#L329-L330)：unpack 对每点 `time = timing_offsets_[i][j] + time_diff_start_to_this_packet`，**无条件填充，无参数开关**
 - 结论：`timestamp`/`timing_offsets` 均为**未声明假参数**，从未生效；time 字段一直是默认行为 → KISS deskew（Utils.hpp 查 t/timestamp/time 字段）一直有有效输入
 
 ### 7. 处置完成

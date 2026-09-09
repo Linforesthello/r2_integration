@@ -16,7 +16,7 @@
 - 动态人横穿 ≥2 + 恢复行为 ≥1 + 综合演练 3 连 → A1 判据 5/5（08-25 仅跑一天未满）— [execution.md A1 卡](minimal-loop2/execution.md)
 - 到达误差 <0.5m 测量（analyze_nav2_goal_error.py）+ 无碰撞 + rviz 显示项确认 + 复盘留档 — [w2-operation.md D7](minimal-loop/w2-operation.md)
 - A1 达标后同日加跑：运动模式「方案①」改前/改后对比（受 09-10 收手线约束）— [planning-control-roadmap.md §5.7ter](roadmaps/planning-control-roadmap.md)、[costmap_experiment.md §五](minimal-loop2/costmap_experiment.md)
-- 排一个 N97 实车窗口日期，把实操路线 ①~⑤ 倒排成小时级操作卡（引用既有执行卡，不新建文档）— [raw_实操路线_2026-09-02_2139.md 后记](raw_data/raw_实操路线_2026-09-02_2139.md)
+- 排一个 N97 实车窗口日期，把实操路线 ①~⑤ 倒排成小时级操作卡（引用既有执行卡，不新建文档）— [raw_实操路线_2026-09-02_2139.txt 后记](raw_data/raw_实操路线_2026-09-02_2139.txt)
 
 ## ② 求职/学习线（阶段一 线 2，exit 清单 09-30）
 
