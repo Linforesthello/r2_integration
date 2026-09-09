@@ -1,4 +1,13 @@
+# EKF 实车验证原始输出（2026-08-04）
 
+> 日期: 2026-08-04 ｜ 机器: N97（终端提示符 lin-Default-string）｜ 性质: 依 [ekf-verification.md](ekf-verification.md)
+> 清单的首轮实车验证现场输出留档（静置 / 作废 / 两次 3m 直线）
+> **结论速览**：EKF `/odometry/filtered` **z 显著发散**——第二次直线 z 76.2→89.4m（轮速 `/odom_wheels` z 恒 0），
+> 第三次直线 z −1.91m。属后续 z 漂移修复的**修复前失效证据**（[retrospect 08-05 chassis_ekf_debug](../retrospect/2026-08-05_chassis_ekf_debug.md)
+> = 协方差 NaN/过程噪声；[retrospect 08-09 ekf_z_drift_fix](../retrospect/2026-08-09_ekf_z_drift_fix.md) = two_d_mode 钳位）。
+> ⚠️ 本档数据不代表修复后基线；现基线见 [startup.md §四](../startup.md)。
+
+---
 
 ## 第一次的静置
 lin@lin-Default-string:~$ ros2 run tf2_ros tf2_echo odom base_link

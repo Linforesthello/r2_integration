@@ -64,7 +64,7 @@
 ## 四、交接级遗留（交接视角；全量待办入口见 [pending-tasks.md](pending-tasks.md)）
 
 - [x] ~~低物盲区修法 B 实车验证~~（09-08 完成并**收手定论**，见 [方向决策 09-08](retrospect/2026-09-08_lowobstacle_pivot_decision.md)）：实车第一次接近停障有效（bag 窗 A mark 保留实证）；**二次失效根因实锤** = 新 goal 触发 global 障碍层整层清空抹掉盲区保留 mark、不可再生（结构性冲突）— [09-08 根因](retrospect/2026-09-08_lowobstacle_secondfail_clearevent.md)；决策：机制精修不再投窗口，`nav2_params_low.yaml` mark-only 结构（180077c）保留不回滚
-- [ ] **Nav2 全速验证**（暂缓 08-17，保持降额现状）：切 `nav2_params.yaml` 前先同步膨胀 0.55→0.30 **及 velodyne_low 低带源块**再复测
+- [ ] **Nav2 全速验证**（暂缓 08-17，保持降额现状）：切 `nav2_params.yaml` 前先同步膨胀 0.55→0.30 **及降额版低带配置（local voxel_layer 的 velodyne_low 源 + global obstacle_low_layer 独立 mark-only 层，180077c 形态）**再复测
 - [ ] **AMCL 多次设初始位姿 → map 重叠**（边界：仅指导航运行中反复设）：待 N97 确认日志 "Ignoring initial pose"，必要时加 `always_reset_initial_pose: true` — [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
 - [ ] **z 回归项**：slip 剧烈加减速 z 漂 +2.5m（08-05 遗留）严格复测 — [retrospect 08-05](retrospect/2026-08-05_chassis_ekf_debug.md)
 - [ ] **VNC 开机自启**（N97 重启后远程桌面不丢）— [n97_remote_desktop.md](n97/n97_remote_desktop.md)

@@ -237,9 +237,13 @@ R2 断点（复盘 09-04 钉死）：/velodyne_points **有完整低环数据**�
 
 ## 四、落地前开放点（决策与部署事实，未定）
 
-1. **L3 修法**：velodyne_low 拆独立 mark-only 层（隔离 scan clear）——设计待定（retrospect 09-06 §8.3）
+1. **L3 修法**：velodyne_low 拆独立 mark-only 层（隔离 scan clear）——设计待定（retrospect 09-06 §8.3）；
+   **✅ 09-08 落地后收手**：180077c 按此实施（global obstacle_low_layer 独立 mark-only 层），二次失效根因实锤后
+   决策机制精修停投（pivot 09-08，见头部注记）
 2. **L4 兜底策略**：近距盲区锥（<1.6m 低带无数据 → 限速/停车/plan cost 惩罚）是否实施、与 A1
-   验收口径如何对齐（感知解决 vs 感知+行为联合）——待用户决策
+   验收口径如何对齐（感知解决 vs 感知+行为联合）——待用户决策；
+   **09-08 收手后维持开放**（pivot 09-08 边界 = 只关低物 costmap 机制子线，行为层未定；近距测试现统一高箱规避，
+   A1 判据不含低物停障）
 3. **N97 安装路径**：pointcloud_to_laserscan 走 apt（需 N97 外网，[ros2-ops.md §1](../ros2-ops.md)
    "外网连通性不可想当然"）还是源码 build 进既有工作区——部署路径待定（若走 ① 时）
 4. **relog 联动**：若日后新增低带 scan 话题，重录话题清单（relog-operation.md）需同步增列。

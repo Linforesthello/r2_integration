@@ -3,6 +3,8 @@
 > 事件：用户质疑「ros2-ops.md 是否成了 ROS2 层面的统一经验回顾？合适么——目前经验仍散落各文档，
 > 何时开始集中化（从散落回顾文档中提取）」→ 讨论后由用户定稿：**经验四层制 + 盘点节奏方案 A**
 > 状态：✅ 已定稿（09-04）；「后续整合进 doc-engineering.md」为既定路线（本次独立成档，待整合）
+> **09-09 注**：四层制 + 方案 A 已于 09-09 整合入 [doc-engineering.md §十二](../doc-engineering.md)；本档保留作
+> 决策记录与来源（原状态行「待整合」为 09-04 当时状态，留原文不改）
 > 关联：[doc-engineering.md](../doc-engineering.md)（未来归宿）、[analysis-methods.md](../analysis-methods.md)（draft 层载体）、
 > [standards.md §1.1](../standards.md)（单一事实来源）、[retrospect/README.md](README.md)（事件索引）
 

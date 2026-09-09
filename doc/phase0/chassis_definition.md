@@ -264,6 +264,12 @@ TF 树：`odom` → `base_link`
 
 ## 八、启动
 
+> ⚠️ **启动命令唯一权威 = [startup.md](../startup.md)**（09-04 起，含模式/前置/验证基线）；本段为
+> 08-06 写作时的最小启动快照，含两处已过时内容：
+> ① source 路径错（`r2_bringup/install/` 不存在，应为工区根 `install/setup.bash`）；
+> ② 键盘控制官方 `teleop_twist_keyboard` 已弃用（键位冲突 + 无横移），08-11 起用
+> `ros2 run r2_bringup teleop_keyboard`（见 [retrospect 07-31](../retrospect/2026-07-31_teleop_keyboard_fix.md)）。
+
 > **部署环境**：开发时在 VMware 虚拟机，最终部署到 N97 Mini PC（实车工控机）。
 > CAN 总线通过 USB-CAN 适配器（slcan 协议）连接，非主板集成 CAN 控制器。
 

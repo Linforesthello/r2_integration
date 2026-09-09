@@ -166,8 +166,8 @@ python3 ~/Lin_workspace/r2_integration/r2_bringup/r2_bringup/teleop_keyboard.py
 | IMU 数据 | `ros2 topic echo /imu/data --once` | 有姿态/角速度/加速度 |
 | EKF 输出 | `ros2 topic echo /odometry/filtered --once` | 有融合后的里程计 |
 | 键盘控制 | 按 w/s/a/d/q/e 等键 | 车子响应运动（w/s 前后，a/d 横移，q/e 旋转） |
-| IMU 帧率 | `ros2 topic hz /imu/data` | ~125 Hz |
-| EKF 帧率 | `ros2 topic hz /odometry/filtered` | ~50 Hz |
+| IMU 帧率 | `ros2 topic hz /imu/data` | ~100 Hz（曾记 ~125 = 规格值误用；基线见 [startup §四](../startup.md)） |
+| EKF 帧率 | `ros2 topic hz /odometry/filtered` | ~30 Hz（08-09 降频 50→30 缓解 CPU；同上） |
 
 ---
 

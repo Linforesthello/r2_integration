@@ -191,6 +191,10 @@ python3 ~/Lin_workspace/r2_integration/scripts/calibrate_direction.py
 
 ## 五、启动方法
 
+> ⚠️ 历史快照（本文件写作时 = 07 月末的启动方式）：本节命令保留作踩坑上下文，**现行启动以
+> [startup.md](../startup.md) 为唯一权威**——键盘控制已改 `ros2 run r2_bringup teleop_keyboard`
+> （官方 teleop_twist_keyboard 键位冲突 + 无横移，见 [retrospect 07-31](../retrospect/2026-07-31_teleop_keyboard_fix.md)）。
+
 ```bash
 # 1. CAN 总线（CANable2 → /dev/ttyACM0）
 sudo slcand -o -c -s8 /dev/ttyACM0 can0

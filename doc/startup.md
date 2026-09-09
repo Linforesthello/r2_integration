@@ -36,7 +36,9 @@ echo 200 | sudo tee /sys/class/hwmon/hwmon4/pwm2          # 设转速（0-255）
 | **FAST-LIO 实验** | 1, 4, 8 | FAST-LIO2 建图/里程计对比（替代 KISS+EKF 链路）；部署/外参/排障见 [fastlio2-n97-deploy.md](n97/fastlio2-n97-deploy.md) |
 | **底盘独立调试** | 3, 6 | 不动雷达/IMU，仅 CAN 控制 |
 
-> 08-15 起 `/scan` 暂无消费者，velodyne_laserscan_node 停用（见 retrospect/2026-08-15_velodyne_perf_tuning.md）；Nav2 接入 scan 时恢复。
+> `/scan` = velodyne.launch.py 内置 velodyne_laserscan_node 输出。08-15 调优当日曾暂停省 CPU，同日因 Nav2
+> 接入（AMCL 与 costmap 订阅 /scan）恢复并保持启用（launch 注释实锤）；调优记录见
+> retrospect/2026-08-15_velodyne_perf_tuning.md。
 
 ---
 

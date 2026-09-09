@@ -50,6 +50,7 @@ r2_integration/
 │   │
 │   ├── retrospect/  ← 事件记录（按日期排序；索引见目录内 README）
 │   │   ├── README.md                      目录索引（结论速查，09-04 建，从 07 §五/§八 拆出）
+│   │   ├── 2026-08-24_fastlio2_verification.md            FAST-LIO2 N97 实车验证原始数据（旋转 <2°/平移 0.5%，A2 决策输入）
 │   │   ├── 2026-08-24_n97_fan_control.md                  N97 风扇调速（ACPI 空壳死路→IT8613E force_id=0x8622 突破，sysfs pwm2 即刻调速可撤销）
 │   │   ├── 2026-08-23_doc_source_traceback.md             文档真实性回溯：roadmap 全篇来源规范化（1.11 落地案例 + 可复用检查清单）
 │   │   ├── 2026-08-18_fast_lio2_deploy.md                 FAST-LIO2 部署首记录（N97 编译坑：PATH 前置 /usr/bin）
@@ -143,7 +144,7 @@ r2_integration/
 ├── r2_sensors/                        ← ROS2 传感器外设包（包名 r2_sensors，08-15 从 r2_bringup 抽出）
 │   ├── README.md                     包说明（话题/参数/启动）
 │   ├── launch/velodyne.launch.py     VLP-16 雷达启动（driver+transform+laserscan+TF，两机通用）
-│   └── config/r2.urdf                base_link→velodyne TF（z=0.56m，08-06 定案）
+│   └── config/r2.urdf                base_link→velodyne TF（z=0.655m，08-24 复测）
 │
 ├── g354_driver/                       ← ROS2 IMU 驱动包（包名 g354_imu_driver）
 │   ├── README.md                     包说明（话题/参数/启动）

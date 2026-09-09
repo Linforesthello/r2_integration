@@ -174,4 +174,6 @@ ros2 bag record /odom_wheels /odometry/filtered /imu/data /cmd_vel
 
 - 速度标定（`speed_scale`）可选做，若 4.2 距离偏差大则必须做
 - EKF 的 yaw 完全依赖 IMU（无磁力计），长时间运行时漂移风险 → 动态过程靠 ZUPT 兜底
+  - **08-12 更新**：起点偏置/运动偏差已由方案①（odom0 开放 yaw，commit 5c46c58）解决并实车验证，
+    见 [ekf-yaw-plan.md](ekf-yaw-plan.md)；无磁力计长时漂移属性不变，仍由 ZUPT 兜底
 - IMU 重启后 yaw 重置为 0：重启 IMU 时需同时重启 EKF，保证 yaw 对齐

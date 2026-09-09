@@ -4,6 +4,11 @@
 > （[nav2_params.yaml](../../r2_bringup/config/nav2_params.yaml)、[nav2.launch.py](../../r2_bringup/launch/nav2.launch.py)），
 > 实机现象来自 [retrospect/2026-08-15_nav2_bringup.md](../retrospect/2026-08-15_nav2_bringup.md)。
 > 阅读顺序：先看 §0 全景树，再按路径深入。
+>
+> **参数快照版本声明（2026-09-09 加注）**：文中 R2 参数实例为 **08-15 全速版（nav2_params.yaml）快照**——
+> 如 §5 inflation 0.55、scan-only 源；降额版（nav2_params_low.yaml）自 09-05/09-08 已演化为 0.30 +
+> velodyne_low/obstacle_low_layer 低带结构，差异与切回警示见 [07-handover.md §三](../07-handover.md)。
+> 概念机制（§1~§15）不受参数版本影响。
 
 ---
 
@@ -424,4 +429,4 @@ Nav2 知识树
 | RViz 配置 | [nav2.rviz](../../r2_bringup/config/nav2.rviz) |
 | 首闭环留档 | [retrospect/2026-08-15_nav2_bringup.md](../retrospect/2026-08-15_nav2_bringup.md) |
 | 建图链路 | [retrospect/2026-08-13_layer_map_3d2d.md](../retrospect/2026-08-13_layer_map_3d2d.md) |
-| 启动手册 | [minimal-loop/w1-operation.md](../minimal-loop/w1-operation.md) |
+| 启动手册（唯一权威） | [startup.md](../startup.md)（09-04 起；w1-operation 为执行史） |

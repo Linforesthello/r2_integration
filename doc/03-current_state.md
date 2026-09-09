@@ -1,6 +1,6 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-09-05（低物盲区修法 B VM 验收 PASS + 必备两节规则化入近期完成）
+> 最后更新: 2026-09-09（低物链收手定论 09-08 入近期完成表）
 > 内容: 当前完成状态快照——Phase 进度、近期完成、现役技术状态。
 > 交接总览 → [07-handover.md](07-handover.md)；事件详细索引 → [retrospect/README.md](retrospect/README.md)；待办 → [pending-tasks.md](pending-tasks.md)
 
@@ -21,10 +21,12 @@
 | 07-handover 职能拆分（09-04） | 启动命令 → [startup.md](startup.md)（全栈唯一权威）；事件索引 → [retrospect/README.md](retrospect/README.md)；07 瘦身 258→76 行（本文件为拆分后同步刷新） |
 | 低物盲区修法 B VM 验收 PASS（09-05） | local voxel_layer 增 velodyne_low 低带源 [0, 0.40]（[nav2_params_low.yaml](../r2_bringup/config/nav2_params_low.yaml)，commit 7b746ef）；**bag 抽帧重发法验收**：W1/W2 判据 254 格命中、89 帧证据（scan 同方位开阔排除旧源）；剩余 = N97 实车检查单 — [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md) |
 | retrospect 必备两节规则化（09-05） | [standards.md](standards.md) §1.14/§2.8：复盘/结案/排障长记录**必备 方法模板节 + 经验点层次标注节**（范本 = 09-05 档）；四层制决策档同步 — [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md) |
+| 低物实车撞箱实锤（09-06） | 实车撞箱验证：local 254 / global 无 = **global 结构性没源实锤**（修法 A 未生效期；[retrospect 09-06](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)） |
+| 低物链收手定论（09-08） | 纯净三录 ring 几何律：低物盲区边界 **1.59m 实锤**（[ringlaw 09-08](retrospect/2026-09-08_lowobstacle_ringlaw_cleandata.md)）；VM A/B 验收 PASS（反转重放：OLD 归零 vs NEW 保留，[AB 验收 09-08](retrospect/2026-09-08_lowobstacle_fixB_ab_acceptance.md)）；实车第一次接近停障有效 + **二次失效根因实锤** = 新 goal 触发 global 整层清空、抹保留 mark、盲区不可再生（[secondfail 09-08](retrospect/2026-09-08_lowobstacle_secondfail_clearevent.md)）；**用户 09-08 定论收手**：机制精修停投、180077c mark-only 保留不回滚、主线转 3D 规控（[pivot 09-08](retrospect/2026-09-08_lowobstacle_pivot_decision.md)）— A1 判据 5/5 不变，09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md) |
 
 ---
 
-## 〇、2026-08-05~06 近期完成
+## 〇（早期 08-05~06）、近期完成
 
 | 事项 | 详情 |
 |:-----|:-----|

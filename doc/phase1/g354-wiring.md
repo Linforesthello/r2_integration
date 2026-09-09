@@ -58,7 +58,7 @@ ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/tt
 ros2 topic echo /imu/data --once
 # 应看到: orientation / angular_velocity / linear_acceleration
 
-# 4. 检查帧率（应为 125 Hz）
+# 4. 检查帧率（≈100 Hz：驱动限速 TARGET_HZ=100，实测基线见 startup.md §四；曾记 125 Hz 为规格值误用）
 ros2 topic hz /imu/data
 ```
 

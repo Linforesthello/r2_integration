@@ -1,6 +1,6 @@
 # R2 外设集成 · 全局进度总览
 
-> 最后更新: 2026-09-05
+> 最后更新: 2026-09-09（低物链收手定论 09-08 入看板）
 > 内容: 全项目进度一览，每个 Phase 的完成度、依赖关系、下一步
 
 ---
@@ -11,7 +11,7 @@
 Phase 0 底盘CAN控制 ━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
 Phase 1 IMU+EKF融合 ━━━━━━━━━━━━━━━━○○  95%  ◆ 实车对比验证（08-06）+ yaw 方案①通过（08-12）
 Phase 2 VLP16+KISS-ICP ━━━━━━━━━━━━━━━━━━━━ 100% ✅
-Phase 3 Nav2导航     ━━━○○○○○○○○  25%  ◆ 首闭环（08-15）+ 降额过缝验证（08-17）；A1 避障实测进行中（08-25 首轮 + 低物盲区断点定位 09-04 → 修法 B VM 验收 PASS 09-05）；全速验证暂缓
+Phase 3 Nav2导航     ━━━○○○○○○○○  25%  ◆ 首闭环（08-15）+ 降额过缝验证（08-17）；A1 避障实测进行中（08-25 首轮 + 低物链：断点定位 09-04 → 修法 B VM 验收 09-05 → 撞箱实锤 09-06 → 实车有效 + 二次失效根因实锤 + 收手定论转 3D 09-08）；全速验证暂缓
 Phase 4 视觉AI       ━○○○○○○○○○  0%  ⏳
 Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
                     ─────────────
@@ -74,7 +74,7 @@ Phase 5 系统集成     ━○○○○○○○○○  0%  ⏳
 | KISS-ICP | ✅ 已跑通 | 属于 Phase 2；/velodyne_points → odom |
 | slam_toolbox 建图 | ❌ 已否决 | 不适合 VLP-16，见 [vlp16_slam_exploration.md](retrospect/vlp16_slam_exploration.md) |
 | Nav2 配置 | ✅ 首闭环（08-15）+ 降额过缝验证（08-17） | AMCL 定位 + MPPI 跟踪 + velocity_smoother；降额参数（0.2/0.15/0.4）实车闭环成功，见 [retrospect 08-15](retrospect/2026-08-15_nav2_bringup.md)；08-17 inflation 0.30 过缝验证通过（无碰撞），见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)；全速验证暂缓 |
-| A1 避障实测（08-25 起现行主线） | 🟡 进行中 | 08-25 首轮 + 漏录重录决策；**低物盲区断点定位（09-04）→ 修法 B VM 验收 PASS（09-05，bag 抽帧重发法；实车验证 = N97 检查单，见 [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md)）**；判据 5/5、09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md)；执行卡 [execution.md A1](minimal-loop2/execution.md)、重录卡 [relog-operation.md](minimal-loop2/relog-operation.md) |
+| A1 避障实测（08-25 起现行主线） | 🟡 进行中 | 08-25 首轮 + 漏录重录决策；**低物盲区断点定位（09-04）→ 修法 B VM 验收 PASS（09-05，bag 抽帧重发法；实车验证 = N97 检查单，见 [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md)）**→ 实车撞箱实锤（09-06：local 254 / global 无 = global 结构性没源，[retrospect 09-06](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)）→ **09-08：修法 B 实车第一次接近停障有效 + ringlaw 盲区边界 1.59m 实锤 + 二次失效根因实锤（global 整层清空抹 mark、盲区不可再生）→ 收手定论**（机制精修停投、180077c mark-only 保留不回滚，主线转 3D 规控，见 [pivot 09-08](retrospect/2026-09-08_lowobstacle_pivot_decision.md)/[secondfail 09-08](retrospect/2026-09-08_lowobstacle_secondfail_clearevent.md)）；判据 5/5、09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md)；执行卡 [execution.md A1](minimal-loop2/execution.md)、重录卡 [relog-operation.md](minimal-loop2/relog-operation.md) |
 | W2 收尾核对 | 🟡 待核 | D5-6 连续导航 / D7 到达误差是否已随 A1 覆盖（[pending-tasks.md §⑤](pending-tasks.md)、[w2-operation.md](minimal-loop/w2-operation.md)） |
 | 全速版 Nav2 验证 | ⏸️ 暂缓（08-17 决策） | 切回 nav2_params.yaml 前须先同步膨胀参数 0.55→0.30（见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)） |
 
