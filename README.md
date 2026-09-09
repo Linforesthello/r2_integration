@@ -90,7 +90,8 @@ r2_integration/
 │   │   ├── 2026-09-08_lowobstacle_ringlaw_cleandata.md    纯净三录 + ring 几何律：盲区边界 1.59m 实锤（09-08）
 │   │   ├── 2026-09-08_lowobstacle_fixB_ab_acceptance.md   修复 VM A/B 验收 PASS：反转重放 OLD 归零 vs NEW 保留（09-08）
 │   │   ├── 2026-09-08_lowobstacle_pivot_decision.md       低物链收手定论 + 主线转 3D 规控（用户 09-08 定）
-│   │   └── 2026-09-08_lowobstacle_secondfail_clearevent.md 二次失效根因实锤：global 整层清空抹保留 mark（09-08 bag 逐帧）
+│   │   ├── 2026-09-08_lowobstacle_secondfail_clearevent.md 二次失效根因实锤：global 整层清空抹保留 mark（09-08 bag 逐帧）
+│   │   └── 2026-09-09_datefix_linkfix_dual_repo.md          日期实证修正 + 坏链 29 条修复双仓闭环（同型聚合/cp 平铺坑经验）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）

@@ -78,6 +78,27 @@
 - **案例**：「0.6m+ 高箱」→ 顶面 z 实测反推 ≈1.0m（[box_top_height.py](../bags/analysis/lowobstacle_0904/box_top_height.py)）；
   断点结论从「物理盲区」细化为「转换层单环」（复盘 §10.3 + closing 更新记录双向留痕）
 
+## 主题 C：会话/记录日期实证核验
+
+> 来源事件：[09-09 双仓闭环复盘](retrospect/2026-09-09_datefix_linkfix_dual_repo.md)（低物链工作日期归属争议 → 09-07 零活动实证，文档误标 09-07 全批修正）。
+> 候选去向：成熟后并入 doc-engineering（证据核验类）或盘点时再定。
+
+### C1 session transcript 按北京日统计定真实工作日
+
+- 证据源：Claude session transcripts `~/.claude/projects/*/*.jsonl`（每行 `timestamp` 为 **UTC**，须 +8h 换算北京时间）
+- 做法：按北京日分组统计消息量——**零活动日 = 铁证**（案例：09-07 无任何消息 vs 09-08 10:02~21:35 密集活动）
+- 交叉：`git log --format='%ai %h %s'` 对照 commit 实际时间 vs 文档内日期，可判定"文档日期笔误"而非"当日没做工作"
+
+### C2 bag metadata 时间戳交叉验证
+
+- `metadata.yaml` 的 `starting_time.nanoseconds_since_epoch` → 除 1e9 → epoch 转北京时间
+  （案例：1788833996504237069 = 09-08 10:19:56 +08，为"盒子 bag 录制于 09-08"落物理物证）
+
+### C3 实证修正的应用判据
+
+- 文档日期与提交/会话实证不符 → 以实证为准修正：git 资产走 `git mv` 保史 + sed + 引用方同步；
+  **未追踪磁盘资产**（bag 目录、raw_data）单独 mv + 内层路径 sed（方法卡②见事件篇）
+
 ---
 
 ## 抽取状态跟踪表

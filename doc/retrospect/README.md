@@ -54,6 +54,7 @@
 | [2026-09-08_lowobstacle_fixB_ab_acceptance.md](2026-09-08_lowobstacle_fixB_ab_acceptance.md) | 近距丢黑块修复 VM A/B 验收 PASS：反转重放 OLD 25→2 归零（复现撞箱链）vs NEW 117 保留；方法模板反转重放操作卡 + 经验点 7 条 |
 | [2026-09-08_lowobstacle_pivot_decision.md](2026-09-08_lowobstacle_pivot_decision.md) | 低物链收手定论（用户定）：机制精修不投窗口、成果保留不回滚、主线转 3D 规控按既有排期；选项×影响决策记录 + 状态文档同步清单 |
 | [2026-09-08_lowobstacle_secondfail_clearevent.md](2026-09-08_lowobstacle_secondfail_clearevent.md) | 二次失效根因实锤（实车 bag 逐帧）：新 goal 触发 global 障碍层整层清空（单帧 2236 格 = 全部非静态 254）抹掉盲区保留 mark、不可再生 → 结构性冲突；H1/H3/H4 排除 |
+| [2026-09-09_datefix_linkfix_dual_repo.md](2026-09-09_datefix_linkfix_dual_repo.md) | 低物链日期实证修正 + 坏链 29 条修复双仓闭环（09-07 零活动实证/三桶+同型聚合/镜像 cp 平铺坑；规则追加见 doc-engineering §四 + obsidian-sync §2/§4） |
 
 ## 专题（无日期前缀）
 
