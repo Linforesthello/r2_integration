@@ -2,7 +2,7 @@
 
 > 日期：2026-09-08｜任务：boxfix_dbl_20260908_1836 bag 逐帧分析（重点两处减速区段）
 > 状态：✅ 结论闭环（触发器待实机日志）
-> 关联：[09-07 A/B 验收](2026-09-07_lowobstacle_fixB_ab_acceptance.md)、[09-05 修法 B VM 验收](2026-09-05_lowobstacle_fixB_vm_acceptance.md)、[09-06 撞箱实锤](2026-09-06_lowobstacle_fixB_crashbox.md)
+> 关联：[09-08 A/B 验收](2026-09-08_lowobstacle_fixB_ab_acceptance.md)、[09-05 修法 B VM 验收](2026-09-05_lowobstacle_fixB_vm_acceptance.md)、[09-06 撞箱实锤](2026-09-06_lowobstacle_fixB_crashbox.md)
 > 证据落位：`bags/analysis/boxfix_dbl_20260908/raw_t4t5t6_20260908_2000.txt`（t4/t5/t6/t7 全输出）+ t1~t6 脚本
 
 ## 一、结论（先行）

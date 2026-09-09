@@ -15,7 +15,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPo
 from rclpy.serialization import deserialize_message
 from rosidl_runtime_py.utilities import get_message
 
-BAG = "/home/lin/Lin_workspace/r2_integration/bags/raw/box_TrendsParallel_20260907_1056"
+BAG = "/home/lin/Lin_workspace/r2_integration/bags/raw/box_TrendsParallel_20260908_1056"
 SPEEDUP = 2.0          # 2× 加速（原始 85.9s → ~43s）
 TAIL_S = 8.0           # 播完后再等 N 秒（old 版清链/收敛）
 

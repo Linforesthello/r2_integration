@@ -1,7 +1,7 @@
 # R2 集成 · 状态交接
 
 > 最后更新: 2026-09-08（低物链收手定论：修法 B 实车验证完成 + 二次失效根因实锤 + 主线转 3D 方向）
-> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%（KISS 建图）｜Phase 3 ⏳ 25%（Nav2 首闭环 08-15 + 降额过缝 08-17；A1 避障实测进行中，低物盲区链路 09-04→09-08 闭环：修法 B 实车第一次接近有效、二次失效根因 = global 清空冲突实锤 → 09-07 决策机制精修收手、主线转 3D 规控，详见 §四/决策记录），全速验证暂缓保持降额
+> 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%（KISS 建图）｜Phase 3 ⏳ 25%（Nav2 首闭环 08-15 + 降额过缝 08-17；A1 避障实测进行中，低物盲区链路 09-04→09-08 闭环：修法 B 实车第一次接近有效、二次失效根因 = global 清空冲突实锤 → 09-08 决策机制精修收手、主线转 3D 规控，详见 §四/决策记录），全速验证暂缓保持降额
 > 下一阶段: A1 避障收口（判据 5/5）→ A2 FAST-LIO2 落地（排期与 09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md)）
 > 基础设施: 08-14 两机 git 同步统一（push→pull）；08-15 VLP-16 运行物抽包 r2_sensors；08-24 N97 风扇可命令行调速；09-04 bags 数据资产入仓
 >
@@ -17,7 +17,7 @@
 | 0 | 底盘 ROS2 + CAN 控制 | ✅ 100% | 四全向轮，全命令可用；定义见 [chassis_definition.md](phase0/chassis_definition.md) |
 | 1 | G354 IMU + 轮速 EKF 融合 | ✅ 95% | 实车验证完成（08-06）+ yaw 方案①通过（08-12）；仅剩 slip 剧烈加减速严格复测（见 §四） |
 | 2 | VLP16 + KISS-ICP SLAM | ✅ 100% | 驱动 + 3D 里程计 + 键盘建图跑通；FAST-LIO2 已验证可作替代（08-24） |
-| 3 | VLP16 + Nav2 导航 | ⏳ 25% | 首闭环 08-15、降额过缝 08-17（inflation 0.30）；A1 避障：08-25 首轮 + 低物盲区链路闭环（09-04~09-08：修法 B 实车验证完成，二次失效根因实锤，09-07 决策收手转 3D），全速验证暂缓保持降额 |
+| 3 | VLP16 + Nav2 导航 | ⏳ 25% | 首闭环 08-15、降额过缝 08-17（inflation 0.30）；A1 避障：08-25 首轮 + 低物盲区链路闭环（09-04~09-08：修法 B 实车验证完成，二次失效根因实锤，09-08 决策收手转 3D），全速验证暂缓保持降额 |
 | 4/5 | 视觉 / 气动+编排 | ⏳ 0% | — |
 
 > 各阶段验证细节、事件结论见 [retrospect/README.md](retrospect/README.md)（事件索引）；进度百分比看板见 [02-progress.md](02-progress.md)。
@@ -63,7 +63,7 @@
 
 ## 四、交接级遗留（交接视角；全量待办入口见 [pending-tasks.md](pending-tasks.md)）
 
-- [x] ~~低物盲区修法 B 实车验证~~（09-07 完成并**收手定论**，见 [方向决策 09-07](retrospect/2026-09-07_lowobstacle_pivot_decision.md)）：实车第一次接近停障有效（bag 窗 A mark 保留实证）；**二次失效根因实锤** = 新 goal 触发 global 障碍层整层清空抹掉盲区保留 mark、不可再生（结构性冲突）— [09-08 根因](retrospect/2026-09-08_lowobstacle_secondfail_clearevent.md)；决策：机制精修不再投窗口，`nav2_params_low.yaml` mark-only 结构（180077c）保留不回滚
+- [x] ~~低物盲区修法 B 实车验证~~（09-08 完成并**收手定论**，见 [方向决策 09-08](retrospect/2026-09-08_lowobstacle_pivot_decision.md)）：实车第一次接近停障有效（bag 窗 A mark 保留实证）；**二次失效根因实锤** = 新 goal 触发 global 障碍层整层清空抹掉盲区保留 mark、不可再生（结构性冲突）— [09-08 根因](retrospect/2026-09-08_lowobstacle_secondfail_clearevent.md)；决策：机制精修不再投窗口，`nav2_params_low.yaml` mark-only 结构（180077c）保留不回滚
 - [ ] **Nav2 全速验证**（暂缓 08-17，保持降额现状）：切 `nav2_params.yaml` 前先同步膨胀 0.55→0.30 **及 velodyne_low 低带源块**再复测
 - [ ] **AMCL 多次设初始位姿 → map 重叠**（边界：仅指导航运行中反复设）：待 N97 确认日志 "Ignoring initial pose"，必要时加 `always_reset_initial_pose: true` — [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)
 - [ ] **z 回归项**：slip 剧烈加减速 z 漂 +2.5m（08-05 遗留）严格复测 — [retrospect 08-05](retrospect/2026-08-05_chassis_ekf_debug.md)

@@ -1,5 +1,5 @@
 #!/bin/bash
-# 09-07 近距丢黑块修复 A/B（box_TrendsParallel 反转重放）：$1 = old|new
+# 09-08 近距丢黑块修复 A/B（box_TrendsParallel 反转重放）：$1 = old|new
 # 静态 tf(identity odom→base_link + 0.655 base_link→velodyne) + standalone costmap + reader
 # + 反转重放（mark 相 2.10m → 接近相 → 盲区 clear 相）
 # 清理纪律：costmap 子进程不随 ros2 run 包装死——按命令行特征精确杀，绝不 pkill -x python3

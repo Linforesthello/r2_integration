@@ -87,9 +87,9 @@ r2_integration/
 │   │   ├── 2026-09-04_bags_migration.md                   数据资产目录跨仓迁移复盘（bags 入仓，09-04）
 │   │   ├── 2026-09-05_lowobstacle_fixB_vm_acceptance.md   修法 B VM 验收 PASS + bag 抽帧重发法模板 + 经验点（09-05）
 │   │   ├── 2026-09-06_lowobstacle_fixB_crashbox.md        修法 B 实车撞箱验证：local 254 / global 无 = 根因实锤（09-06）
-│   │   ├── 2026-09-07_lowobstacle_ringlaw_cleandata.md    纯净三录 + ring 几何律：盲区边界 1.59m 实锤（09-07）
-│   │   ├── 2026-09-07_lowobstacle_fixB_ab_acceptance.md   修复 VM A/B 验收 PASS：反转重放 OLD 归零 vs NEW 保留（09-07）
-│   │   ├── 2026-09-07_lowobstacle_pivot_decision.md       低物链收手定论 + 主线转 3D 规控（用户 09-07 定）
+│   │   ├── 2026-09-08_lowobstacle_ringlaw_cleandata.md    纯净三录 + ring 几何律：盲区边界 1.59m 实锤（09-08）
+│   │   ├── 2026-09-08_lowobstacle_fixB_ab_acceptance.md   修复 VM A/B 验收 PASS：反转重放 OLD 归零 vs NEW 保留（09-08）
+│   │   ├── 2026-09-08_lowobstacle_pivot_decision.md       低物链收手定论 + 主线转 3D 规控（用户 09-08 定）
 │   │   └── 2026-09-08_lowobstacle_secondfail_clearevent.md 二次失效根因实锤：global 整层清空抹保留 mark（09-08 bag 逐帧）
 │   │
 │   ├── n97/  ← N97 部署/运维手册

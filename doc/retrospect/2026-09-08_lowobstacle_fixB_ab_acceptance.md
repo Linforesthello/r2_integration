@@ -1,7 +1,7 @@
 # 09-08 近距丢黑块修复（修法 B·global 独立层）VM A/B 验收 PASS + ring 几何律实测定稿
 
 > 日期：2026-09-08
-> 任务：近距丢黑块修复的纯净数据源重录 + VM A/B 对照验收（config 修复已在 09-07 前完成，见下）
+> 任务：近距丢黑块修复的纯净数据源重录 + VM A/B 对照验收（config 修复已在 09-08 前完成，见下）
 > 状态：✅ A/B 验收 PASS（OLD 箱区 254 25→2 归零复现 / NEW 24→117 稳定保留）；留档完成
 > 关联：前篇 [2026-09-06_lowobstacle_fixB_crashbox.md](2026-09-06_lowobstacle_fixB_crashbox.md)（近距丢黑块发现与取证）、
 >       [2026-09-05_lowobstacle_fixB_vm_acceptance.md](2026-09-05_lowobstacle_fixB_vm_acceptance.md)（修法 B 首版 VM PASS + 抽帧重发法模板）、

@@ -1,15 +1,15 @@
-# 低物链收手定论 + 主线转向 3D 规控 —— 方向决策（2026-09-07）
+# 低物链收手定论 + 主线转向 3D 规控 —— 方向决策（2026-09-08）
 
-> 日期：2026-09-07｜类型：方向决策（用户定）｜状态：✅ 已定稿落地（决策正文）
-> 决策人：用户（09-07「执行 B，写入文档」指令确认 pivot 方向；倾向原话见 §二 引文）
-> 关联：[09-08 二次失效根因（bag 实锤）](2026-09-08_lowobstacle_secondfail_clearevent.md)、[09-07 ring 律/纯净数据](2026-09-07_lowobstacle_ringlaw_cleandata.md)、[09-07 A/B 验收](2026-09-07_lowobstacle_fixB_ab_acceptance.md)、[09-06 撞箱](2026-09-06_lowobstacle_fixB_crashbox.md)、[感知手段调研（survey）](../surveys/3d-lidar-2d-navigation-survey.md)、排期权威 [recruitment-learning-plan §4.1/§4.3/§5.1](../roadmaps/recruitment-learning-plan.md)
+> 日期：2026-09-08｜类型：方向决策（用户定）｜状态：✅ 已定稿落地（决策正文）
+> 决策人：用户（09-08「执行 B，写入文档」指令确认 pivot 方向；倾向原话见 §二 引文）
+> 关联：[09-08 二次失效根因（bag 实锤）](2026-09-08_lowobstacle_secondfail_clearevent.md)、[09-08 ring 律/纯净数据](2026-09-08_lowobstacle_ringlaw_cleandata.md)、[09-08 A/B 验收](2026-09-08_lowobstacle_fixB_ab_acceptance.md)、[09-06 撞箱](2026-09-06_lowobstacle_fixB_crashbox.md)、[感知手段调研（survey）](../surveys/3d-lidar-2d-navigation-survey.md)、排期权威 [recruitment-learning-plan §4.1/§4.3/§5.1](../roadmaps/recruitment-learning-plan.md)
 
 ---
 
 ## 一、决策（结论先行）
 
 1. **低物感知机制精修 —— 收手定论**（不再投入实车/VM 窗口）：
-   - 物理边界（0.35m 箱 1.59m 临界，ring 几何律）无参数可改（09-02 已认知，09-07 实锤定稿）
+   - 物理边界（0.35m 箱 1.59m 临界，ring 几何律）无参数可改（09-02 已认知，09-08 实锤定稿）
    - **结构性冲突实锤**（09-08 bag 逐帧）：盲区保留 mark 会被导航栈自身的 global 整层清空事件一票抹除、且盲区内不可再观测 → 第二次接近必然失效；修法 B（mark-only 保留）在无清空事件时工作正常，但"保留信息 vs clear 语义"冲突无根治解，变通（禁清 global/独立层保 mark）皆为打补丁
    - 近期测试场景维持 [recruitment-learning-plan §4.1 ③](../roadmaps/recruitment-learning-plan.md) 既有处置：**统一用高箱规避干扰**（A1 判据本就不含低物停障）
 2. **成果保留不回滚**：降额版 `nav2_params_low.yaml` 的 velodyne_low 独立 mark-only 结构（180077c）保持生效——第一次接近停障有效是实测事实（09-08 bag 窗 A），不因收手而回滚；全速版切回警示（07-handover）维持
@@ -18,15 +18,15 @@
 
 ## 二、决策输入（证据链全回指源文档，不复制细节）
 
-**用户 pivot 倾向（09-07 会话原文）**："在不增加传感器的基础上我感觉到极限了，是否应该就此跳过？后面上 3D 的规控方案（fastlio 多传感器规划重定位等等）以及 explore 方向"——09-07「执行 B + 写入文档」指令 = 拍板落盘。
+**用户 pivot 倾向（09-08 会话原文）**："在不增加传感器的基础上我感觉到极限了，是否应该就此跳过？后面上 3D 的规控方案（fastlio 多传感器规划重定位等等）以及 explore 方向"——09-08「执行 B + 写入文档」指令 = 拍板落盘。
 
 | 输入 | 内容 | 证据 |
 |:---|:---|:---|
-| ① 物理几何边界 | 0.35m 箱在传感轴 1.59m 外即被 -15° 环越顶，<1.59m 进入绝对盲区（ring 律，纯净三录实锤） | [09-07 ringlaw/cleandata](2026-09-07_lowobstacle_ringlaw_cleandata.md)、[survey §三B](../surveys/3d-lidar-2d-navigation-survey.md) |
+| ① 物理几何边界 | 0.35m 箱在传感轴 1.59m 外即被 -15° 环越顶，<1.59m 进入绝对盲区（ring 律，纯净三录实锤） | [09-08 ringlaw/cleandata](2026-09-08_lowobstacle_ringlaw_cleandata.md)、[survey §三B](../surveys/3d-lidar-2d-navigation-survey.md) |
 | ② 保留机制的结构性冲突（新） | 修法 B 实车第一次接近有效（mark 保留 9.5s 静止不衰减）；新 goal 触发 global 障碍层整层清空（单帧 2260 格 = 全部非静态 254 归零），保留箱 mark 被抹（箱区 -52%）；盲区不可再生 → 第二次接近直行穿越实锤 | [09-08 secondfail_clearevent](2026-09-08_lowobstacle_secondfail_clearevent.md) |
 | ③ 替代手段现状 | FAST-LIO2 已实车验证（08-24 旋转 <2° / 平移 0.5%）；A2 TF 桥/建图源方案已定 08-18；加传感器（MID-70/D435）触发条件已满足但排期后置 | [08-24 fastlio2 验证](2026-08-24_fastlio2_verification.md)、[execution.md A2 卡](../minimal-loop2/execution.md)、[recruitment-learning-plan §4.3/§6 池](../roadmaps/recruitment-learning-plan.md) |
 
-## 三、选项与影响（决策记录，用户 09-07 定）
+## 三、选项与影响（决策记录，用户 09-08 定）
 
 | 选项 | 做法 | 影响 | 结果 |
 |:---|:---|:---|:---:|
@@ -39,7 +39,7 @@
 - [x] 07-handover：§四 第 1 项（修法 B 实车验证）→ 完成态改写；头部状态行刷新 — 待授权提交
 - [x] pending-tasks ⑤：近距丢黑块行刷新（180077c 已提交 → N97 已拉取 → 实车验证完成 → 收手）；costmap 刷新慢行补源链接 — 待授权提交
 - [x] recruitment-learning-plan：§4.3 增"低物机制精修收手"行；头部刷新注记 — 待授权提交
-- [x] survey 3d-lidar：头部状态行补 09-07 收手注记 — 待授权提交
+- [x] survey 3d-lidar：头部状态行补 09-08 收手注记 — 待授权提交
 - [x] retrospect/README + 根 README 树：登记 clearevent + pivot 两篇 — 待授权提交
 
 ## 五、遗留（与本文决策相关，不阻塞）
