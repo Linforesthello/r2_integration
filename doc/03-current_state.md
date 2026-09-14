@@ -1,6 +1,6 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-09-09（低物链收手定论 09-08 入近期完成表）
+> 最后更新: 2026-09-11（低物链收手定论 09-08 入近期完成表；§二 Phase 3 行同步）
 > 内容: 当前完成状态快照——Phase 进度、近期完成、现役技术状态。
 > 交接总览 → [07-handover.md](07-handover.md)；事件详细索引 → [retrospect/README.md](retrospect/README.md)；待办 → [pending-tasks.md](pending-tasks.md)
 
@@ -57,7 +57,7 @@
 |:------|:-----|:------|:------|
 | **1** | G354 IMU + 轮速 → EKF 融合 | Phase 0 | ✅ 95% 实车验证完成（08-06）；yaw 方案①通过（08-12）；仅剩 slip 剧烈加减速 z 漂移严格复测（[pending-tasks.md §⑤](pending-tasks.md)，非阻塞） |
 | **2** | 3D LiDAR SLAM (VLP16 + KISS-ICP) | Phase 0 | ✅ 100% 驱动+里程计+键盘建图全跑通（现役 KISS；FAST-LIO2 已实车验证可替代，见上表 08-24） |
-| **3** | VLP16 + Nav2 导航 | Phase 1+2 | ⏳ 25% 首闭环（08-15）+ 降额过缝验证（08-17，无碰撞）；**A1 避障实测进行中**——08-25 首轮 + 低物盲区断点定位（09-04）→ 修法 B VM 验收 PASS（09-05，实车验证待 N97 检查单）；全速验证暂缓（08-17 决策）；09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md) |
+| **3** | VLP16 + Nav2 导航 | Phase 1+2 | ⏳ 25% 首闭环（08-15）+ 降额过缝验证（08-17，无碰撞）；**A1 避障实测进行中**——08-25 首轮 + 低物链收手（09-04 断点定位 → 09-05 VM 验收 PASS → 09-06 撞箱实锤 → 09-08 实车有效 + 二次失效根因实锤 → **收手定论**，详见上表 §〇）；全速验证暂缓（08-17 决策）；09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md) |
 | **4** | D435 + Jetson YOLO 视觉 | Phase 0 | ⏳ 0% |
 | **5** | 气动+异常处理+Robocon编排 | 全部 | ⏳ 0% |
 

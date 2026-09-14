@@ -1,6 +1,6 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-09-08（低物链收手定论：修法 B 实车验证完成 + 二次失效根因实锤 + 主线转 3D 方向）
+> 最后更新: 2026-09-11（低物链收手定论：修法 B 实车验证完成 + 二次失效根因实锤 + 主线转 3D 方向；§三 低带配置措辞同步）
 > 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%（KISS 建图）｜Phase 3 ⏳ 25%（Nav2 首闭环 08-15 + 降额过缝 08-17；A1 避障实测进行中，低物盲区链路 09-04→09-08 闭环：修法 B 实车第一次接近有效、二次失效根因 = global 清空冲突实锤 → 09-08 决策机制精修收手、主线转 3D 规控，详见 §四/决策记录），全速验证暂缓保持降额
 > 下一阶段: A1 避障收口（判据 5/5）→ A2 FAST-LIO2 落地（排期与 09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md)）
 > 基础设施: 08-14 两机 git 同步统一（push→pull）；08-15 VLP-16 运行物抽包 r2_sensors；08-24 N97 风扇可命令行调速；09-04 bags 数据资产入仓
@@ -57,7 +57,7 @@
 3. 首次实机/新参数一律降额（速度 20%/力矩 30%），上电前检查清单，失控先拍急停（[ros2-ops.md §8](ros2-ops.md)）
 4. 改配置后必须 build 或同步 install 副本再重启（launch 加载 install 副本，[ros2-ops.md §2](ros2-ops.md)）
 
-**配置警示**：Nav2 降额版 `nav2_params_low.yaml` 膨胀 0.30 + **09-05 增 velodyne_low 低带源**（local voxel_layer，[0,0.40] odom 系，修法 B）；**全速版 `nav2_params.yaml` 仍是 0.55 且无低带源**，切回前须先同步两项（膨胀 0.55→0.30 见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)，低带源见 [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md)）；N97 风扇调速**不持久化**，重启后需手动 modprobe（[retrospect 08-24](retrospect/2026-08-24_n97_fan_control.md)）。
+**配置警示**：Nav2 降额版 `nav2_params_low.yaml` 膨胀 0.30 + **09-05 增 velodyne_low 低带源**（local voxel_layer，[0,0.40] odom 系，修法 B）**+ 09-08 拆 global obstacle_low_layer 独立 mark-only 层（180077c）**；**全速版 `nav2_params.yaml` 仍是 0.55 且无低带源**，切回前须先同步两项（膨胀 0.55→0.30 见 [retrospect 08-17](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)，低带配置见 [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md)/[09-08](retrospect/2026-09-08_lowobstacle_fixB_ab_acceptance.md)）；N97 风扇调速**不持久化**，重启后需手动 modprobe（[retrospect 08-24](retrospect/2026-08-24_n97_fan_control.md)）。
 
 ---
 

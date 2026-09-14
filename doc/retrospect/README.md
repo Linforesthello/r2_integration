@@ -55,6 +55,8 @@
 | [2026-09-08_lowobstacle_pivot_decision.md](2026-09-08_lowobstacle_pivot_decision.md) | 低物链收手定论（用户定）：机制精修不投窗口、成果保留不回滚、主线转 3D 规控按既有排期；选项×影响决策记录 + 状态文档同步清单 |
 | [2026-09-08_lowobstacle_secondfail_clearevent.md](2026-09-08_lowobstacle_secondfail_clearevent.md) | 二次失效根因实锤（实车 bag 逐帧）：新 goal 触发 global 障碍层整层清空（单帧 2236 格 = 全部非静态 254）抹掉盲区保留 mark、不可再生 → 结构性冲突；H1/H3/H4 排除 |
 | [2026-09-09_datefix_linkfix_dual_repo.md](2026-09-09_datefix_linkfix_dual_repo.md) | 低物链日期实证修正 + 坏链 29 条修复双仓闭环（09-07 零活动实证/三桶+同型聚合/镜像 cp 平铺坑；规则追加见 doc-engineering §四 + obsidian-sync §2/§4） |
+| [2026-09-09_experience_preinventory.md](2026-09-09_experience_preinventory.md) | 经验盘点 A1 预盘点：7 批全 doc 检索（126 候选）→ 分桶批准 → 双批落地 + 09-11 六维收口（拆见下行）；流程升格 draft 主题 F |
+| [2026-09-11_a1_closing_review.md](2026-09-11_a1_closing_review.md) | A1 收口终核：§十一 六维核对（4 绿 + 3 处残留修复）+ 底稿升格处置；一文一事一档先例（09-11 内容独立成档） |
 
 ## 专题（无日期前缀）
 
