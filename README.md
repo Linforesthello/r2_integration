@@ -30,7 +30,7 @@ r2_integration/
 │   ├── startup.md           R2 启动手册（全栈启动命令唯一权威，09-04 从 07 §三 拆出）
 │   ├── pending-tasks.md     近期待办汇总索引（每条一句话+源文档入口，09-03 建）
 │   ├── doc-engineering.md   文档工程规范（整理/重构/校验/双仓同步，跨项目通用，09-03 建）
-│   ├── analysis-methods.md  数据分析方法经验长文档（draft 层：新经验先落此，成熟后抽取入规范，09-04 建）
+│   ├── analysis-methods.md  方法经验长文档（draft 层：新经验先落此，成熟后抽取入规范，09-04 建）
 │   ├── vscode-workspace-guide.md  VSCode 工作区建立规范（Claude 会话归属；独立 doc 先行，盘点后抽调，09-09 建）
 │   │
 │   ├── minimal-loop/        最小闭环执行史（plan + w1/w2/w3-operation.md + Nav2 bringup + 审计数据）
