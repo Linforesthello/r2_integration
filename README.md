@@ -76,6 +76,7 @@ r2_integration/
 │   │   ├── 2026-08-05_n97_remote_desktop.md               N97 远程桌面三方案排障（NoMachine/RealVNC/TigerVNC）
 │   │   ├── 2026-08-03_r2_repo_repair.md                   r2_integration 仓库修复全记录
 │   │   ├── 2026-08-02_vlp16_switch_network.md             VLP-16 交换机接入方案（+vlp16-switch-network-topology.png）
+│   │   ├── 2026-08-02_vlp16_arp_sticky_mac.md             VLP-16 ARP 固化排障（2368 单向不老化/8308 双向刷新；专用 IP 隔离）— 09-16 镜像独有档迁回
 │   │   ├── 2026-08-02_ekf_tf_fusion_fix.md                EKF/TF 融合排障全记录（7 问题）
 │   │   ├── 2026-07-31_chassis_launch_fix.md               chassis.launch.py 路径修复
 │   │   ├── 2026-07-31_claude_md_import_setup.md           流程模式：Claude 优先读到文档

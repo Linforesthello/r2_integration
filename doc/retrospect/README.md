@@ -18,6 +18,7 @@
 | [2026-07-31_workspace_check_fix.md](2026-07-31_workspace_check_fix.md) | r2_integration 工作区检查与修复 |
 | [2026-08-02_ekf_tf_fusion_fix.md](2026-08-02_ekf_tf_fusion_fix.md) | EKF/TF 融合链路 7 问题全解决（网络迁移/use_sim_time/imu_link/QoS/双发布者/协方差/ekf.yaml） |
 | [2026-08-02_vlp16_switch_network.md](2026-08-02_vlp16_switch_network.md) | VLP-16 交换机接入方案（IP 迁移 10.10.3.6→10.18.18.6；NVRAM 重启清 ARP 经验） |
+| [2026-08-02_vlp16_arp_sticky_mac.md](2026-08-02_vlp16_arp_sticky_mac.md) | VLP-16 ARP 固化排障（2368 单向不老化 / 8308 双向刷新；专用 IP 隔离根治）— 09-16 由镜像独有档迁回 |
 | [2026-08-03_r2_repo_repair.md](2026-08-03_r2_repo_repair.md) | r2_integration 仓库修复全记录 |
 | [2026-08-05_chassis_ekf_debug.md](2026-08-05_chassis_ekf_debug.md) | 底盘里程计修复 + EKF 过程噪声 225 值矩阵排障 |
 | [2026-08-05_imu_covariance_ekf_nan.md](2026-08-05_imu_covariance_ekf_nan.md) | IMU 协方差病态 → EKF NaN 排障 |
