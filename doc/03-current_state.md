@@ -1,6 +1,6 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-09-11（低物链收手定论 09-08 入近期完成表；§二 Phase 3 行同步）
+> 最后更新: 2026-09-16（传感器加装装法定档入 §〇/§二：MID-70 + D435 装法与几何评价；低物链 09-08 状态保留）
 > 内容: 当前完成状态快照——Phase 进度、近期完成、现役技术状态。
 > 交接总览 → [07-handover.md](07-handover.md)；事件详细索引 → [retrospect/README.md](retrospect/README.md)；待办 → [pending-tasks.md](pending-tasks.md)
 
@@ -23,6 +23,7 @@
 | retrospect 必备两节规则化（09-05） | [standards.md](standards.md) §1.14/§2.8：复盘/结案/排障长记录**必备 方法模板节 + 经验点层次标注节**（范本 = 09-05 档）；四层制决策档同步 — [retrospect 09-05](retrospect/2026-09-05_lowobstacle_fixB_vm_acceptance.md) |
 | 低物实车撞箱实锤（09-06） | 实车撞箱验证：local 254 / global 无 = **global 结构性没源实锤**（修法 A 未生效期；[retrospect 09-06](retrospect/2026-09-06_lowobstacle_fixB_crashbox.md)） |
 | 低物链收手定论（09-08） | 纯净三录 ring 几何律：低物盲区边界 **1.59m 实锤**（[ringlaw 09-08](retrospect/2026-09-08_lowobstacle_ringlaw_cleandata.md)）；VM A/B 验收 PASS（反转重放：OLD 归零 vs NEW 保留，[AB 验收 09-08](retrospect/2026-09-08_lowobstacle_fixB_ab_acceptance.md)）；实车第一次接近停障有效 + **二次失效根因实锤** = 新 goal 触发 global 整层清空、抹保留 mark、盲区不可再生（[secondfail 09-08](retrospect/2026-09-08_lowobstacle_secondfail_clearevent.md)）；**用户 09-08 定论收手**：机制精修停投、180077c mark-only 保留不回滚、主线转 3D 规控（[pivot 09-08](retrospect/2026-09-08_lowobstacle_pivot_decision.md)）— A1 判据 5/5 不变，09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md) |
+| 传感器加装装法定档（09-16） | MID-70 装 VLP-16 **下方**（离地 0.55~0.65m、前倾 15~20°）+ D435 夹两雷达之间（**视觉导航栈用，不检测低物**）；拟走双雷达组合（roadmap 方案 b）。几何评价（纸面，未实测）：0.35m 箱盲区 **1.59m → 0.14~0.25m**；**近距贴地 <0.46m 无感知覆盖 → 归 L4 行为层兜底**；待办 = 实车安装结构核算（三层叠装/供电/网口）+ 外参标定（含 MID-70 倾角旋转）— [survey](surveys/sensor-mounting-layout-survey.md) |
 
 ---
 
@@ -58,7 +59,7 @@
 | **1** | G354 IMU + 轮速 → EKF 融合 | Phase 0 | ✅ 95% 实车验证完成（08-06）；yaw 方案①通过（08-12）；仅剩 slip 剧烈加减速 z 漂移严格复测（[pending-tasks.md §⑤](pending-tasks.md)，非阻塞） |
 | **2** | 3D LiDAR SLAM (VLP16 + KISS-ICP) | Phase 0 | ✅ 100% 驱动+里程计+键盘建图全跑通（现役 KISS；FAST-LIO2 已实车验证可替代，见上表 08-24） |
 | **3** | VLP16 + Nav2 导航 | Phase 1+2 | ⏳ 25% 首闭环（08-15）+ 降额过缝验证（08-17，无碰撞）；**A1 避障实测进行中**——08-25 首轮 + 低物链收手（09-04 断点定位 → 09-05 VM 验收 PASS → 09-06 撞箱实锤 → 09-08 实车有效 + 二次失效根因实锤 → **收手定论**，详见上表 §〇）；全速验证暂缓（08-17 决策）；09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md) |
-| **4** | D435 + Jetson YOLO 视觉 | Phase 0 | ⏳ 0% |
+| **4** | D435 + Jetson YOLO 视觉 | Phase 0 | ⏳ 0%；**传感器加装装法已定档（09-16，MID-70 下挂 VLP-16 下方 + D435 夹层，视觉导航栈定位，见 §〇）** |
 | **5** | 气动+异常处理+Robocon编排 | 全部 | ⏳ 0% |
 
 ### SLAM 方案探索结论

@@ -115,6 +115,12 @@ Phase 5（编排）:     waypoint 任务队列（已有待办）+ 气动 + 异�
 通过（见 [fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)）；**A/B 对比本身尚未做**，现属 Phase 3 收尾
 可选项，随时可发起，不必等"质量不达标"才做。
 
+> **2026-09-16 更新（装法已定档）**：传感器加装的**装法与几何**已完成调研评价——
+> MID-70 装 VLP-16 下方（离地 0.55~0.65m、前倾 15~20°）、D435 夹两雷达之间、
+> 后续倾向 **b（双雷达组合）+ 车体一台 D435**。覆盖包络 / 安装核查（三层叠装互为遮挡）/
+> 应用评价（FAST-LIO2·explore·视觉栈）见 [sensor-mounting-layout-survey.md](../surveys/sensor-mounting-layout-survey.md)；
+> **§3.4 的实机 A/B 对比仍待做**（几何数值全为纸面计算，未实测）。
+
 ---
 
 ## 四、ROS1/跨版本包 Docker 部署与通信协作

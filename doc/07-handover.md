@@ -1,6 +1,6 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-09-11（低物链收手定论：修法 B 实车验证完成 + 二次失效根因实锤 + 主线转 3D 方向；§三 低带配置措辞同步）
+> 最后更新: 2026-09-16（传感器加装装法定档入 §四：MID-70 + D435 装法与几何评价完成；低物链 09-08 状态保留）
 > 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%（KISS 建图）｜Phase 3 ⏳ 25%（Nav2 首闭环 08-15 + 降额过缝 08-17；A1 避障实测进行中，低物盲区链路 09-04→09-08 闭环：修法 B 实车第一次接近有效、二次失效根因 = global 清空冲突实锤 → 09-08 决策机制精修收手、主线转 3D 规控，详见 §四/决策记录），全速验证暂缓保持降额
 > 下一阶段: A1 避障收口（判据 5/5）→ A2 FAST-LIO2 落地（排期与 09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md)）
 > 基础设施: 08-14 两机 git 同步统一（push→pull）；08-15 VLP-16 运行物抽包 r2_sensors；08-24 N97 风扇可命令行调速；09-04 bags 数据资产入仓
@@ -69,4 +69,5 @@
 - [ ] **z 回归项**：slip 剧烈加减速 z 漂 +2.5m（08-05 遗留）严格复测 — [retrospect 08-05](retrospect/2026-08-05_chassis_ekf_debug.md)
 - [ ] **VNC 开机自启**（N97 重启后远程桌面不丢）— [n97_remote_desktop.md](n97/n97_remote_desktop.md)
 - [ ] **FAST-LIO2 TF 桥集成**（静态桥 camera_init↔odom + body→base_link；方案已定 08-18）— [fastlio2-n97-deploy.md §五](n97/fastlio2-n97-deploy.md)
+- [ ] **传感器加装（MID-70 + D435，阶段二）**：装法与几何已定档（09-16）——MID-70 装 VLP-16 **下方**（离地 0.55~0.65m、**前倾 15~20°**）、D435 夹两雷达之间（**视觉导航栈用，不检测低物**）、拟走**双雷达组合**（roadmap 方案 b）+ 车体一台 D435。几何：0.35m 箱盲区 **1.59m → 0.14~0.25m**；**近距贴地 <0.46m 无感知覆盖 → 归 L4 行为层兜底**（[ros2-ops §12.2](ros2-ops.md) 待决策）。待办 = 实车安装结构核算（三层叠装机械/供电/交换机口）+ 外参标定（**含 MID-70 倾角旋转**，新易错点）+ 实机验证 — [survey](surveys/sensor-mounting-layout-survey.md)
 - [ ] 可选：VLP-16 rpm 600→1200（20Hz）帧内畸变试验 ｜ waypoint 雷达闭环（基于 /kiss/odometry 自主行走）
