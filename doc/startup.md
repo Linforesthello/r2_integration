@@ -142,6 +142,16 @@ velodyne_driver_node / velodyne_transform_node / rviz / rqt
 - EKF position.z = 0.000000（08-09 two_d_mode 修复后）
 - odom→base_link 单一发布者（chassis publish_tf:=false）✅
 
+### 4.4 导航闭环核对点（到达误差量化，2026-09-16 自 draft 层抽取）
+
+> 用途：导航模式跑完一轮后量化"到点误差"，供 A1 及后续验收对账；结论落位见
+> [w2-operation D7.2](minimal-loop/w2-operation.md)。
+
+- **停稳判据**：`/cmd_vel_smoothed` 线速度与角速度均 <0.01 且持续 ≥2s；停稳时刻的实际位姿取最近一帧
+  `/amcl_pose`（**AMCL 静止不发布**，须向前/后取最近帧，不能现取）
+- **误差定义**：2D 欧氏距离（实际 vs 目标）+ 归一化航向差；权威脚本
+  [analyze_nav2_goal_error.py](../bags/analysis/analyze_nav2_goal_error.py)（参数化复用，见 [ros2-ops §5.1](ros2-ops.md)）
+
 ---
 
 ## 五、IMU 独立看姿态

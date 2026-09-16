@@ -20,7 +20,7 @@ r2_integration/
 ├── doc/                               ← 文档（顶层 = 规范 + 阅读主线 + 待办索引）
 │   ├── standards.md         文档标准 ← 先看这个
 │   ├── obsidian-tags.md     Obsidian 标签体系习惯
-│   ├── ros2-ops.md          ROS/ROS2 操作规范（构建/启动/录包/分析）
+│   ├── ros2-ops.md          ROS/ROS2 操作规范（构建/启动/录包/分析/感知覆盖判据）
 │   ├── ros2-qos-dds.md      QoS/DDS 问题手册（hz 大消息坑/兼容矩阵/排查四步法）
 │   ├── obsidian-sync.md     Obsidian 镜像同步规范（全局适用）
 │   ├── 01-plan.md           五阶段集成方案总纲

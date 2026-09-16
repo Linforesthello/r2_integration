@@ -62,7 +62,7 @@
 - 可选：VLP-16 vs MID-70 实机 A/B（触发条件已满足，未做）— [planning-control-roadmap.md §3.4](roadmaps/planning-control-roadmap.md)
 - 可选：MPPI batch 调优（视 N97 CPU 实测）— [nav2-bringup.md](minimal-loop/nav2-bringup.md)
 - 遗留现象（算法本底非故障）：KISS 抖动/旋转点云滞后 → 长期方案已由 FAST-LIO2 承接 — [07-handover.md §三](07-handover.md)
-- **09-10 收口盘点（方案 A 首轮）**：以 retrospect/README 过新增事件 → 筛跨事件可复用 → 归入规范（只增不删）+ analysis-methods 抽取状态表更新；**profiles v0.1 试行评估**（试建 1~2 档结论 → 提炼入 doc-engineering 或归档）— [decision 09-04 §三/§五](retrospect/2026-09-04_experience-layer-decision.md)、[profiles/spec.md §5](profiles/spec.md)
+- **09-10 收口盘点（方案 A 首轮）剩项**：~~以 retrospect/README 过新增事件 → 筛跨事件可复用 → 归入规范 + analysis-methods 抽取状态表更新~~（**09-16 完成**：30 条抽入 ros2-ops §5.1/§7.1/§11/§12、doc-engineering §十三/§十四、startup §4.4，draft 收薄回指；B1~B3 按成熟条件未满足留 draft）；**剩 profiles v0.1 试行评估**（试建 1~2 档结论 → 提炼入 doc-engineering 或归档）— [decision 09-04 §三/§五](retrospect/2026-09-04_experience-layer-decision.md)、[profiles/spec.md §5](profiles/spec.md)、[09-11 收口档 §七](retrospect/2026-09-11_a1_closing_review.md)
 - **~~R2 会话/工作区迁出 STM32_Now~~（09-05 记 → 09-09 完成主体）**：`r2.code-workspace` 建仓根（方案 B）+ 源哈希含 r2_integration 的 78 会话全量迁至新哈希 `-home-lin-Lin-workspace-r2-integration`（全文 grep 判据；VS Code 实测目录 + Reload 验证通过，cmp 77/79 一致）— 落地记录与后续待办（本会话补最终同步 / 旧源副本去留 / robot.code-workspace 收敛）见 [vscode-workspace-guide.md §四](vscode-workspace-guide.md)
 
 ## ⑥ 远期池（阶段二+ / 计划态，仅入口备查，不排期）

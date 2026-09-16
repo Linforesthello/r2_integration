@@ -79,7 +79,8 @@
 ## 六、遗留与后续
 
 - [ ] **raw 底稿清理/留存**（由用户定；升格后其独立价值 = 被搁置候选明细与批次原貌）
-- [ ] **A1 收口盘点余项**：抽取状态表 26+ 条款抽取、profiles 试行判定、knowledge-tree §5 联动刷新——入口 [pending-tasks.md](../pending-tasks.md)
+- [x] ~~**A1 收口盘点余项**：抽取状态表条款抽取~~（**09-16 完成**：30 条抽入规则层、draft 收薄回指——落点见 [09-11 收口档 §七](2026-09-11_a1_closing_review.md)）；
+     剩 profiles 试行判定、knowledge-tree §5 联动刷新——入口 [pending-tasks.md](../pending-tasks.md)
 
 ---
 
