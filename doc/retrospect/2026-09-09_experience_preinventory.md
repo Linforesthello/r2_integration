@@ -4,7 +4,7 @@
 > 任务：A1 收口前置**预盘点**（用户 09-09 发起）——全 doc 检索提炼经验/基准/规则候选，逐批呈报批准后回写规则层/draft 层（只增不删、来源回指）
 > 状态：✅ 完成（7/7 批返回 → 全批逐桶批准 → `247e8b8` + `d827e0b` → 镜像 `8c343ed`；09-11 §十一 核对卡残留清零）
 > 关联：[doc-engineering.md §十一/§十二](../doc-engineering.md)（核对卡入规范 / 四层制盘点节奏）｜[analysis-methods.md 主题 F](../analysis-methods.md)（流程方法落 draft 层）｜[同日双仓闭环事件](2026-09-09_datefix_linkfix_dual_repo.md)
-> 证据落位：候选汇总底稿 [raw_经验盘点A1_候选汇总_2026-09-09_1342.md](../raw_data/raw_经验盘点A1_候选汇总_2026-09-09_1342.md)（raw_data，不入 git）；落地 commit `247e8b8`（9 文件）/ `d827e0b`（15 文件）；镜像 `8c343ed`（22 文件）
+> 证据落位：候选汇总底稿 [raw_经验盘点A1_候选汇总_2026-09-09_1342.md](../raw_data/raw_经验盘点A1_候选汇总_2026-09-09_1342.md)（raw_data，不入 git；**2026-09-16 升格后保留**——白名单另升入 [doc-engineering §十四 附录](../doc-engineering.md)）；落地 commit `247e8b8`（9 文件）/ `d827e0b`（15 文件）；镜像 `8c343ed`（22 文件）
 
 ---
 
@@ -39,7 +39,7 @@
 | `8c343ed`（Obsidian 镜像） | 镜像\|R2 经验盘点双批同步 | 上两 commit（raw_data 排除） | 22 |
 
 - 去向分布（域级）：standards / ros2-ops / ros2-qos-dds / doc-engineering / vscode-workspace-guide / analysis-methods（主题 C×3、D×6、E×9 扩容）/ w1-operation / sensor-mount / `ekf.yaml` 注释回写。
-- **逐文件落点表**与各批完整候选清单（含被搁置/降级项）见[底稿](../raw_data/raw_经验盘点A1_候选汇总_2026-09-09_1342.md)「执行落账」节；权威差异以两个 commit 为准。
+- **逐文件落点表**与各批完整候选清单（含被搁置/降级项）见[底稿](../raw_data/raw_经验盘点A1_候选汇总_2026-09-09_1342.md)「执行落账」节（**09-16 决定保留**；其白名单部分另升入 [doc-engineering §十四 附录](../doc-engineering.md)）；权威差异以两个 commit 为准。
 
 ### 2.3 批内防重复报告机制（信噪比设计）
 
@@ -78,7 +78,7 @@
 
 ## 六、遗留与后续
 
-- [ ] **raw 底稿清理/留存**（由用户定；升格后其独立价值 = 被搁置候选明细与批次原貌）
+- [x] ~~**raw 底稿清理/留存**（由用户定）~~ —— **2026-09-16 处置完成**：采纳方案 (b) **升格+保留**（白名单 → [doc-engineering §十四 附录](../doc-engineering.md)；**底稿本体保留**——用户当日决定不清理；中间一度误删，已由会话记录完整恢复，见 [analysis-methods 主题 I](../analysis-methods.md)）
 - [x] ~~**A1 收口盘点余项**：抽取状态表条款抽取~~（**09-16 完成**：30 条抽入规则层、draft 收薄回指——落点见 [09-11 收口档 §七](2026-09-11_a1_closing_review.md)）；
      剩 profiles 试行判定、knowledge-tree §5 联动刷新——入口 [pending-tasks.md](../pending-tasks.md)
 
@@ -89,4 +89,4 @@
 - 流程方法（draft 层）：[analysis-methods.md 主题 F](../analysis-methods.md)
 - 规范归宿：[doc-engineering.md §十一/§十二](../doc-engineering.md)
 - 同日事件：[2026-09-09_datefix_linkfix_dual_repo.md](2026-09-09_datefix_linkfix_dual_repo.md)
-- 底稿（raw，不入 git）：[raw_经验盘点A1_候选汇总_2026-09-09_1342.md](../raw_data/raw_经验盘点A1_候选汇总_2026-09-09_1342.md)
+- 底稿（raw，不入 git）：[raw_经验盘点A1_候选汇总_2026-09-09_1342.md](../raw_data/raw_经验盘点A1_候选汇总_2026-09-09_1342.md)——**09-16 升格后保留**（白名单另见 [doc-engineering §十四 附录](../doc-engineering.md)）

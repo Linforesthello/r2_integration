@@ -40,6 +40,9 @@
 - **处置（用户 09-11 批准）**：**双升格**——叙事/轨迹 → [09-09 事件档](2026-09-09_experience_preinventory.md)；可复用流程 → [analysis-methods 主题 F](../analysis-methods.md)（F1~F6）。
 - **登记**：retrospect/README 索引行 + 根 README 文件树；校验器本次致坏 = 0。
 - **保留**：底稿清理/留存仍待定（raw_data 不入 git，删除不可逆）。
+  **→ 2026-09-16 结案**：采纳方案 **(b) 升格+保留**——「已规则化核对」白名单升入
+  [doc-engineering §十四 附录](../doc-engineering.md)，**底稿本体保留**（用户当日决定不清理；中间一度误删，
+  经会话记录完整恢复，方法与教训见 [analysis-methods 主题 I](../analysis-methods.md)）。
 - **09-14 跟进**：本档从 09-09 档 §三 拆出（避免新事件埋进旧档），09-09 档只留回指。
 
 ## 五、方法模板（可复用：收口终核与底稿处置）

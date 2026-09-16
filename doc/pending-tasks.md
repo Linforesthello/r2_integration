@@ -65,7 +65,7 @@
 - **09-10 收口盘点（方案 A 首轮）余项**：~~以 retrospect/README 过新增事件 → 筛跨事件可复用 → 归入规范 + analysis-methods 抽取状态表更新~~（**09-16 完成**：30 条抽入 ros2-ops §5.1/§7.1/§11/§12、doc-engineering §十三/§十四、startup §4.4，draft 收薄回指；B1~B3 按成熟条件未满足留 draft — [事件档](retrospect/2026-09-16_a1_item1_extraction.md)）；**剩 4 项**：
      ① 项 2 = profiles v0.1 试行评估（试建 1~2 档 → 结论提炼入 doc-engineering 或归档留否决原因）；
      ② 项 4 = nav2-knowledge-tree §5 参数快照滞后（0.55+scan-only vs 现行 low 0.30+velodyne_low），随全速版切回联动刷新（非必做）；
-     ③ raw 底稿清理/留存（由用户定，删除不可逆）；
+     ③ ~~raw 底稿清理/留存~~（**09-16 完成**：方案 (b) 升格+**保留**——白名单 → [doc-engineering §十四 附录](doc-engineering.md)；底稿本体保留；中间一度误删已由会话记录恢复，见 [analysis-methods 主题 I](analysis-methods.md)）；
      ④ standards §2.1 树内 ros2-ops 行是否补小节描述（09-16 请示，未改以免破该树统一风格）
      — [decision 09-04 §三/§五](retrospect/2026-09-04_experience-layer-decision.md)、[profiles/spec.md §5](profiles/spec.md)、[09-11 收口档 §七](retrospect/2026-09-11_a1_closing_review.md)、[09-16 事件档 §七](retrospect/2026-09-16_a1_item1_extraction.md)、[nav2-knowledge-tree §5](roadmaps/nav2-knowledge-tree.md)
 - **L4 近距兜底策略待决策（09-16 建位）**：盲区锥 <1.6m 的限速/停车/plan cost 惩罚**是否实施** + 验收口径（感知解决 vs 感知+行为联合）——承载位已建 ros2-ops §12.2，决策前不动 — [ros2-ops §12](ros2-ops.md)、[survey §四](surveys/3d-lidar-2d-navigation-survey.md)

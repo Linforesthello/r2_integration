@@ -224,6 +224,27 @@ rosbag（`*_0.db3` 分片 + metadata.yaml）**≠ 文件**——`rm`/`mv` 会报
 > 配套纪律（源自同批教训）：**「标注了去向 ≠ 已落地」**——盘前须逐条核查既有文档里标注的经验点是否真落地
 > （09-09 D 批暴露多条未落地）；落地后 draft 条目按 §十二 原则 3 替换为状态回指。
 
+### 附录：A1 预盘点「已规则化核对」白名单（2026-09-09 快照）
+
+> **来源**：`raw_data/raw_经验盘点A1_候选汇总_2026-09-09_1342.md`——该底稿经处置方案 **(b) 升格**（2026-09-16）：
+> 抽出本节（白名单）入规范；**底稿本体保留**（用户 09-16 决定不清理；期间一度误删，已由会话记录完整恢复——
+> 方法与教训见 [analysis-methods.md 主题 I](analysis-methods.md)）。
+> **用途**：下轮盘点（方案 A）的**防重复呈报白名单**——下列主题已进规则层，不再作为候选重复呈报
+> （对应 §十四 步骤 2 的「已规则化核对（不再报）」段）。
+> ⚠️ **快照时效**：本表为 **09-09 时点**；**09-16 抽取（`e4b873f` 等）又落入 30 条**（ros2-ops §5.1/§7.1/§11/§12、
+> doc-engineering §十三/§十四、startup §4.4），**下轮盘点前须先刷新本表**（把 09-10 之后新入规则层的主题补进来）。
+
+| 批次 | 已规则化主题 → 规则层位置（09-09 时点） |
+|:---|:---|
+| A（retrospect 07-31~08-09） | 多机对象确认/独立副本（ros2-ops §1）；install 副本加载与同步（§2/§6）；IMU 校准 3s + EKF 联动重启（§3）；CPU performance（§3.1）；bag 话题清单（§4）；git push→pull 权威源（standards §1.10-4）；不入库清单（§1.10-3）；Co-Authored-By（§1.10-5）；git -C 多仓（doc-engineering §八）；WIP 隔离（§七）；镜像同步（obsidian-sync）；远程桌面定型（n97 手册）；QoS 假阴性（ros2-qos-dds §二）；只加一个变量/杀不掉节点（ros2-ops §7/§10）；两节必备（standards §1.14/§2.8） |
+| B（retrospect 08-11~08-17） | KISS 3.6Hz/performance → ros2-ops §3；VLP-16 供电排查序 → §7；bashrc DDS + daemon 缓存 → §1/§7；map frame 噪音/初始位姿纪律 → startup.md + README + 07 §三；AMCL 重设重叠 → 07 §四；KISS 本底 → 07 §三；短段录制纪律 → w1-operation；降额 → ros2-ops §8 + low.yaml；git mv/爆点地图 → doc-engineering §七/§一；人形过滤产物 → w1-operation D4 |
+| C（retrospect 08-18~08-24 + 专题） | Laser_map 排障主体 → ros2-qos-dds 全文 + fastlio2 manual §七；FAST-LIO2 部署知识 → fastlio2 manual §二~§六 + velodyne_r2.patch；KISS use_sim_time → startup.md；08-24 验收数值 → manual §六验收表；08-23 来源回溯 → standards §1.11；n97 风扇命令 → n97info.md；slam 选型 → 事件层自足 + manual 承载现役 |
+| D（09 系）**零增量确认** | 09-03_costmap_far_refresh_closed（经验全入 analysis-methods A/B）；09-03_doc_engineering（全规则化，仅 #27）；09-04_bags_migration（九步全入 §八，仅 #26）；09-09（四承诺全落地 ✓） |
+
+> 批次 E/F/G 当批未出独立白名单，其防重复信息以「判重确认（零候选）」「交叉核缺发现」「文件自洽评级」等形式承载。
+> D 批的「**标注经验点落地核对**」清单（09-05/09-06/09-08 各篇标注 vs 实际）为该方法的首次实践快照，
+> 其中多条**已由 09-16 抽取落地**；残留项由 [pending-tasks.md §⑤](pending-tasks.md) 承接，不在此复制。
+
 ---
 
 ## 检查清单（收尾自查）
