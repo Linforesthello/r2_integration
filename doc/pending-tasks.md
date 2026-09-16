@@ -69,6 +69,8 @@
      ④ standards §2.1 树内 ros2-ops 行是否补小节描述（09-16 请示，未改以免破该树统一风格）
      — [decision 09-04 §三/§五](retrospect/2026-09-04_experience-layer-decision.md)、[profiles/spec.md §5](profiles/spec.md)、[09-11 收口档 §七](retrospect/2026-09-11_a1_closing_review.md)、[09-16 事件档 §七](retrospect/2026-09-16_a1_item1_extraction.md)、[nav2-knowledge-tree §5](roadmaps/nav2-knowledge-tree.md)
 - **L4 近距兜底策略待决策（09-16 建位）**：盲区锥 <1.6m 的限速/停车/plan cost 惩罚**是否实施** + 验收口径（感知解决 vs 感知+行为联合）——承载位已建 ros2-ops §12.2，决策前不动 — [ros2-ops §12](ros2-ops.md)、[survey §四](surveys/3d-lidar-2d-navigation-survey.md)
+- **WIP 泄漏处置（09-16 发生）**：`b2caad1` 带入用户并发新增的 `sensor-mounting-layout-survey.md` 树行（该文件仍未跟踪，远端该行暂 404）；处置三选：等文档写完一起提交 / 现在提交 / 回退该行（新增 commit，不重写历史）— [checker fix 档 §八](retrospect/2026-09-16_checker_codespan_fix.md)、[doc-engineering §七 协作边界](doc-engineering.md)（经验点 G4）
+- **围栏内真实引用是否纳入闸门**：校验器代码跨度排除后，代码围栏内的真实引用（如 01-plan §8.2 状态块）脱离闸门——可加「围栏内白名单」一档，待用户定 — [checker fix 档 §五](retrospect/2026-09-16_checker_codespan_fix.md)
 - **下轮盘点抽取候选（09-16 事件档 §五/§六）**：抽取执行六步卡（draft→规则层流程，拟抽入 doc-engineering）+ E2/E3/E6 三条规则层候选（域外条目不硬塞 / 条数口径先行 / 抽取连带动权威树）— [09-16 事件档](retrospect/2026-09-16_a1_item1_extraction.md)
 - **~~R2 会话/工作区迁出 STM32_Now~~（09-05 记 → 09-09 完成主体）**：`r2.code-workspace` 建仓根（方案 B）+ 源哈希含 r2_integration 的 78 会话全量迁至新哈希 `-home-lin-Lin-workspace-r2-integration`（全文 grep 判据；VS Code 实测目录 + Reload 验证通过，cmp 77/79 一致）— 落地记录与后续待办（本会话补最终同步 / 旧源副本去留 / robot.code-workspace 收敛）见 [vscode-workspace-guide.md §四](vscode-workspace-guide.md)
 

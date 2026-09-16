@@ -78,6 +78,8 @@
 ## 四、验收
 
 - **校验器**（`python3 scripts/check_doc_links.py`）：898 条链接、缺失 14 = 既有基线（格式示例 + 历史坏链）、**本次致坏 = 0**。
+  > 09-16 晚后续：该 14 条中 **12 条为工具误报**（代码跨度内示例）——已由校验器代码跨度排除修复、缺失归 0，
+  > 本行「14 = 基线」的口径由 [checker fix 档](2026-09-16_checker_codespan_fix.md) 翻案（同 [doc-engineering §十](../doc-engineering.md) 留痕口径）。
 - **条数口径**：分母 = 33 行；未抽 = B1~B3（3）；抽取 = 30——**口径写死在各状态位**，避免多轮口径漂移。
 - **双仓**：权威源 `e4b873f`（09:18:43）→ 镜像同步（同步前无镜像独有、8 文件差异；rsync `--exclude=raw_data/`；`diff -rq` 0 差异）→ `514a7c3`（09:21:10）→ 两仓 push 后 `## main...origin/main`。
 - **WIP 隔离**：`r2.code-workspace`（用户 WIP）全程未 stage。

@@ -96,7 +96,8 @@ r2_integration/
 │   │   ├── 2026-09-09_datefix_linkfix_dual_repo.md          日期实证修正 + 坏链 29 条修复双仓闭环（同型聚合/cp 平铺坑经验）
 │   │   ├── 2026-09-09_experience_preinventory.md          经验盘点 A1 预盘点：7 批检索 → 分桶批准 → 双批落地（流程入 draft 主题 F）
 │   │   ├── 2026-09-11_a1_closing_review.md                A1 收口终核：六维核对 + 残留修复 + 底稿升格处置（09-11）
-│   │   └── 2026-09-16_a1_item1_extraction.md              A1 收口盘点项 1 执行：30 条抽入规则层 + E5 裁定落 ros2-ops §12（09-16）
+│   │   ├── 2026-09-16_a1_item1_extraction.md              A1 收口盘点项 1 执行：30 条抽入规则层 + E5 裁定落 ros2-ops §12（09-16）
+│   │   └── 2026-09-16_checker_codespan_fix.md             校验器代码跨度排除：缺失 14→0（其中 12 条系误报）+ 闸门集合比对验证（09-16）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）
