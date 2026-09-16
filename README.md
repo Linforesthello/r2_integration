@@ -95,7 +95,8 @@ r2_integration/
 │   │   ├── 2026-09-08_lowobstacle_secondfail_clearevent.md 二次失效根因实锤：global 整层清空抹保留 mark（09-08 bag 逐帧）
 │   │   ├── 2026-09-09_datefix_linkfix_dual_repo.md          日期实证修正 + 坏链 29 条修复双仓闭环（同型聚合/cp 平铺坑经验）
 │   │   ├── 2026-09-09_experience_preinventory.md          经验盘点 A1 预盘点：7 批检索 → 分桶批准 → 双批落地（流程入 draft 主题 F）
-│   │   └── 2026-09-11_a1_closing_review.md                A1 收口终核：六维核对 + 残留修复 + 底稿升格处置（09-11）
+│   │   ├── 2026-09-11_a1_closing_review.md                A1 收口终核：六维核对 + 残留修复 + 底稿升格处置（09-11）
+│   │   └── 2026-09-16_a1_item1_extraction.md              A1 收口盘点项 1 执行：30 条抽入规则层 + E5 裁定落 ros2-ops §12（09-16）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）
@@ -115,7 +116,8 @@ r2_integration/
 │   ├── surveys/  ← 调研/选型留档区（问题导向调研清单，跟项目走，2026-09-05 建）
 │   │   ├── 3d-lidar-2d-navigation-survey.md           低矮障碍感知手段调研（09-05；09-06 实车更新 §三B：物理边界实锤）
 │   │   ├── navigation-behavior-safety-survey.md       导航行为病×安全设计调研（Q1 灰格/Q2 转弯 margin/Q5 IMU 安全，09-06）
-│   │   └── chassis-kinematics-controller-survey.md    底盘运动学×控制器选型调研（Q3 全向轮行为/Q4 舵轮 MPPI 路线，09-06）
+│   │   ├── chassis-kinematics-controller-survey.md    底盘运动学×控制器选型调研（Q3 全向轮行为/Q4 舵轮 MPPI 路线，09-06）
+│   │   └── sensor-mounting-layout-survey.md           MID-70+D435 安装位置与倾角调研（几何计算表/安装位候选/a-b-c 倾向，09-16）
 │   │
 │   ├── profiles/  ← 对象档案层（实体为中心横切视图：spec v0.1 + README，09-04 建）
 │   │   ├── spec.md              对象档案规范（建档门槛/模板/纪律，v0.1 试行）

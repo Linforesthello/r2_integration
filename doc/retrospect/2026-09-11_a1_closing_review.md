@@ -69,14 +69,15 @@
 - [x] ~~A1 收口盘点项 1（抽取状态表条款抽取）~~ → **09-16 执行完毕**：30 条抽入规则层
   （[ros2-ops §5.1/§7.1/§11/§12](../ros2-ops.md)、[doc-engineering §十三/§十四](../doc-engineering.md)、
   [startup §4.4](../startup.md)），draft 条目收薄为状态回指；E5 经归属讨论后按用户裁定落
-  ros2-ops §12「感知覆盖 / 可观测性判据」新小节（未留 draft）
+  ros2-ops §12「感知覆盖 / 可观测性判据」新小节（未留 draft）——执行过程独立成档
+  [2026-09-16_a1_item1_extraction.md](2026-09-16_a1_item1_extraction.md)（一文一事一档）
 - [ ] A1 收口盘点项 2（profiles 判定）/ 项 4（knowledge-tree §5 联动）——入口 [pending-tasks.md](../pending-tasks.md)
-- [ ] 镜像重同步（本档 + 09-09 档拆分 + 02/03/07 修复，随下批）
+- [x] ~~镜像重同步（本档 + 09-09 档拆分 + 02/03/07 修复，随下批）~~ → **09-16 复核**：`878c936` 已覆盖此前改动，本批（09-16 抽取档）同步后 `diff -rq` 0 差异
 
 ---
 
 ## 相关
 
-- 前序事件：[2026-09-09 预盘点](2026-09-09_experience_preinventory.md)
+- 前序事件：[2026-09-09 预盘点](2026-09-09_experience_preinventory.md) ｜ 后序事件：[2026-09-16 抽取执行](2026-09-16_a1_item1_extraction.md)
 - 规范归宿：[doc-engineering.md §十一/§十二](../doc-engineering.md)（盘点与收口规则）｜[§十三/§十四](../doc-engineering.md)（09-16 抽取落点）
 - 流程方法：[doc-engineering.md §十四](../doc-engineering.md)（规则层）｜[analysis-methods.md 主题 F](../analysis-methods.md)（draft 母本，已收薄回指）

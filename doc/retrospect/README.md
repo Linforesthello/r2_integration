@@ -57,6 +57,7 @@
 | [2026-09-09_datefix_linkfix_dual_repo.md](2026-09-09_datefix_linkfix_dual_repo.md) | 低物链日期实证修正 + 坏链 29 条修复双仓闭环（09-07 零活动实证/三桶+同型聚合/镜像 cp 平铺坑；规则追加见 doc-engineering §四 + obsidian-sync §2/§4） |
 | [2026-09-09_experience_preinventory.md](2026-09-09_experience_preinventory.md) | 经验盘点 A1 预盘点：7 批全 doc 检索（126 候选）→ 分桶批准 → 双批落地 + 09-11 六维收口（拆见下行）；流程升格 draft 主题 F |
 | [2026-09-11_a1_closing_review.md](2026-09-11_a1_closing_review.md) | A1 收口终核：§十一 六维核对（4 绿 + 3 处残留修复）+ 底稿升格处置；一文一事一档先例（09-11 内容独立成档） |
+| [2026-09-16_a1_item1_extraction.md](2026-09-16_a1_item1_extraction.md) | A1 收口盘点项 1 执行：33 行状态表 30 条抽入规则层（ros2-ops §5.1/§7.1/§11/§12、doc-engineering §十三/§十四、startup §4.4）+ draft 收薄回指；E5 归属裁定落 §12 新小节（抽取执行六步卡 + 经验点 E1~E6） |
 
 ## 专题（无日期前缀）
 
