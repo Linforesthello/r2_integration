@@ -116,7 +116,7 @@ R2 断点（复盘 09-04 钉死）：/velodyne_points **有完整低环数据**�
 - 做法：一个 obstacle 层内列多个 `observation_sources`，或 **两个 obstacle_layer 插件实例**
   （`obstacle_layer_low` 吃低带 + `obstacle_layer_high` 吃高带，各配自己的 topic 与高度带）。
 - 老坑（ROS Answers 经典结论）：多传感器**不要互相 clear**（长距源会把短距源刚标的障碍清掉）——
-  用独立层/独立源各管各的；Nav2 docs 对多源合并语义写得含糊（[docs.nav2.org #851](…)），
+  用独立层/独立源各管各的；Nav2 docs 对多源合并语义写得含糊（[docs.nav2.org #851](https://github.com/ros-navigation/docs.nav2.org/issues/851)），
   分开层 + combination_method 更可控。
 - **AMCL 限制**：只吃单一 scan，不支持多激光源合并——要喂 AMCL 必须先合流
   （laser_assembler ROS2 无维护版；ir_laser_tools 仅 ROS1）。

@@ -113,4 +113,4 @@ tigervncserver -kill :2         # 停止会话
 - 排障全记录：`~/Lin_workspace/r2_integration/doc/retrospect/2026-08-05_n97_remote_desktop.md`
 - N97 工作区：`~/Lin_workspace/r2_integration/`
 - IMU 驱动源码（EKF NaN 修复点）：`~/Lin_workspace/r2_integration/g354_driver/g354_imu_driver/imu_node.py`
-- 参考：[R1 树莓派控制操作手顺](raspi_r1_control.md)
+- 参考：`R1 树莓派控制操作手顺`（R1 侧文档，不在本仓）
