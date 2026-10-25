@@ -80,7 +80,7 @@
 - 运动线：Go2 地形扩展（SO-101/机械臂明确不做）— [recruitment-learning-plan.md §5.1](roadmaps/recruitment-learning-plan.md)、[motion-control-roadmap.md §七](roadmaps/motion-control-roadmap.md)
 - LocoWiki 两轮扫读 + 复现 1~2 开源项目；里程碑：10 底 A2+RL 首数据 / 11 底复现 1 / 12 底题库骨架 — [recruitment-learning-plan.md §5.2](roadmaps/recruitment-learning-plan.md)
 - 全向轮运动模式方案①运动学专项（未定论，秋招后处理）— [planning-control-roadmap.md §5.7ter](roadmaps/planning-control-roadmap.md)
-- **传感器加装：MID-70 + D435（阶段二，装法与几何已定档 09-16）**：MID-70 装 VLP-16 下方（离地 0.55~0.65m、前倾 15~20°）、D435 夹两雷达之间、拟走双雷达组合（roadmap 方案 b）；**待办** = ① 实车安装结构核算（三层叠装机械实现/供电余量/交换机口）② 外参标定（含 MID-70 倾角旋转）③ 实机验证或 A/B — [surveys/sensor-mounting-layout-survey.md](surveys/sensor-mounting-layout-survey.md)、[roadmap §三](roadmaps/planning-control-roadmap.md)
+- **传感器加装：MID-70 + D435（阶段二，装法与几何已定档 09-16；倾角 10-25 初步确定）**：MID-70 装 VLP-16 下方（离地 0.55~0.65m、**倾角初定 +17.5°**，09-16 拟定区间 15~20°）、D435 夹两雷达之间、拟走双雷达组合（roadmap 方案 b）；**待办** = ① 实车安装结构核算（三层叠装机械实现/供电余量/交换机口）② 外参标定（含 MID-70 倾角旋转）③ 实机验证或 A/B — [surveys/sensor-mounting-layout-survey.md](surveys/sensor-mounting-layout-survey.md)、[roadmap §三](roadmaps/planning-control-roadmap.md)
 - Phase 4 D435+Jetson 视觉（0%）与 Phase 5 气动+异常+编排（0%）— [02-progress.md](02-progress.md)
 - MBD 状态机（MATLAB/Simulink 部署路径未定，秋招后优先）；探索效率升级路 explore_lite — [planning-control-roadmap.md §5.7bis/§5.8](roadmaps/planning-control-roadmap.md)
 - STM32/MCLM 技术栈 LocoWiki「翻译层」整理（低优先级）— [planning-control-roadmap.md §6.8](roadmaps/planning-control-roadmap.md)
