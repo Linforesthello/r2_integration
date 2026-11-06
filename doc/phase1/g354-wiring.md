@@ -36,6 +36,7 @@
 ## 串口参数
 
 - 设备路径: `/dev/ttyACM1`（N97 上固定；CANable2 占 ttyACM0，launch 默认即 ttyACM1）
+  - **2026-11-06 更新**：N97 已改为 udev 固定名 `/dev/r2_g354`（serial `000063728613`）；上句的 ttyACM 编号是历史枚举，禁止再写死。规则与实测见 [old-car/ld06-dual-lidar.md §P3](../old-car/ld06-dual-lidar.md)。
 - 波特率: 460800
 - 数据位: 8
 - 停止位: 1
@@ -66,4 +67,5 @@ ros2 topic hz /imu/data
 
 - 设备对应关系固定：`/dev/ttyACM0` = CANable2（CAN 总线）、`/dev/ttyACM1` = G354（JLink OB Mini）
 - 若设备路径变化，用 launch 参数覆盖：`ros2 launch g354_imu_driver g354_rviz.launch.py serial_port:=/dev/ttyACM0 rviz:=false`（`imu_node.py` 代码默认值仍是 ttyACM0，无需改代码）
+- **2026-11-06 更新**：N97 实测枚举已变化（G354=ACM0、CAN=ACM1、LD06 A/B=ACM2/3），对应关系现由 udev 固定名保证（`/dev/r2_g354` / `/dev/r2_can` / `/dev/r2_ld06_a/b`）；上面两句按 ACM 编号判断的说法仅作历史快照。
 - 5V 供电不要接错到 JLink 的 VTref（VTref 是 3.3V 参考电压，非供电）

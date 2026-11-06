@@ -66,7 +66,7 @@
 | G354（串口 IMU） | **STM32 + MPU6050** | `/imu/data`（`sensor_msgs/Imu`） | MPU6050 无磁力计，yaw 只能靠陀螺积分 + 轮速修正，漂移需实测；协方差/时间戳必须正确填充；**S1/S2 保留 G354，S3 才替换** |
 | 无 | **GO-M8010-6 击球机构** | `/striker/trigger`、`/striker/state` | 新增执行器；控制时序与安全见 §七 |
 
-**LD06 现有资产**：VM 外部 `~/ldlidar_ros2_ws`（参考，不随 r2 同步）；r2 仓内 [ldlidar_stl_ros2/](../ldlidar_stl_ros2/) 为上游 `bf668a8` vendor 入仓版本（去掉内层 `.git`，来源/本地改动见包内 [README_R2.md](../ldlidar_stl_ros2/README_R2.md)）。2026-11-06 launch 已参数化（9 个参数：`node_name` / `topic_name` / `frame_id` / `port_name` / `port_baudrate` / `z` / `yaw` / `pitch` / `roll`）：单雷达默认 `topic_name=scan`、`frame_id=base_laser`、`port_name=/dev/r2_ld06_a`（udev 符号链接）、`port_baudrate=230400`、`z=0.18`（**占位值**，实车按安装高度重标）；双实例用 `/scan_a` + `laser_a`、`/scan_b` + `laser_b` + `/dev/r2_ld06_a/b`；驱动参数 `product_name=LDLiDAR_LD06`、`laser_scan_dir=True` 不变。VM 已验收 V1–V6（双实例各 ~10Hz、数据隔离、udev 插拔不穿号、互扰初筛；详见 [old-car/ld06-dual-lidar.md](old-car/ld06-dual-lidar.md)）；首测 18m36s 掉电根因已确认 = **接线端子松动掉出**（用户 2026-11-06 实测）。N97 侧尚未验证，需本机构建/接线 + 补 udev/供电长跑后实测。
+**LD06 现有资产**：VM 外部 `~/ldlidar_ros2_ws`（参考，不随 r2 同步）；r2 仓内 [ldlidar_stl_ros2/](../ldlidar_stl_ros2/) 为上游 `bf668a8` vendor 入仓版本（去掉内层 `.git`，来源/本地改动见包内 [README_R2.md](../ldlidar_stl_ros2/README_R2.md)）。2026-11-06 launch 已参数化（9 个参数：`node_name` / `topic_name` / `frame_id` / `port_name` / `port_baudrate` / `z` / `yaw` / `pitch` / `roll`）：单雷达默认 `topic_name=scan`、`frame_id=base_laser`、`port_name=/dev/r2_ld06_a`（udev 符号链接）、`port_baudrate=230400`、`z=0.18`（**占位值**，实车按安装高度重标）；双实例用 `/scan_a` + `laser_a`、`/scan_b` + `laser_b` + `/dev/r2_ld06_a/b`；驱动参数 `product_name=LDLiDAR_LD06`、`laser_scan_dir=True` 不变。VM 已验收 V1–V6（双实例各 ~10Hz、数据隔离、udev 插拔不穿号、互扰初筛；详见 [old-car/ld06-dual-lidar.md](old-car/ld06-dual-lidar.md)）；首测 18m36s 掉电根因已确认 = **接线端子松动掉出**（用户 2026-11-06 实测）。N97 侧已完成 2026-11-06 交接前置：`git pull` 4860c2c + `colcon build` 通过，udev 四路固定（`r2_g354` / `r2_can` / `r2_ld06_a` / `r2_ld06_b`，serial 见 [执行计划 §二](old-car/ld06-dual-lidar.md)）；双实例运行 2026-11-06 19:21 实测通过（`/scan_a` 10.000 Hz、`/scan_b` 10.002 Hz，frame `laser_a`/`laser_b`，各 Publisher 1），**供电长跑仍待实测**。
 
 **STM32 IMU 的传输方式未定**（见 §十）：无论 micro-ROS 还是「STM32 串口帧 + 主机桥接」，ROS 侧都必须稳定产出 `sensor_msgs/Imu`，且 `frame_id=imu_link`、协方差非零、时间戳可用。IMU 固件细节不在本文展开。
 
@@ -239,7 +239,7 @@ map ──→ odom ──→ base_link ──┬──→ base_laser        (老
 ### 6.3 参数与命名契约
 
 - **每车一份配置**：计划采用 `r2_bringup/config/old_car/`、`r2_bringup/config/new_car/`（目录名待实施时定），launch 用 `car:=old|new` 或显式 `params_file` 选择；不要在同一文件里混两车参数。
-- **设备路径不用硬编码**：LD06 用 udev 符号链接 `/dev/r2_ld06_a` / `/dev/r2_ld06_b`（2026-11-06 VM 已落，二期低装可加 `/dev/r2_ld06_low`）；G8010 用 `/dev/r2_g8010`；IMU 用 `/dev/r2_imu`。启动前 `ls -l /dev/r2_*` 核对。
+- **设备路径不用硬编码**：LD06 用 udev 符号链接 `/dev/r2_ld06_a` / `/dev/r2_ld06_b`（2026-11-06 VM+N97 已落，二期低装可加 `/dev/r2_ld06_low`）；G354 用 `/dev/r2_g354`；CAN 用 `/dev/r2_can`；G8010 用 `/dev/r2_g8010`；S3 换 STM32 后可另立 `/dev/r2_imu`。启动前 `ls -l /dev/r2_*` 核对。
 - **frame 名不随驱动默认值漂移**：LD06 单雷达默认 `base_laser`，双雷达用 `laser_a` / `laser_b`（2026-11-06 已用），二期低装可加 `laser_low`；IMU 固定 `imu_link`；G8010 不发布 TF（击球臂如需可视化，单独加 `striker_link`）。
 - **QoS 不靠猜**：新驱动接入后先 `ros2 topic info -v` 记录发布/订阅两端，再写进配置；大消息/瞬态话题按 [ros2-qos-dds.md](ros2-qos-dds.md) 处理。
 

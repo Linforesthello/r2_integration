@@ -502,7 +502,7 @@ coverage = ROI 内已知栅格数 / ROI 总栅格数
 
 | 本文原前提 | 老车新前提 | 处理 |
 |:---|:---|:---|
-| `/scan` 来自 `velodyne_laserscan`（VLP-16） | `/scan` 来自 LD06 驱动（`ldlidar_stl_ros2`，230400，`/dev/ttyACM0` 占位） | 启动 LD06 launch；先 `ros2 topic info -v /scan` 核对 QoS/frame/频率 |
+| `/scan` 来自 `velodyne_laserscan`（VLP-16） | `/scan` 来自 LD06 驱动（`ldlidar_stl_ros2`，230400，`/dev/r2_ld06_a` udev 固定名） | 启动 LD06 launch；先 `ros2 topic info -v /scan` 核对 QoS/frame/频率 |
 | `base_link→velodyne`（z=0.655） | `base_link→base_laser`（LD06 launch 的 z=0.18 是**占位值**） | 实车量安装高度后改静态 TF；不要沿用 0.655/0.18 |
 | `nav2_params_low.yaml` 的 `velodyne_low` 低带源 | 老车无 `/velodyne_points` | 老车另建参数：首期先跑无低带源的 2D explore；二期用 `/scan_low` 或按 §十.2 处理 |
 | 低物盲区 1.59m（VLP-16 几何） | 换雷达后几何全变 | 旧数字不适用；首测避开低物；低物验收另立 |
@@ -522,7 +522,7 @@ coverage = ROI 内已知栅格数 / ROI 总栅格数
 
 ```bash
 # LD06 设备与驱动
-ls -l /dev/r2_ld06_front /dev/ttyACM0 2>/dev/null   # udev 符号链接优先；没有则先确认实际端口
+ls -l /dev/r2_ld06_a 2>/dev/null   # udev 固定名优先；没有则先确认实际端口
 ros2 launch ldlidar_stl_ros2 ld06.launch.py          # 端口/frame 按实车改
 ros2 topic info -v /scan                             # 看 QoS、frame_id、发布者
 ros2 topic hz /scan                                  # 预期 ~10Hz（待实测）

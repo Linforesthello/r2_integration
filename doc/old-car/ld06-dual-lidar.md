@@ -2,8 +2,8 @@
 
 > 日期：2026-11-06
 > 任务：老车平替 S1/S2 的 LD06 接入——**先在 VM 完成双雷达基本功能与串口固定**，再交 N97 部署
-> 状态：✅ VM 阶段验收完成（2026-11-06，V1~V6 通过）；P6 N97 交接待执行
-> 回填：2026-11-06（执行结果、参数快照、已知限制）
+> 状态：✅ VM 阶段验收完成（2026-11-06，V1~V6 通过）；✅ N97 交接前置完成（udev 四路固定 + 构建，2026-11-06）；✅ N97 双实例运行实测 10Hz（2026-11-06 19:21，`/scan_a` 10.000 Hz / `/scan_b` 10.002 Hz）；⏳ N97 供电长跑待测
+> 回填：2026-11-06（VM 执行结果、参数快照、已知限制；N97 udev/构建实测）
 > 上位文档：[two-car-architecture.md §三/§八](../two-car-architecture.md)
 > 事件记录：[2026-11-06 LD06 VM 接入与冒烟](../retrospect/2026-11-06_ld06_vm_bringup_smoke.md)
 > 原始数据：`doc/raw_data/raw_ld06_*`（本地，不入 git）
@@ -45,6 +45,19 @@
   2026-11-06 用户确认根因为**接线端子松动掉出**（[事件记录 §五](../retrospect/2026-11-06_ld06_vm_bringup_smoke.md)）。
 - **已确认（2026-11-06，udev 固定）**：A = serial `000063728672`，B = serial `000063728647`；
   单颗拔插不串号（P0.5）。
+
+**N97 实测基线（2026-11-06 18:49~18:52）**：
+
+| 设备 | tty（N97 当时） | serial | udev 固定名 |
+|:---|:---|:---|:---|
+| G354 IMU | `/dev/ttyACM0` | `000063728613` | `/dev/r2_g354` |
+| CANable2（USB-CAN/slcan） | `/dev/ttyACM1` | `208C37AF4845` | `/dev/r2_can` |
+| LD06-A | `/dev/ttyACM2` | `000063728672` | `/dev/r2_ld06_a` |
+| LD06-B | `/dev/ttyACM3` | `000063728647` | `/dev/r2_ld06_b` |
+
+- N97 的 ACM 编号与 VM 完全不同（VM 为 ACM0/ACM1），**再次实锤不能按 tty 编号写死**；四条链接均经
+  `readlink -f` + `udevadm info` 核对到正确 serial。
+- CANable2 不是 J-Link：VID:PID `16d0:117e`，规则单独按该 VID/PID + serial 匹配。
 
 ---
 
@@ -179,6 +192,13 @@ ls -l /dev/r2_ld06_a /dev/r2_ld06_b
 - [x] launch 使用 `r2_ld06_a/b` 双路正常（P2）；
 - [ ] 重启复验未单独记录（规则已落盘，可补一次 reboot 验证）。
 
+**N97 实测（2026-11-06）**：
+
+- [x] `/etc/udev/rules.d/99-r2-serial.rules` 已装，含 4 条规则（G354 / CANable2 / LD06 A / LD06 B）；
+- [x] `ls -l /dev/r2_*` 四条链接均存在，指向正确 serial（对照表见 §二）；
+- [x] 规则按本机 serial 重写，未直接照搬 VM 文件（N97 的 G354/CAN serial 与 VM 不同）；
+- [ ] N97 重启复验待补。
+
 **坑位**：
 
 - 克隆 J-Link 可能 serial 相同（本批不相同）；若遇到，改用 `ENV{ID_PATH}` 按 USB 物理口固定。
@@ -212,14 +232,22 @@ ls -l /dev/r2_ld06_a /dev/r2_ld06_b
 **实测结果（2026-11-06）**：双开实测无异常（用户结论）；未留三组量化分布数据。
 VM 摆位不代表实车，实车安装后按同法复验（或标注为 VM 初筛结论）。
 
-### P6 交接 N97（待执行，S1 前）
+### P6 交接 N97（⏳ 进行中，2026-11-06）
 
-1. N97 `git pull`（含本计划与 P1 改动）→ `colcon build --packages-select ldlidar_stl_ros2`；
-2. 写 udev：两颗 LD06 + **G354 + CAN**（serial 全收齐）；
-3. 接线后 `ros2 topic hz /scan_a` / `/scan_b`；
-4. **供电长跑 ≥30 min**：带载测 PSV 4.5~5.5V、查 GND/接头/5V 来源；不要依赖 J-Link 的 5V 给雷达供电，
+1. [x] N97 `git pull` 到 `4860c2c`；`colcon build --packages-select ldlidar_stl_ros2` 通过
+   （install 副本含 9 参数 launch 与可执行节点）；
+   - 构建 stderr 有 CMake 弃用警告（上游 `cmake_minimum_required(VERSION 3.5)`，N97 CMake 3.22.1），
+     **非错误、不影响产物**；保持 vendor 原样，未来 CMake 4 报错再评估改 3.10（见 §五）；
+2. [x] 写 udev：G354 + CAN + 两颗 LD06 四路固定（serial 见 §二；规则内容见 P3）；
+3. [x] 接线后 N97 双实例运行实测（2026-11-06 19:21，进程已连续运行 8m35s）：
+   - `/scan_a` **10.000 Hz**（min/max 0.100s，std 0.00010s，window 65）
+   - `/scan_b` **10.002 Hz**（min/max 0.099~0.100s，std 0.00020s，window 65）
+   - frame：`laser_a` / `laser_b`；`ros2 topic info -v` 各 Publisher 1（RELIABLE / VOLATILE）
+   - 节点：`/ld06_a`、`/ld06_b`、两个 `base_link_to_laser_*_ld06` 静态 TF 节点各 1，无重名
+   - 对应 VM 侧 B 路 9.76Hz 的单帧缺口在 N97 未复现（两侧摆位/线材不同，仅记录不归因）；
+4. [ ] **供电长跑 ≥30 min**：带载测 PSV 4.5~5.5V、查 GND/接头/5V 来源；不要依赖 J-Link 的 5V 给雷达供电，
    建议雷达独立 5V + 共地；
-5. 通过后再进 S1（slam_toolbox + Nav2 + explore_lite）。
+5. [ ] 通过后再进 S1（slam_toolbox + Nav2 + explore_lite）。
 
 ---
 
@@ -246,6 +274,7 @@ VM 摆位不代表实车，实车安装后按同法复验（或标注为 VM 初�
 | USB/hub 供电不足 | 双开后 `time out`、单开正常 | 换供电 hub / 雷达独立 5V；不要用 J-Link 5V 带载 |
 | 18m36s 掉电不复现 | 根因已确认 = 接线端子松动掉出（用户 11-06 实测）；VM 长跑 ≥30 min 通过 | 不以 VM 结论关闭供电项；N97 按 P6 长跑并检查端子/接头 |
 | launch 参数类型错 | `port_baudrate` 传字符串报类型错 | `ParameterValue(..., value_type=int)` |
+| CMake 弃用警告（上游 VERSION 3.5） | 构建 stderr 出现 "Compatibility with CMake < 3.10 will be removed" | 非错误，N97 CMake 3.22.1 下构建成功；保持 vendor 原样，未来 CMake 4 报错再改 `3.10`（并同步 README_R2 本地改动） |
 | `ros2 param` 不可用 | `param get` 超时、`param list` 报服务异常 | 驱动主循环不 spin 参数服务；参数以启动日志 9 行为准；如需运行时查看再评估补 `spin_some`（本次跳过） |
 | launch 残留进程 | `ros2 node list` 同名节点重复 | 停 launch 用 Ctrl-C/SIGINT；清理须含 launch 父进程 + `static_transform_publisher`；重名先 `ros2 daemon stop` |
 | 节点/静态 TF 重名 | 两实例互相覆盖、TF 断 | node_name、TF 节点名随实例参数化 |
@@ -262,7 +291,8 @@ VM 摆位不代表实车，实车安装后按同法复验（或标注为 VM 初�
 3. ⏳ 待实车实测后回填（z / 俯仰 / 前后位置，替换占位 `0.18`）；
 4. ⏳ 未做（可选：VM 离线 slam_toolbox 验证，只验 launch/参数）；
 5. ✅ 已定：本轮由用户执行、AI 给指令与判据；
-6. ⏳ 待收齐 N97 G354/CAN 的 J-Link serial（建议一并纳入 udev）。
+6. ✅ 已收齐（2026-11-06 N97）：G354 `000063728613`、CANable2 `208C37AF4845`、LD06 A/B 同 VM
+   （`...8672` / `...8647`），已写入 `/etc/udev/rules.d/99-r2-serial.rules`。
 
 ---
 
@@ -273,4 +303,4 @@ VM 摆位不代表实车，实车安装后按同法复验（或标注为 VM 初�
 - 构建/部署/进程纪律：[ros2-ops.md §2/§7/§10](../ros2-ops.md)
 - 验收边界：[standards.md §1.15](../standards.md)
 - 驱动与 launch：[ldlidar_stl_ros2/launch/ld06.launch.py](../../ldlidar_stl_ros2/launch/ld06.launch.py)、[README_R2.md](../../ldlidar_stl_ros2/README_R2.md)
-- 设备基线：2026-11-06 16:20 VM `lsusb` / `udevadm info` 实测（本文件 §二）
+- 设备基线：2026-11-06 16:20 VM `lsusb` / `udevadm info` 实测；2026-11-06 18:49~18:52 N97 实测（本文件 §二）

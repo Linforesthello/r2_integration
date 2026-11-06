@@ -35,7 +35,7 @@ r2_integration/
 │   ├── two-car-architecture.md    两车架构与接口（老车平替 + 新车升级 + 共用/分叉，11-06 建）
 │   │
 │   ├── old-car/  ← 老车平替专题（11-06 建）
-│   │   └── ld06-dual-lidar.md     LD06 单/双雷达执行计划（VM 验收 V1–V6 完成 → N97 交接：串口固定/双实例/互扰）
+│   │   └── ld06-dual-lidar.md     LD06 单/双雷达执行计划（VM 验收 V1–V6 完成；N97 udev/构建/双实例 10Hz 完成，供电长跑待测）
 │   │
 │   ├── minimal-loop/        最小闭环执行史（plan + w1/w2/w3-operation.md + Nav2 bringup + 审计数据）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan.md + execution/relog/costmap 执行卡 + explore-plan.md 工作稿）
@@ -231,7 +231,7 @@ Phase 5 气动 + 异常处理 + Robocon 编排   ⏳
 
 部署时（N97 Mini PC / 192.168.1.210）
 ├──  CAN 总线: slcan 转串口 (USB-CAN 适配器) → CanCmd 工具配置
-├──  IMU/G354: ttyACM1（JLink OB Mini 串口直连）
+├──  IMU/G354: /dev/r2_g354（udev 固定名；JLink OB Mini 串口直连）
 ├──  LiDAR:    VLP-16 经交换机转接（设备 IP 10.18.18.6）
 ├──  视觉:     D435 USB 直连（可选 Jetson 协同）
 └──  OS:       Ubuntu 22.04 + ROS2 Humble
@@ -258,7 +258,7 @@ ros2 launch r2_bringup chassis.launch.py publish_tf:=false
 # 3. 启动 IMU（在终端 2 运行；保持静止 3s 等校准完成）
 #    mount_axes:=y_front_x_left_z_down 是 R2 的 G354 出厂轴定义（x左/y前/z下），见 doc/phase0/sensor-mount.md
 source ~/Lin_workspace/r2_integration/install/setup.bash
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/r2_g354 mount_axes:=y_front_x_left_z_down
 
 # 4. 启动 EKF 融合（在终端 3 运行；⚠️ 必须在 IMU 校准完成后启动，重启 IMU 须同时重启 EKF）
 source ~/Lin_workspace/r2_integration/install/setup.bash

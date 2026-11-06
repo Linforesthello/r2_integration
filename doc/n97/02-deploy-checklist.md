@@ -2,6 +2,10 @@
 
 > ✅ 已部署完成（2026-07-31，N97 Ubuntu 22.04 + ROS2 Humble），本文档保留作部署手册
 > 原目标：从 VMware 虚拟机迁移到 N97 Mini PC（实车工控机），N97 安装 Ubuntu 22.04 + ROS2 Humble
+>
+> **2026-11-06 串口固定名更新**：N97 已装 `/etc/udev/rules.d/99-r2-serial.rules`——G354=`/dev/r2_g354`、
+> CAN=`/dev/r2_can`、LD06 A/B=`/dev/r2_ld06_a/b`。下文出现的 `/dev/ttyACM0`（CAN）/`/dev/ttyACM1`（G354）
+> 为当时枚举快照，照做时请改用固定名；规则与实测见 [old-car/ld06-dual-lidar.md §P3](../old-car/ld06-dual-lidar.md)。
 
 ---
 

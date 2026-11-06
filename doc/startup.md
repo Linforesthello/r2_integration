@@ -74,8 +74,9 @@ ros2 launch r2_bringup chassis.launch.py publish_tf:=false
 
 # 终端 4: IMU（启动后静止 3s 等校准，校准期不可动）
 #   mount_axes:=y_front_x_left_z_down 是 R2 的 G354 出厂轴定义（x左/y前/z下），见 phase0/sensor-mount.md
+#   串口用 udev 固定名 /dev/r2_g354（N97 2026-11-06 起；VM 无该链接时改用 /dev/ttyACM1 或实际端口）
 source ~/Lin_workspace/r2_integration/install/setup.bash
-ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/ttyACM1 mount_axes:=y_front_x_left_z_down
+ros2 launch g354_imu_driver g354_rviz.launch.py rviz:=false serial_port:=/dev/r2_g354 mount_axes:=y_front_x_left_z_down
 
 # 终端 5: EKF（必须在 IMU 校准完成后启动；重启 IMU 必须同时重启 EKF）
 source ~/Lin_workspace/r2_integration/install/setup.bash

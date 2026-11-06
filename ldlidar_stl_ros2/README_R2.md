@@ -52,7 +52,8 @@ ros2 launch ldlidar_stl_ros2 ld06.launch.py \
 ## 使用与待办
 
 - 构建：`colcon build --packages-select ldlidar_stl_ros2`
-- launch 默认端口 `/dev/r2_ld06_a`，由 udev 按 J-Link serial 固定（VM 已建 `r2_ld06_a` / `r2_ld06_b`）；**上 N97 前**须把 N97 的 LD06/G354/CAN serial 写入本机 udev 规则，避免与 G354 的 ACM 设备互换。
+- launch 默认端口 `/dev/r2_ld06_a`，由 udev 按 J-Link serial 固定（VM 已建 `r2_ld06_a` / `r2_ld06_b`；N97 2026-11-06 已建四路 `r2_g354` / `r2_can` / `r2_ld06_a` / `r2_ld06_b`，避免与 G354/CAN 的 ACM 设备互换）。
+- 构建告警：上游 `CMakeLists.txt` 的 `cmake_minimum_required(VERSION 3.5)` 在 CMake 3.22 下产生弃用警告（stderr），**非错误**；保持 vendor 原样，未来 CMake 4 报错再评估改为 `3.10`。
 - 上游 `scripts/ldlidar.rules` 仅匹配 CP210x 的 `ttyUSB*`，不适用于 J-Link；R2 已按 serial 另建规则（`MODE="0666"`、`GROUP="dialout"`，见 [执行计划 P3](../doc/old-car/ld06-dual-lidar.md)），N97 侧待补。
 - 静态 TF `base_link→base_laser` 的 `z=0.18` 是占位值，实车必须按安装高度重标。
 - 原始外部工作区：`~/ldlidar_ros2_ws`（保留作参考，不随 r2 同步）。
