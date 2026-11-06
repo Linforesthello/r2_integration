@@ -1,6 +1,6 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-09-16（传感器加装装法定档入 §四：MID-70 + D435 装法与几何评价完成；低物链 09-08 状态保留）
+> 最后更新: 2026-11-06（平台分叉决策入 §五：老车 LD06/STM32/G8010 平替 + 新车 3D/视觉升级；**实施分阶段：S1 先只换雷达，G354 + EKF 保留**；正文 09-16 基线保留）
 > 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%（KISS 建图）｜Phase 3 ⏳ 25%（Nav2 首闭环 08-15 + 降额过缝 08-17；A1 避障实测进行中，低物盲区链路 09-04→09-08 闭环：修法 B 实车第一次接近有效、二次失效根因 = global 清空冲突实锤 → 09-08 决策机制精修收手、主线转 3D 规控，详见 §四/决策记录），全速验证暂缓保持降额
 > 下一阶段: A1 避障收口（判据 5/5）→ A2 FAST-LIO2 落地（排期与 09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md)）
 > 基础设施: 08-14 两机 git 同步统一（push→pull）；08-15 VLP-16 运行物抽包 r2_sensors；08-24 N97 风扇可命令行调速；09-04 bags 数据资产入仓
@@ -37,6 +37,7 @@
 | 排障/事件结论速查 | [retrospect/README.md](retrospect/README.md) |
 | 实验数据资产（bag/地图清单） | [bags/README.md](../bags/README.md) |
 | 文档/操作规范 | [standards.md](standards.md) ｜ [ros2-ops.md](ros2-ops.md) ｜ [doc-engineering.md](doc-engineering.md) |
+| **两车架构与接口（老车平替/新车升级/共用分叉）** | **[two-car-architecture.md](two-car-architecture.md)**（2026-11-06 建） |
 
 **新会话阅读路线**：本文件（状态）→ 按任务进 §二 对应文档；先看规范则从 [README](../README.md) 起。
 
@@ -71,3 +72,26 @@
 - [ ] **FAST-LIO2 TF 桥集成**（静态桥 camera_init↔odom + body→base_link；方案已定 08-18）— [fastlio2-n97-deploy.md §五](n97/fastlio2-n97-deploy.md)
 - [ ] **传感器加装（MID-70 + D435，阶段二）**：装法与几何已定档（09-16）——MID-70 装 VLP-16 **下方**（离地 0.55~0.65m、**前倾 15~20°**）、D435 夹两雷达之间（**视觉导航栈用，不检测低物**）、拟走**双雷达组合**（roadmap 方案 b）+ 车体一台 D435。几何：0.35m 箱盲区 **1.59m → 0.14~0.25m**；**近距贴地 <0.46m 无感知覆盖 → 归 L4 行为层兜底**（[ros2-ops §12.2](ros2-ops.md) 待决策）。待办 = 实车安装结构核算（三层叠装机械/供电/交换机口）+ 外参标定（**含 MID-70 倾角旋转**，新易错点）+ 实机验证 — [survey](surveys/sensor-mounting-layout-survey.md)
 - [ ] 可选：VLP-16 rpm 600→1200（20Hz）帧内畸变试验 ｜ waypoint 雷达闭环（基于 /kiss/odometry 自主行走）
+
+---
+
+## 五、2026-11-06 平台分叉（新增；上文为 VLP-16 时代基线）
+
+> 用户 2026-11-06 定：老车结构无法进一步升级，但必须做传感器低成本平替；新车在本项目基础上做结构/传感器升级。
+> 上位文档 = [two-car-architecture.md](two-car-architecture.md)；决策记录 = [retrospect/2026-11-06_platform_split_old_retrofit.md](retrospect/2026-11-06_platform_split_old_retrofit.md)。
+
+| 项 | 老车（先行） | 新车（升级） |
+|:---|:---|:---|
+| 主雷达 | LD06 串口 2D ×1（首期）→ ×2 低装（二期）；**VLP-16 撤下** | MID-70（首期）+ MID-360（后续）+ D435 |
+| IMU | STM32 + MPU6050 → `/imu/data`（**S1/S2 保留 G354；S3 才替换**；传输方式待定） | 待定 |
+| 执行器 | **GO-M8010-6 击球机构**（触发→爆发→停→慢回，打排球） | 待定 |
+| 软件 | 2D slam_toolbox + Nav2 + explore_lite；**不跑 KISS/FAST-LIO2** | 3D LIO + 视觉 + Nav2 |
+| 状态 | **先行实施**：先单 LD06 跑 explore | 设计/选型中，不阻塞老车 |
+
+**接手注意**：
+
+1. 上文 §一~§四 的 VLP-16 进度/遗留仍是**历史基线**，不要据此判断老车现状；老车 VLP-16 已撤。
+2. 老车 `nav2_params_low.yaml` 里的 `velodyne_low` 源不可用，必须另建参数；不要直接改历史文件。
+3. 旧结论（低物 1.59m 盲区、KISS/FAST-LIO2 验证）保留给新车/其他用途参考，**不要直接套到 LD06**。
+4. 两车共用话题/TF 契约见上位文档 §六；共用/分叉清单见 §五。
+5. **首期边界（B 方案）**：S1/S2 保留 G354 + 现有 EKF，只换雷达感知源；S3 才换 STM32 IMU；G8010 台架可并行，装车放 S4。S1 验收须含 EKF 基线对照，避免把感知问题误判为 IMU 问题。

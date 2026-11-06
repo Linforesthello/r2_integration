@@ -10,6 +10,11 @@
 > 为写作时快照，**部分命令/状态已过期**（如早期 G354 启动缺 `mount_axes:=y_front_x_left_z_down`、
 > 启动方式随包演进）。**现行启动命令以 [startup.md](startup.md) 为准**（全栈唯一权威，09-04 起）；
 > 进度状态以 [02-progress.md](02-progress.md)/[07-handover.md](07-handover.md) 为准。规划章节不受影响。
+>
+> **2026-11-06 平台分叉注记**：本文件是 **VLP-16 时代五阶段基线**。老车已撤 VLP-16，改为 LD06 2D 低成本平替；
+> 新车做结构/传感器升级（MID-70/D435/后续 MID-360）。现行两车架构与接口见 [two-car-architecture.md](two-car-architecture.md)，
+> 决策记录见 [retrospect/2026-11-06_platform_split_old_retrofit.md](retrospect/2026-11-06_platform_split_old_retrofit.md)。
+> 下文 VLP-16/KISS/FAST-LIO2 内容保留为历史基线与新车参考，**不代表老车现状**。
 
 ---
 
@@ -874,6 +879,9 @@ local_costmap:
 > 状态：候选记录（2026-08-18 建），**不承诺执行**。minimal-loop 闭环验收（W3，08-26）后
 > 从池中挑一条主线深化，其余保持"能沟通接口"即可（一超多强原则，见全局 CLAUDE.md）。
 > 精简版：minimal-loop [plan.md](minimal-loop/plan.md) 第八节（单一事实来源在本节）。
+>
+> **2026-11-06 平台分叉**：本候选池的 VLP-16/MID-70 A/B 前提已变——老车无 VLP-16；3D 传感器线迁新车。
+> 保留为历史候选，不按老车执行；现行路线见 [two-car-architecture.md](two-car-architecture.md)。
 
 #### 可介入外设
 

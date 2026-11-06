@@ -60,6 +60,7 @@
 | [2026-09-11_a1_closing_review.md](2026-09-11_a1_closing_review.md) | A1 收口终核：§十一 六维核对（4 绿 + 3 处残留修复）+ 底稿升格处置；一文一事一档先例（09-11 内容独立成档） |
 | [2026-09-16_a1_item1_extraction.md](2026-09-16_a1_item1_extraction.md) | A1 收口盘点项 1 执行：33 行状态表 30 条抽入规则层（ros2-ops §5.1/§7.1/§11/§12、doc-engineering §十三/§十四、startup §4.4）+ draft 收薄回指；E5 归属裁定落 §12 新小节（抽取执行六步卡 + 经验点 E1~E6） |
 | [2026-09-16_checker_codespan_fix.md](2026-09-16_checker_codespan_fix.md) | 校验器误报治理：12 条假报全在代码跨度内 → 工具加代码围栏/行内代码置空 + 修 2 条真坏链，缺失 14→0；集合比对证明闸门未削弱；附「基线危险/同文件并发 WIP」经验 |
+| [2026-11-06_platform_split_old_retrofit.md](2026-11-06_platform_split_old_retrofit.md) | 平台分叉决策：老车 VLP-16→LD06 2D 低成本平替 + STM32 IMU + G8010 击球；新车 3D/视觉升级；两车共用接口/分叉清单见 [two-car-architecture.md](../two-car-architecture.md) |
 
 ## 专题（无日期前缀）
 

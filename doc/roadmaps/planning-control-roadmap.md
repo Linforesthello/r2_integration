@@ -3,6 +3,10 @@
 > 状态：调研结论定稿（2026-08-18）；§五「全流程替代方案全景」与 §六「RL 增强方向」2026-08-23 补充（WebSearch 核实）；2026-08-23 按 [standards.md §1.11](../standards.md) 规范化（补 §3.2 规格来源 / §5.5-5.6 仓库链接 + §6.6 来源小节 + 相关索引）；2026-09-02 状态同步至 **08-25 基线**（FAST-LIO2 已于 08-24 实车验证全项通过，见 [07-handover.md](../07-handover.md)）+ §六补 6.0 大基调「全局传统、局部 RL」/ 6.7 AI 快速复现开源总体路线 / 6.8 LocoWiki RL 素材地图（来源 = LocoWiki 全站浏览学习，2026-09-02，见 §6.9）；来源 = 官方仓库/README + WebSearch 社区核实 + 本地 LocoWiki 学习，未实测项标注
 > 定位：01-plan 第四章（集成路线图）的补充引用，视觉/规划控制的选型依据
 > 关联：[01-plan.md](../01-plan.md)｜[fastlio2-n97-deploy.md](../n97/fastlio2-n97-deploy.md)（FAST-LIO2 部署）｜[motion-control-roadmap.md](motion-control-roadmap.md)（RL 运动控制姊妹篇，§六 6.0 大基调同适用）
+>
+> **2026-11-06 平台分叉注记**：VLP-16 已从老车撤下，老车改 LD06 2D 平替；§三 的 **VLP-16 vs MID-70 A/B
+> 不再适用于老车**，3D 传感器线迁新车；2D 探索线由 LD06 承接。原文保留为调研基线，现行路线见
+> [two-car-architecture.md](../two-car-architecture.md)。
 
 ---
 

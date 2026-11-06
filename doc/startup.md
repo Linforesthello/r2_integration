@@ -4,6 +4,11 @@
 > 职责边界：命令在此维护；启动纪律/坑在 [ros2-ops.md §3](ros2-ops.md)；部署细节在 `n97/` 各手册。
 > 引用方：07-handover（交接）｜README（快速启动）｜w1/w2/w3/execution/relog（执行卡）——启动一律以本文为准。
 > 相关：[07-handover.md](07-handover.md)（状态交接）｜[fastlio2-n97-deploy.md](n97/fastlio2-n97-deploy.md)（FAST-LIO 部署/排障）｜[greenwave-monitor-deploy.md](n97/greenwave-monitor-deploy.md)（话题监测替代手动 hz）｜[sensor-mount.md](phase0/sensor-mount.md)（传感器安装/轴定义）
+>
+> **2026-11-06 平台分叉**：本文命令为 **VLP-16 时代基线**。老车已撤 VLP-16、改 LD06 串口 2D，
+> 老车启动命令待 S1 落地后替换；新车 3D/视觉启动参考本文 + [two-car-architecture.md](two-car-architecture.md)。
+> 老车不得直接套用本文的 `velodyne.launch.py` / KISS-ICP / FAST-LIO2 段。
+> **S1 只替换雷达终端**：G354、EKF、底盘终端仍按本文原命令执行；S3 换 IMU 后再改 IMU 段。
 
 ---
 

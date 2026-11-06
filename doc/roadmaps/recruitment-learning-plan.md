@@ -6,6 +6,10 @@
 > [minimal-loop2/plan.md](../minimal-loop2/plan.md) 的全局排期语义；规划控制 / 运动控制两条业务路线仍以
 > [planning-control-roadmap.md](planning-control-roadmap.md) / [motion-control-roadmap.md](motion-control-roadmap.md) 为准。
 > 关联：[minimal-loop2/plan.md](../minimal-loop2/plan.md)（R2 执行序列来源）｜[07-handover.md](../07-handover.md)（状态快照）｜[01-plan.md](../01-plan.md)（集成总纲）
+>
+> **2026-11-06 平台分叉注记**：A1/A2 的 VLP-16 前提已变（老车撤 VLP-16、改 LD06 2D；3D 线迁新车）。
+> 执行前先看 [two-car-architecture.md](../two-car-architecture.md)；本文排期基线保留，具体 R2 任务以
+> [pending-tasks.md](../pending-tasks.md) ⓪ 组为准。
 
 ---
 

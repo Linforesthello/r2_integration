@@ -6,6 +6,29 @@
 > 状态变化时改源文档，并顺手更新/删除本文对应行；以源文档为唯一事实来源（standards.md §1.1）。
 > 分组：① 当前主线（阶段一线 1/线 2）→ ② 运维 → ③ 遗留收尾 → ④ 远期池。
 
+## ⓪ 平台分叉（2026-11-06 新增；①/③/⑤ 的 VLP-16 条目转历史基线）
+
+> 决策与边界见 [two-car-architecture.md](two-car-architecture.md) ｜ [决策记录](retrospect/2026-11-06_platform_split_old_retrofit.md)。
+> **老车先行**：LD06 2D 平替；**新车升级**：3D/视觉。下列 ①/③/⑤ 的 VLP-16 条目不再作为老车待办，保留作历史/新车参考。
+> **S1 只换雷达**：G354 + 现有 EKF 保留；S3 才换 STM32；G8010 台架独立，不阻塞 S1。
+
+**老车（R2-OLD）**
+
+- S1：单 LD06 正常高度 + slam_toolbox + Nav2 + explore_lite（**G354/EKF 不变**），5×5m 首测（覆盖率 >80%，含 EKF 基线对照）— [two-car-architecture.md §三](two-car-architecture.md)
+- S2：低装 + 第二颗 LD06（`/scan_low`）+ 低带障碍层，对比单雷达地图/低物可见性 — 同上
+- S3：STM32 + MPU6050 → `/imu/data`（**S1/S2 保留 G354，S3 才替换**），EKF 重标（yaw 漂移/协方差/时间戳） — 同上
+- S4：GO-M8010-6 击球机构（触发→爆发→停→慢回），台架 → 装车（**台架可与 S1 并行，装车后置**） — 同上 §七
+- 安装/串口：LD06 高度/俯仰、udev 符号链接、双雷达互扰实测（**G354 + LD06 同时占 ACM，S1 起固定名**） — 同上 §3.6
+
+**新车（R2-NEW）**
+
+- 底盘运动结构/上层安装/传感器（D435、MID-70、后续 MID-360、单点激光）方案与算力核算 — [two-car-architecture.md §四](two-car-architecture.md)
+- 3D LIO + 视觉 + Nav2 的软件栈与标定（MID-70 倾角外参） — 同上
+
+**待用户定夺（不排期）**：LD06 数量/布置、双雷达融合拓扑、STM32 传输、G8010 触发接口、新车 360° 覆盖/算力、VLP-16 去向 — [two-car-architecture.md §十](two-car-architecture.md)
+
+---
+
 ## ① 当前主线 · R2 导航（阶段一 线 1）
 
 > 权威排期与收手纪律见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md)；**09-10 = R2 补数收手线**（判据未满即记录缺口收手，不拖期）。

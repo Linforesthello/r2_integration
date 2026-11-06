@@ -1,6 +1,6 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-09-16（传感器加装装法定档入 §〇/§二：MID-70 + D435 装法与几何评价；低物链 09-08 状态保留）
+> 最后更新: 2026-11-06（平台分叉：老车 LD06 2D 平替 + 新车 3D/视觉升级入 §〇；上文 Phase 状态为 VLP-16 时代基线）
 > 内容: 当前完成状态快照——Phase 进度、近期完成、现役技术状态。
 > 交接总览 → [07-handover.md](07-handover.md)；事件详细索引 → [retrospect/README.md](retrospect/README.md)；待办 → [pending-tasks.md](pending-tasks.md)
 
@@ -10,6 +10,7 @@
 
 | 事项 | 详情 |
 |:-----|:-----|
+| **平台分叉决策（11-06）** | 老车结构无法进一步升级 → **低成本平替**：VLP-16 撤下换 LD06 串口 2D（首期单颗，二期低装/双颗）、G354 后续换 STM32+MPU6050（S3 实施）、加入 GO-M8010-6 击球机构；软件走 2D slam_toolbox + Nav2 + explore_lite。新车在本项目基础上做底盘/上层/传感器升级（D435、MID-70、后续 MID-360、单点激光），走 3D LIO + 视觉。两车共用接口/分叉清单见 [two-car-architecture.md](two-car-architecture.md)，决策记录见 [retrospect 11-06](retrospect/2026-11-06_platform_split_old_retrofit.md)。**实施顺序（B 方案）**：S1/S2 保留 G354 + 现有 EKF，S3 才换 STM32；G8010 台架独立，S4 装车 |
 | Nav2 降额过缝验证（08-17） | inflation_radius 0.55→0.30（local/global）修复窄缝 costmap 全灰过不去，实车验证**基本无碰撞、能通过过道**，见 [retrospect](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md) |
 | 全速验证决策（08-17） | **暂缓，保持降额现状**；切全速版前须先同步其膨胀参数（仍 0.55） |
 | 多次设初始位姿诊断（08-17） | map 重叠 = AMCL 锁错位（机制链 + 操作纪律见 [retrospect](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md)） |
