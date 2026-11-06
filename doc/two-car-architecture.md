@@ -66,7 +66,7 @@
 | G354（串口 IMU） | **STM32 + MPU6050** | `/imu/data`（`sensor_msgs/Imu`） | MPU6050 无磁力计，yaw 只能靠陀螺积分 + 轮速修正，漂移需实测；协方差/时间戳必须正确填充；**S1/S2 保留 G354，S3 才替换** |
 | 无 | **GO-M8010-6 击球机构** | `/striker/trigger`、`/striker/state` | 新增执行器；控制时序与安全见 §七 |
 
-**LD06 现有资产**：VM 已有 `~/ldlidar_ros2_ws`（包 `ldlidar_stl_ros2`，launch `ld06.launch.py`）——参数为 `product_name: LDLiDAR_LD06`、`topic_name: scan`、`frame_id: base_laser`、`port_name: /dev/ttyACM0`、`port_baudrate: 230400`、`laser_scan_dir: True`；launch 内静态 TF `base_link→base_laser` 的 `z=0.18` 是**占位值**，实车必须按安装高度重标。N97 侧尚未验证，需本机构建/接线后实测。
+**LD06 现有资产**：VM 已有 `~/ldlidar_ros2_ws`（包 `ldlidar_stl_ros2`，launch `ld06.launch.py`）——参数为 `product_name: LDLiDAR_LD06`、`topic_name: scan`、`frame_id: base_laser`、`port_name: /dev/ttyACM0`、`port_baudrate: 230400`、`laser_scan_dir: True`；launch 内静态 TF `base_link→base_laser` 的 `z=0.18` 是**占位值**，实车必须按安装高度重标。N97 侧尚未验证，需本机构建/接线后实测。2026-11-06 VM 首测已跑通 `/scan` 10 Hz（J-Link VCOM，230400）；同次运行 18m36s 后发生一次掉电（蓝灯灭/停转，重插恢复），S1 前须核查供电/接头（见 [sensor-mount §六](phase0/sensor-mount.md)）。2026-11-06 已按上游 `bf668a8` vendor 入仓 `ldlidar_stl_ros2/`（去掉内层 `.git`，来源/本地改动见包内 `README_R2.md`）；外部 `~/ldlidar_ros2_ws` 保留作参考，不随 r2 同步。
 
 **STM32 IMU 的传输方式未定**（见 §十）：无论 micro-ROS 还是「STM32 串口帧 + 主机桥接」，ROS 侧都必须稳定产出 `sensor_msgs/Imu`，且 `frame_id=imu_link`、协方差非零、时间戳可用。IMU 固件细节不在本文展开。
 
@@ -356,7 +356,7 @@ IDLE ──trigger──→ BURST（快速到击球角）──→ HOLD（短停
 - `g8010_striker`：新 ROS2 包（C++），链接本机 Unitree SDK。
 - `stm32_imu_bridge`：新包（名称待定），串口/micro-ROS → `/imu/data`。
 - `r2_bringup`：新增老车/新车参数目录与 bringup launch；**不改**现有 `nav2.launch.py`/`nav2_params_low.yaml` 的历史基线。
-- `ldlidar_stl_ros2`：复用 `~/ldlidar_ros2_ws`，N97 本机构建；不要直接把 VM 的 install 拷到 N97。
+- `ldlidar_stl_ros2`：复用 `~/ldlidar_ros2_ws`，N97 本机构建；不要直接把 VM 的 install 拷到 N97。2026-11-06 已 vendor 入仓 `ldlidar_stl_ros2/`（去内层 `.git`），N97 从 r2 仓构建；外部工作区保留参考。
 
 ---
 

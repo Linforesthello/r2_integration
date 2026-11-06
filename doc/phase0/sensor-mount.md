@@ -104,6 +104,14 @@
 | STM32 IMU | **S3 才替换**；替代 G354，`/imu/data`，frame `imu_link` | 安装位置/轴向/零偏待标；MPU6050 无磁力计，yaw 漂移需实测；协方差/时间戳必须正确 |
 | G8010 击球 | 任务执行器，不参与 TF/导航 | 击球臂安装、限位、供电、触发源待定；详见上位文档 §七 |
 
+**LD06 供电/接触（2026-11-06 首测记录）**：VM 首次验证运行 **18 min 36 s** 后雷达蓝灯灭/停转，驱动连续报
+`get ldlidar data is time out`；重启后串口可开、`Actual BaudRate reported:230400`，但 3 s 内无有效帧 →
+`ldlidar communication is abnormal`（exit 1）；重新插拔供电后恢复。判断为 **LD06 本体掉电/供电接触瞬断**，
+非驱动/波特率问题。S1 前须：带载测 PSV 对 GND 电压（手册 4.5~5.5 V）、检查 ZH1.5T-4P 的 PSV/GND 接触与
+共地、确认 5V 来源带载能力；装车后做 ≥30 min 长跑复现。原始日志见
+`doc/raw_data/raw_ld06_power_loss_2026-11-06_1424.txt`（本地留档，不入 git）。事件复盘与冒烟证据见
+[2026-11-06 LD06 VM 接入与冒烟](../retrospect/2026-11-06_ld06_vm_bringup_smoke.md)。
+
 **共同注意**：
 
 - **首期边界（B 方案）**：S1 只换雷达，G354 + 现有 EKF 保持不动，作为对照基线；S3 再换 STM32。

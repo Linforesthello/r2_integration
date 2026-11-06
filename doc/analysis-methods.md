@@ -166,6 +166,45 @@
 - **采信判据**：同一会话对该文件**多次 Read 且长度一致** → 期间无改动，可采信该快照
 - **纪律建议**：处置"删除不可逆"类文件前，先确认可恢复性（会话记录 / 他处副本 / 先拷入 git 跟踪位）
 
+## 主题 J：新传感器驱动接入（vendor / 运行态 / 串口 / 显示）（未抽取，全文保留；11-06 新增）
+
+> 来源事件：[2026-11-06 LD06 VM 接入与冒烟](retrospect/2026-11-06_ld06_vm_bringup_smoke.md)。
+> 候选去向：[ros2-ops.md §2](ros2-ops.md)（构建/部署）、[§7](ros2-ops.md)（排障）、[§7.1](ros2-ops.md)（无真车验证）邻域，成熟后抽。
+> 说明：单事件（LD06 首接）新经验，按四层制先落 draft，不直写规则层。
+
+### J1 第三方 ROS2 包 vendor 入仓：去内层 `.git` + 来源卡 + 包根平铺
+
+- **规则**：从外部工作区把驱动包装进主仓时，用 `rsync -a --exclude='.git' --exclude=build --exclude=install --exclude=log`；
+  入仓后 `test -d <pkg>/.git` 必须为假。带内层 `.git` 会被外层 git 记成 gitlink，GitHub 只显示目录、不展开源码。
+  包放在仓根（与其它 `package.xml` 包平级），包内写 `README_R2.md` 记录上游仓库/commit/版本/License/本地改动。
+- **验证**：`colcon build --packages-select <pkg>`；运行态用 `ps` 看进程可执行文件路径是否在新 install。
+- **案例**：LD06 包 31 文件/276K，去 `.git` 后正常入仓；`README_R2.md` 记上游 `bf668a8` 与端口改动。
+
+### J2 新传感器驱动冒烟：进程路径 + 频率 + 单发布者 + frame + TF + 短窗
+
+- **规则**：冒烟 PASS 的六项最小判据——① 进程可执行文件在目标 install；② 数据源成功日志；③ 话题频率与手册量级一致；
+  ④ 单发布者；⑤ `frame_id` 正确；⑥ TF 可解析、短窗无 timeout/退出。**冒烟 PASS ≠ 验收 PASS**：
+  精度、安装方向、长跑、目标机、下游算法必须单列“未覆盖”。
+- **运行态判据**：`ros2 pkg prefix` 受 shell 的 `AMENT_PREFIX_PATH` 顺序影响，不能单独作为“跑的是哪份包”的证据；
+  以进程命令行/可执行文件路径为准。
+- **案例**：LD06 冒烟 `/scan` 9.996–10.001 Hz、单发布者、`base_laser`、TF z=0.18；
+  同一 shell 未 source r2 时 `pkg prefix` 命中外部 workspace，source 后命中 r2，但进程路径始终在 r2。
+
+### J3 串口传感器掉电/接触判定：`Actual BaudRate` ≠ 数据流
+
+- **规则**：串口能打开、`Actual BaudRate reported` 打印成功，只证明 tty 配置成功，**不证明传感器在发数据**。
+  判定顺序：本体 LED/转动 → 连续 timeout 日志（约 100 ms 一条）→ 重启后 3 s 内有无有效帧 →
+  重插供电是否恢复 → 再查带载电压/接头/共地/5V 来源。
+- **案例**：LD06 首跑 18m36s 后蓝灯灭/停转；重启打印 230400 但 3 s 无帧 → `communication is abnormal`（exit 1）；
+  重插后恢复。判为供电/接触瞬断，未改驱动。
+
+### J4 包内 RViz 配置造成的“180°/变色”是显示差异
+
+- **规则**：先比 `Fixed Frame`、颜色变换器、点大小/样式、保存的相机位姿，再怀疑数据；
+  相机 `Yaw≈180°` 只转视角，不转 `/scan`。方向验证用已知非对称场景或 `angle_min/angle_max + ranges`。
+- **案例**：`ldlidar.rviz` 的 `Yaw=3.1354`（179.6°）+ Intensity 彩虹（22–245）+ Flat Squares 3px；
+  TF 旋转为单位四元数，`laser_scan_dir=True`，数据方向未被反转。
+
 ## 抽取状态跟踪表
 
 | 条款 | 状态 | 落点 | 注 |
@@ -211,6 +250,10 @@
 | H1 镜像中间态识别 | 沉淀（未抽，09-16 新增） | obsidian-sync §4 邻域 | 单事件未成熟 |
 | H2 同步范围含仓根 README | 沉淀（未抽，09-16 新增） | obsidian-sync §2 邻域 | 同上 |
 | I1 不入 git 底稿删改与恢复 | 沉淀（未抽，09-16 新增） | doc-engineering §八/§七 邻域 | 恢复法本次已实证可用 |
+| J1 vendor 去内层 `.git` | 沉淀（未抽，11-06 新增） | doc-engineering §八 / ros2-ops §2 邻域 | 单事件未成熟 |
+| J2 冒烟六判据 + 进程路径 | 沉淀（未抽，11-06 新增） | ros2-ops §2/§7 邻域 | 同上 |
+| J3 串口掉电/接触判定 | 沉淀（未抽，11-06 新增） | ros2-ops §7 邻域 | 同上 |
+| J4 RViz 显示差异判读 | 沉淀（未抽，11-06 新增） | 各传感器手册邻域 | 同上 |
 
 > 盘点节奏：**方案 A 已定稿**（09-04，阶段收尾即盘点，首个 = 09-10 A1 收口；分层架构与决策全文见
 > [retrospect/2026-09-04_experience-layer-decision.md](retrospect/2026-09-04_experience-layer-decision.md)）——

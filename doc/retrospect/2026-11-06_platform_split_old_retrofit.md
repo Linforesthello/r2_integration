@@ -162,7 +162,7 @@
 | KISS-ICP / FAST-LIO2 代码、配置、部署手册、验证数据 | **保留**；3D 主线迁新车，不在老车复活 |
 | `nav2_params_low.yaml`（含 `velodyne_low` 低带源、mark-only 结构） | **保留为历史基线**；老车另建参数，不直接改它 |
 | 旧地图/bag/分析脚本 | **保留**；老车新地图另存 |
-| LD06 驱动 `~/ldlidar_ros2_ws` | **保留并复用**；N97 本机构建 |
+| LD06 驱动 `~/ldlidar_ros2_ws` | **保留并复用**；N97 本机构建；2026-11-06 已 vendor 入仓 `ldlidar_stl_ros2/`（去内层 `.git`，见 [README_R2](../../ldlidar_stl_ros2/README_R2.md)） |
 | G8010 本机栈 `~/Lin_workspace/unitree_goM80106`、`~/Lin_workspace/unitree_actuator_sdk` | **保留并复用**；新 ROS2 包链接，不复制乱改 |
 | 既有文档（07/01/02/03/roadmap/explore 等） | **只增不删**；加平台分叉注记，历史结论保留 |
 | `r2.code-workspace`（用户 WIP） | **不动、不 stage** |

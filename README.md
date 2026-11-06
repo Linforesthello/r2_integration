@@ -100,7 +100,8 @@ r2_integration/
 │   │   ├── 2026-09-11_a1_closing_review.md                A1 收口终核：六维核对 + 残留修复 + 底稿升格处置（09-11）
 │   │   ├── 2026-09-16_a1_item1_extraction.md              A1 收口盘点项 1 执行：30 条抽入规则层 + E5 裁定落 ros2-ops §12（09-16）
 │   │   ├── 2026-09-16_checker_codespan_fix.md             校验器代码跨度排除：缺失 14→0（其中 12 条系误报）+ 闸门集合比对验证（09-16）
-│   │   └── 2026-11-06_platform_split_old_retrofit.md      平台分叉决策：老车平替 + 新车升级 + G8010 击球（11-06）
+│   │   ├── 2026-11-06_platform_split_old_retrofit.md      平台分叉决策：老车平替 + 新车升级 + G8010 击球（11-06）
+│   │   └── 2026-11-06_ld06_vm_bringup_smoke.md            LD06 VM 接入冒烟 + 18m36s 掉电定位 + RViz 差异 + vendor 入仓（11-06）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）
@@ -161,6 +162,12 @@ r2_integration/
 │   ├── config/g354_imu.rviz          RViz2 配置
 │   ├── doc/                           G354 专题文档（completion-report/debug-log/observation-methods/test-flow）
 │   └── scripts/                       测试脚本
+│
+├── ldlidar_stl_ros2/                  ← LD06 串口 2D 雷达驱动（vendor 上游，S1 老车用）
+│   ├── README_R2.md                  来源/上游 commit/本地改动
+│   ├── launch/ld06.launch.py         LD06 启动（当前 /dev/ttyACM0；S1 前改固定名）
+│   ├── ldlidar_driver/               串口协议/解析实现
+│   └── rviz2/ldlidar.rviz            LD06 可视化配置
 │
 ├── bags/                                ← 实验数据资产（N97 采集 + VM 分析副本，09-04 入仓）
 │   ├── README.md                       数据目录导航（bag 清单/maps 产物）

@@ -15,6 +15,7 @@
 **老车（R2-OLD）**
 
 - S1：单 LD06 正常高度 + slam_toolbox + Nav2 + explore_lite（**G354/EKF 不变**），5×5m 首测（覆盖率 >80%，含 EKF 基线对照）— [two-car-architecture.md §三](two-car-architecture.md)
+- S1 供电风险：LD06 首测运行 18m36s 后掉电（蓝灯灭/停转，重插恢复）→ S1 前带载测 PSV 4.5~5.5V、检查 GND/接头/5V 来源 + ≥30min 长跑 — [sensor-mount §六](phase0/sensor-mount.md)、原始日志 `doc/raw_data/raw_ld06_power_loss_2026-11-06_1424.txt`（本地，不入 git）、[事件记录](retrospect/2026-11-06_ld06_vm_bringup_smoke.md)
 - S2：低装 + 第二颗 LD06（`/scan_low`）+ 低带障碍层，对比单雷达地图/低物可见性 — 同上
 - S3：STM32 + MPU6050 → `/imu/data`（**S1/S2 保留 G354，S3 才替换**），EKF 重标（yaw 漂移/协方差/时间戳） — 同上
 - S4：GO-M8010-6 击球机构（触发→爆发→停→慢回），台架 → 装车（**台架可与 S1 并行，装车后置**） — 同上 §七
