@@ -306,6 +306,8 @@ r2_integration/
 │   ├── vscode-workspace-guide.md  VSCode 工作区建立规范（Claude 会话归属；独立 doc 先行，盘点后抽调入规范，2026-09-09 起）
 │   ├── two-car-architecture.md  两车架构与接口（老车平替 + 新车升级 + 共用/分叉，2026-11-06 起）
 │   │
+│   ├── old-car/             老车平替专题（LD06 双雷达执行计划，2026-11-06 起）
+│   │
 │   ├── minimal-loop/        最小闭环 W1/W2 执行史（plan + w1/w2/w3-operation + Nav2 bringup + 审计）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan + execution/relog/costmap 执行卡）
 │   ├── phase0/              ← Phase 0 专题（chassis_definition/sensor-mount/completion_report/debug_log）

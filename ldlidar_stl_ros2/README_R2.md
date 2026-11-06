@@ -12,8 +12,36 @@
 
 ## 本地改动
 
-- `launch/ld06.launch.py`：`port_name` 由 `/dev/ttyUSB0` 改为 `/dev/ttyACM0`（当前 VM 用 J-Link VCOM；上游默认是 CP2102 套件的 `ttyUSB0`）。
+- `launch/ld06.launch.py`：**参数化重写（2026-11-06，R2 双雷达）**——新增 9 个 `DeclareLaunchArgument`：
+  `node_name` / `topic_name` / `frame_id` / `port_name` / `port_baudrate` / `z` / `yaw` / `pitch` / `roll`；
+  静态 TF 节点名随 `frame_id` 派生（`base_link_to_<frame_id>_ld06`）；`port_baudrate` 用
+  `ParameterValue(..., value_type=int)` 显式转 int。**默认端口改为 `/dev/r2_ld06_a`**（udev 符号链接；
+  上游默认 CP2102 套件的 `/dev/ttyUSB0`，R2 首版曾改 `/dev/ttyACM0`）。
 - 其余文件未改。
+
+**默认参数**：`node_name=LD06`、`topic_name=scan`、`frame_id=base_laser`、`port_name=/dev/r2_ld06_a`、
+`port_baudrate=230400`、`z=0.18`、`yaw/pitch/roll=0.0`；驱动参数 `product_name=LDLiDAR_LD06`、
+`laser_scan_dir=True`（ROS 逆时针）保持不变。
+
+**双实例启动**（2026-11-06 VM 验收用）：
+
+```bash
+# A（默认端口 /dev/r2_ld06_a）
+ros2 launch ldlidar_stl_ros2 ld06.launch.py \
+  node_name:=ld06_a topic_name:=scan_a frame_id:=laser_a
+
+# B（显式 udev 符号链接）
+ros2 launch ldlidar_stl_ros2 ld06.launch.py \
+  node_name:=ld06_b topic_name:=scan_b frame_id:=laser_b \
+  port_name:=/dev/r2_ld06_b
+```
+
+完整验收记录（双实例 10Hz、udev 固定名、互扰初筛）见
+[doc/old-car/ld06-dual-lidar.md](../doc/old-car/ld06-dual-lidar.md)。
+
+**已知限制**：`src/demo.cpp` 主循环不调用 `rclcpp::spin*`，参数服务只创建不响应——
+`ros2 param get/list/set` 会超时/报 `Exception while calling service`；参数在启动时已生效，
+以启动日志（`<port_name>` 等行）为准。未打补丁（参数本就只读一次，`param set` 无法动态生效）。
 
 ## 显示配置说明（VM 首测 2026-11-06）
 
@@ -24,7 +52,7 @@
 ## 使用与待办
 
 - 构建：`colcon build --packages-select ldlidar_stl_ros2`
-- 当前 launch 仍硬编码 `/dev/ttyACM0`；**上 N97 前**应改为固定符号链接（如 `/dev/r2_ld06`）或另建 R2 项目 launch，避免与 G354 的 ACM 设备互换。
-- 上游 `scripts/ldlidar.rules` 仅匹配 CP210x 的 `ttyUSB*`，不适用于 J-Link；R2 的 G354/LD06 固定名需另建 udev 规则（按 serial 区分）。
+- launch 默认端口 `/dev/r2_ld06_a`，由 udev 按 J-Link serial 固定（VM 已建 `r2_ld06_a` / `r2_ld06_b`）；**上 N97 前**须把 N97 的 LD06/G354/CAN serial 写入本机 udev 规则，避免与 G354 的 ACM 设备互换。
+- 上游 `scripts/ldlidar.rules` 仅匹配 CP210x 的 `ttyUSB*`，不适用于 J-Link；R2 已按 serial 另建规则（`MODE="0666"`、`GROUP="dialout"`，见 [执行计划 P3](../doc/old-car/ld06-dual-lidar.md)），N97 侧待补。
 - 静态 TF `base_link→base_laser` 的 `z=0.18` 是占位值，实车必须按安装高度重标。
 - 原始外部工作区：`~/ldlidar_ros2_ws`（保留作参考，不随 r2 同步）。

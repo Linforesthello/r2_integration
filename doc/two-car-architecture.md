@@ -66,7 +66,7 @@
 | G354（串口 IMU） | **STM32 + MPU6050** | `/imu/data`（`sensor_msgs/Imu`） | MPU6050 无磁力计，yaw 只能靠陀螺积分 + 轮速修正，漂移需实测；协方差/时间戳必须正确填充；**S1/S2 保留 G354，S3 才替换** |
 | 无 | **GO-M8010-6 击球机构** | `/striker/trigger`、`/striker/state` | 新增执行器；控制时序与安全见 §七 |
 
-**LD06 现有资产**：VM 已有 `~/ldlidar_ros2_ws`（包 `ldlidar_stl_ros2`，launch `ld06.launch.py`）——参数为 `product_name: LDLiDAR_LD06`、`topic_name: scan`、`frame_id: base_laser`、`port_name: /dev/ttyACM0`、`port_baudrate: 230400`、`laser_scan_dir: True`；launch 内静态 TF `base_link→base_laser` 的 `z=0.18` 是**占位值**，实车必须按安装高度重标。N97 侧尚未验证，需本机构建/接线后实测。2026-11-06 VM 首测已跑通 `/scan` 10 Hz（J-Link VCOM，230400）；同次运行 18m36s 后发生一次掉电（蓝灯灭/停转，重插恢复），S1 前须核查供电/接头（见 [sensor-mount §六](phase0/sensor-mount.md)）。2026-11-06 已按上游 `bf668a8` vendor 入仓 `ldlidar_stl_ros2/`（去掉内层 `.git`，来源/本地改动见包内 `README_R2.md`）；外部 `~/ldlidar_ros2_ws` 保留作参考，不随 r2 同步。
+**LD06 现有资产**：VM 外部 `~/ldlidar_ros2_ws`（参考，不随 r2 同步）；r2 仓内 [ldlidar_stl_ros2/](../ldlidar_stl_ros2/) 为上游 `bf668a8` vendor 入仓版本（去掉内层 `.git`，来源/本地改动见包内 [README_R2.md](../ldlidar_stl_ros2/README_R2.md)）。2026-11-06 launch 已参数化（9 个参数：`node_name` / `topic_name` / `frame_id` / `port_name` / `port_baudrate` / `z` / `yaw` / `pitch` / `roll`）：单雷达默认 `topic_name=scan`、`frame_id=base_laser`、`port_name=/dev/r2_ld06_a`（udev 符号链接）、`port_baudrate=230400`、`z=0.18`（**占位值**，实车按安装高度重标）；双实例用 `/scan_a` + `laser_a`、`/scan_b` + `laser_b` + `/dev/r2_ld06_a/b`；驱动参数 `product_name=LDLiDAR_LD06`、`laser_scan_dir=True` 不变。VM 已验收 V1–V6（双实例各 ~10Hz、数据隔离、udev 插拔不穿号、互扰初筛；详见 [old-car/ld06-dual-lidar.md](old-car/ld06-dual-lidar.md)）；首测 18m36s 掉电根因已确认 = **接线端子松动掉出**（用户 2026-11-06 实测）。N97 侧尚未验证，需本机构建/接线 + 补 udev/供电长跑后实测。
 
 **STM32 IMU 的传输方式未定**（见 §十）：无论 micro-ROS 还是「STM32 串口帧 + 主机桥接」，ROS 侧都必须稳定产出 `sensor_msgs/Imu`，且 `frame_id=imu_link`、协方差非零、时间戳可用。IMU 固件细节不在本文展开。
 
@@ -94,7 +94,7 @@ explore_lite ──→ NavigateToPose ──→ Nav2
 |:---|:---|:---|
 | `map→odom` | `slam_toolbox` 或 AMCL（二选一） | 同时启动必跳变 |
 | `odom→base_link` | EKF | 不变 |
-| `base_link→base_laser` | LD06 launch / `robot_state_publisher` | 首期一个；二期再加 `base_link→laser_low` |
+| `base_link→base_laser`（单）/ `base_link→laser_a`、`base_link→laser_b`（双） | LD06 launch / `robot_state_publisher` | VM 双实例已用 `laser_a`/`laser_b`（2026-11-06）；二期低装再加 `base_link→laser_low` |
 | `base_link→imu_link` | G354 现有静态 TF（S1/S2）/ STM32 桥或 URDF（S3 后） | 静态变换 |
 
 **3D 线退役**：老车不启动 `velodyne_driver`、`velodyne_laserscan`、KISS-ICP、FAST-LIO2；相关代码/配置/文档保留，供新车或 VLP-16 其他用途复用。`nav2_params_low.yaml` 中的 `velodyne_low` 源在老车不可用，**老车必须另建参数文件**（不要直接改现有全速/降额文件，防污染历史基线）。
@@ -122,7 +122,7 @@ explore_lite ──→ NavigateToPose ──→ Nav2
 
 | 风险 | 影响 | 缓解 |
 |:---|:---|:---|
-| LD06 串口设备名漂移（`/dev/ttyACM0`/`ttyUSB0`） | 重启后读错设备/两颗雷达互换 | udev 固定符号链接（如 `/dev/r2_ld06_front`、`/dev/r2_ld06_low`），launch 用符号链接；**G354 与 LD06 同时占 ACM，S1 起必须固定名**（如 `/dev/r2_g354` + `/dev/r2_ld06`） |
+| LD06 串口设备名漂移（`/dev/ttyACM0`/`ttyUSB0`） | 重启后读错设备/两颗雷达互换 | udev 按 J-Link serial 固定符号链接：VM 已落 `/dev/r2_ld06_a`、`/dev/r2_ld06_b`（2026-11-06，[执行计划 P3](old-car/ld06-dual-lidar.md)），二期低装可加 `/dev/r2_ld06_low`；G354 用 `/dev/r2_g354`；**G354 与 LD06 同时占 ACM，S1 起必须固定名** |
 | 低装地面杂波 | costmap 假障碍、建图脏 | 调整安装高度/俯仰；驱动角度裁剪；地面点过滤；先静态标定 |
 | 双雷达同频互扰 | 偶发噪点/丢帧 | 错开安装/遮挡；实测同开与单开差异；必要时分时/分区 |
 | MPU6050 yaw 漂移 | EKF 航向退化、Nav2 定位差 | 陀螺零偏标定 + 轮速 yaw 融合 + 静止 ZUPT；验收设漂移阈值 |
@@ -209,7 +209,7 @@ Nav2 ──→ /cmd_vel ──→ 新底盘
 
 | 话题 | 类型 | frame | 期望频率 | 发布者 | 主要订阅者 | 备注 |
 |:---|:---|:---|:---|:---|:---|:---|
-| `/scan` | `sensor_msgs/LaserScan` | `base_laser`（老车首期） | ~10Hz（待实测） | LD06 驱动 | slam_toolbox、Nav2 | 老车 2D 主感知；QoS 以驱动实际为准，启动后 `ros2 topic info -v` 核对 |
+| `/scan` | `sensor_msgs/LaserScan` | `base_laser`（老车首期） | ~10Hz（VM 已验证，2026-11-06；N97 待实测） | LD06 驱动 | slam_toolbox、Nav2 | 老车 2D 主感知；QoS 以驱动实际为准，启动后 `ros2 topic info -v` 核对 |
 | `/scan_low` | `sensor_msgs/LaserScan` | `laser_low`（待定） | ~10Hz | 第二颗 LD06（二期） | Nav2 低带障碍层 | 不喂 slam_toolbox；避免低平面污染建图 |
 | `/imu/data` | `sensor_msgs/Imu` | `imu_link` | 100~200Hz | G354（S1/S2）/ STM32 桥（S3 后） | EKF | 协方差必须非零；时间戳可用；orientation 可信度按传感器标 |
 | `/odom_wheels` | `nav_msgs/Odometry` | `odom` | ~50Hz | 底盘 | EKF | 现有契约不变 |
@@ -239,8 +239,8 @@ map ──→ odom ──→ base_link ──┬──→ base_laser        (老
 ### 6.3 参数与命名契约
 
 - **每车一份配置**：计划采用 `r2_bringup/config/old_car/`、`r2_bringup/config/new_car/`（目录名待实施时定），launch 用 `car:=old|new` 或显式 `params_file` 选择；不要在同一文件里混两车参数。
-- **设备路径不用硬编码**：LD06 两颗用 udev 符号链接（`/dev/r2_ld06_front`、`/dev/r2_ld06_low`）；G8010 用 `/dev/r2_g8010`；IMU 用 `/dev/r2_imu`。启动前 `ls -l /dev/r2_*` 核对。
-- **frame 名不随驱动默认值漂移**：LD06 驱动默认 `base_laser`，二期第二颗改 `laser_low`；IMU 固定 `imu_link`；G8010 不发布 TF（击球臂如需可视化，单独加 `striker_link`）。
+- **设备路径不用硬编码**：LD06 用 udev 符号链接 `/dev/r2_ld06_a` / `/dev/r2_ld06_b`（2026-11-06 VM 已落，二期低装可加 `/dev/r2_ld06_low`）；G8010 用 `/dev/r2_g8010`；IMU 用 `/dev/r2_imu`。启动前 `ls -l /dev/r2_*` 核对。
+- **frame 名不随驱动默认值漂移**：LD06 单雷达默认 `base_laser`，双雷达用 `laser_a` / `laser_b`（2026-11-06 已用），二期低装可加 `laser_low`；IMU 固定 `imu_link`；G8010 不发布 TF（击球臂如需可视化，单独加 `striker_link`）。
 - **QoS 不靠猜**：新驱动接入后先 `ros2 topic info -v` 记录发布/订阅两端，再写进配置；大消息/瞬态话题按 [ros2-qos-dds.md](ros2-qos-dds.md) 处理。
 
 ### 6.4 安全契约
@@ -345,7 +345,7 @@ IDLE ──trigger──→ BURST（快速到击球角）──→ HOLD（短停
 
 | 文档（计划） | 内容 |
 |:---|:---|
-| `doc/old-car/ld06-dual-lidar.md` | LD06 单/双雷达安装、串口、TF、扫描平面几何、低物实测 |
+| [doc/old-car/ld06-dual-lidar.md](old-car/ld06-dual-lidar.md) | LD06 单/双雷达安装、串口、TF、扫描平面几何、低物实测；**VM 阶段已验收 V1–V6（2026-11-06）→ N97 交接（P6）待执行** |
 | `doc/old-car/stm32-imu.md` | STM32+MPU6050 固件接口、传输方案、协方差/时间戳、EKF 重标 |
 | `doc/old-car/g8010-striker.md` | 击球机构、控制时序、参数、台架/装车验收 |
 | `doc/new-car/sensor-suite.md` | MID-70/MID-360/D435/单点激光装法、外参、标定 |
@@ -386,7 +386,7 @@ IDLE ──trigger──→ BURST（快速到击球角）──→ HOLD（短停
 | 老车结构无法进一步升级、必须低成本平替；VLP-16 撤下挪作他用；新车升级底盘/上层/传感器 | 用户 2026-11-06 会话原话（见 [决策记录](retrospect/2026-11-06_platform_split_old_retrofit.md) §四） |
 | 老车先单 LD06 跑 explore，再考虑低装/双雷达 | 用户 2026-11-06 会话原话（同上） |
 | G8010 击球动作：触发→快速爆发转角→停→慢速回初始位 | 用户 2026-11-06 会话原话（同上） |
-| LD06 驱动参数/端口/frame/静态 TF 占位值 | 本机 `~/ldlidar_ros2_ws/src/ldlidar_stl_ros2/launch/ld06.launch.py`（已读） |
+| LD06 驱动参数/端口/frame/静态 TF 占位值 | r2 仓内 [ldlidar_stl_ros2/launch/ld06.launch.py](../ldlidar_stl_ros2/launch/ld06.launch.py)（2026-11-06 参数化；外部 `~/ldlidar_ros2_ws` 仅参考） |
 | G8010 串口 4Mbaud、FOC、id 0、gear ratio 6.33、控制律、过流/停机教训 | 本机 `~/Lin_workspace/unitree_goM80106/include/...`、`src/locationMode_8010t1.cpp`、`src/doc/*.md`；`~/Lin_workspace/unitree_actuator_sdk/README.md`（已读） |
 | 2D 探索链路/参数/风险 | [explore-plan.md](minimal-loop2/explore-plan.md)（2026-11-05，未实测） |
 | 低物盲区旧几何 1.59m 的来源与边界 | [3d-lidar-2d-navigation-survey.md §三B](surveys/3d-lidar-2d-navigation-survey.md)；[ros2-ops.md §12](ros2-ops.md) |
@@ -401,3 +401,4 @@ IDLE ──trigger──→ BURST（快速到击球角）──→ HOLD（短停
 | 日期 | 变更 | 说明 |
 |:---|:---|:---|
 | 2026-11-06 | 初稿 | 两车架构/接口冻结；老车平替（LD06、STM32 IMU、G8010）+ 新车升级；共用/分叉清单；G8010 时序与复用栈 |
+| 2026-11-06 | 回填 | LD06 双实例 VM 验收 V1–V6 通过：launch 9 参数、`/dev/r2_ld06_a/b` udev 固定名、`scan_a/scan_b` + `laser_a/laser_b`；掉电根因 = 接线端子松动；N97 交接待执行 |

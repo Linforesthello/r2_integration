@@ -15,11 +15,12 @@
 **老车（R2-OLD）**
 
 - S1：单 LD06 正常高度 + slam_toolbox + Nav2 + explore_lite（**G354/EKF 不变**），5×5m 首测（覆盖率 >80%，含 EKF 基线对照）— [two-car-architecture.md §三](two-car-architecture.md)
-- S1 供电风险：LD06 首测运行 18m36s 后掉电（蓝灯灭/停转，重插恢复）→ S1 前带载测 PSV 4.5~5.5V、检查 GND/接头/5V 来源 + ≥30min 长跑 — [sensor-mount §六](phase0/sensor-mount.md)、原始日志 `doc/raw_data/raw_ld06_power_loss_2026-11-06_1424.txt`（本地，不入 git）、[事件记录](retrospect/2026-11-06_ld06_vm_bringup_smoke.md)
+- S1 供电风险：LD06 首测 18m36s 掉电**根因已确认 = 接线端子松动掉出**（用户 2026-11-06 实测）；VM 长跑 ≥30min 通过 → **N97 仍须**带载测 PSV 4.5~5.5V、检查 GND/接头/5V 来源 + ≥30min 长跑 — [sensor-mount §六](phase0/sensor-mount.md)、原始日志 `doc/raw_data/raw_ld06_power_loss_2026-11-06_1424.txt`（本地，不入 git）、[事件记录](retrospect/2026-11-06_ld06_vm_bringup_smoke.md)
 - S2：低装 + 第二颗 LD06（`/scan_low`）+ 低带障碍层，对比单雷达地图/低物可见性 — 同上
 - S3：STM32 + MPU6050 → `/imu/data`（**S1/S2 保留 G354，S3 才替换**），EKF 重标（yaw 漂移/协方差/时间戳） — 同上
 - S4：GO-M8010-6 击球机构（触发→爆发→停→慢回），台架 → 装车（**台架可与 S1 并行，装车后置**） — 同上 §七
-- 安装/串口：LD06 高度/俯仰、udev 符号链接、双雷达互扰实测（**G354 + LD06 同时占 ACM，S1 起固定名**） — 同上 §3.6
+- 安装/串口：LD06 高度/俯仰（实车待定）、udev 符号链接（VM 已落 `r2_ld06_a/b`，N97 待补 G354/CAN serial）、双雷达互扰实测（VM 初筛通过，实车复验）（**G354 + LD06 同时占 ACM，S1 起固定名**） — 同上 §3.6
+- 执行计划（VM 阶段 ✅ V1–V6 通过，2026-11-06）：双雷达 launch 参数化 / 双实例并发 / udev 固定名 / 互扰初筛已完成 → 下一步 N97 交接（P6） — [old-car/ld06-dual-lidar.md](old-car/ld06-dual-lidar.md)
 
 **新车（R2-NEW）**
 

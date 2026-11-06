@@ -34,6 +34,9 @@ r2_integration/
 │   ├── vscode-workspace-guide.md  VSCode 工作区建立规范（Claude 会话归属；独立 doc 先行，盘点后抽调，09-09 建）
 │   ├── two-car-architecture.md    两车架构与接口（老车平替 + 新车升级 + 共用/分叉，11-06 建）
 │   │
+│   ├── old-car/  ← 老车平替专题（11-06 建）
+│   │   └── ld06-dual-lidar.md     LD06 单/双雷达执行计划（VM 验收 V1–V6 完成 → N97 交接：串口固定/双实例/互扰）
+│   │
 │   ├── minimal-loop/        最小闭环执行史（plan + w1/w2/w3-operation.md + Nav2 bringup + 审计数据）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan.md + execution/relog/costmap 执行卡 + explore-plan.md 工作稿）
 │   │
@@ -165,7 +168,7 @@ r2_integration/
 │
 ├── ldlidar_stl_ros2/                  ← LD06 串口 2D 雷达驱动（vendor 上游，S1 老车用）
 │   ├── README_R2.md                  来源/上游 commit/本地改动
-│   ├── launch/ld06.launch.py         LD06 启动（当前 /dev/ttyACM0；S1 前改固定名）
+│   ├── launch/ld06.launch.py         LD06 启动（9 参数化；默认 /dev/r2_ld06_a，udev 固定名）
 │   ├── ldlidar_driver/               串口协议/解析实现
 │   └── rviz2/ldlidar.rviz            LD06 可视化配置
 │
