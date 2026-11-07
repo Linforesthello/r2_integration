@@ -1,6 +1,6 @@
 # R2 外设集成 · 全局进度总览
 
-> 最后更新: 2026-11-07（§六 增 S1 进度快照：LD06 `/scan` 规格/crop 实测完成；依赖与几何状态、阻塞已列。11-06 平台分叉口径不变；上文 Phase 进度为 VLP-16 时代基线）
+> 最后更新: 2026-11-07（§六 增 S1 进度快照：LD06 `/scan` 规格/crop 实测完成；**同日纠错：explore_lite 的"网络阻塞"不成立，根因是代理 TUN 未开**；仅安装几何未实测。11-06 平台分叉口径不变；上文 Phase 进度为 VLP-16 时代基线）
 > 内容: 全项目进度一览，每个 Phase 的完成度、依赖关系、下一步
 
 ---
@@ -162,7 +162,7 @@ Phase 0  Phase 1    Phase 2+3    Phase 4+5
 ### 6.1 S1 进度快照（2026-11-07）
 
 - **驱动/规格** ✅：LD06 单/双实例 10 Hz、`/scan` beam 452~455/圈、角分辨率 ~0.795°、crop 机制实测 — [ld06-dual-lidar P7](old-car/ld06-dual-lidar.md)
-- **软件依赖** 🟡：slam_toolbox / Nav2 已装；explore_lite 无 apt 包、源码构建受网络阻塞（11-07 N97/VM 访问 GitHub 超时）
+- **软件依赖** 🟡：slam_toolbox / Nav2 已装；explore_lite 无 apt 包、需源码构建。**11-07 纠错**：此前记的"网络阻塞"不成立——根因是代理 TUN 未开，开启后 VM/N97 `git ls-remote` 均 exit=0（两机本地仍无副本，须 clone）
 - **安装几何** ❌：待实车量测（[sensor-mount §六](phase0/sensor-mount.md)）；`ld06.launch.py` 缺 x/y 参数、z 为占位
 - **S1 首跑** ❌：等几何 + explore_lite；缺口全表见 [s1-readiness-gap.md](old-car/s1-readiness-gap.md)（23 项，G11 部分销项）
 

@@ -7,6 +7,9 @@
 > 核实方式：2026-11-06 在 VM 与 N97 做只读核对（`ls` / `grep` / `ros2 pkg list` / `git ls-remote`），
 > 每条附证据位置；**未实测项已显式标注**，不把"方案里写了"当成"已经具备"。
 > 更新：2026-11-07 补测 LD06 `/scan` 规格与 angle crop（G11 部分销项、§三新增实测行），其余缺口状态不变。
+> **更新（2026-11-07 晚，纠错）**：G5 的取包路径此前被记为"GitHub 超时、原因未定位"，复核后**不成立**——
+> 根因是代理 TUN 未开；开启后 VM/N97 `git ls-remote` 均 exit=0。G5 缺口仍在（两机本地确无副本），但**不构成阻塞**，
+> 仅需 clone 前确认代理在线。gitee 镜像路线实测不稳（2/3 次 SSL eof），不采用。见 [07-handover §五](../07-handover.md)。
 > 相关：[two-car-architecture.md §三](../two-car-architecture.md)（S1 判据）｜[07-handover.md §五](../07-handover.md)（老车接手注意）｜
 > [ld06-dual-lidar.md](ld06-dual-lidar.md)（雷达接入执行计划）
 
@@ -36,7 +39,7 @@
 | G2 | `r2_bringup/launch/nav2_explore.launch.py` 不存在 | launch 目录只有 `chassis` / `ekf` / `nav2` 三个 | 无法起"去定位层"的 Nav2 | P0 |
 | G3 | `r2_bringup/config/explore_params.yaml` 不存在 | 同上 config 列表；方案给草案（[Step 3.2](../minimal-loop2/explore-plan.md)） | explore_lite 只能吃官方 `params.yaml`（订阅 `/map` 直连，与 Nav2 代价地图链路不匹配） | P0 |
 | G4 | **老车专用 Nav2 参数文件缺失**（方案口径冲突） | 现有 `nav2_params_low.yaml` 的 local `voxel_layer` 与 global `obstacle_low_layer` 均订阅 `/velodyne_points`（[L250](../../r2_bringup/config/nav2_params_low.yaml#L250)、[L269](../../r2_bringup/config/nav2_params_low.yaml#L269)、[L322-L324](../../r2_bringup/config/nav2_params_low.yaml#L322-L324)）；老车已无 VLP-16。而 explore-plan [Step 2.1](../minimal-loop2/explore-plan.md) 仍写「两种模式共用同一份参数文件」，与 [07-handover §五-2](../07-handover.md)「必须另建参数；不要直接改历史文件」**直接冲突** | 低带源无输入（是否持续告警未实测）；S1 也不做低物验收，留着纯属噪声 | P0 |
-| G5 | explore_lite 源码与构建产物均无 | VM 无 `~/explore_ws`；N97 无 `~/explore_ws`；`ros2 pkg list` 两侧均无 `explore_lite` | 无前沿探索节点 | P0 |
+| G5 | explore_lite 源码与构建产物均无 | VM 无 `~/explore_ws`；N97 无 `~/explore_ws`；`ros2 pkg list` 两侧均无 `explore_lite`；**11-07 复核**：两机 `dpkg -l \| grep -i explore` 与 `find *m-explore*` 均为空 → 确认无本地副本，须 clone（取包路径已通，见文首纠错） | 无前沿探索节点 | P0 |
 | G6 | 覆盖率统计脚本无 | `bags/analysis/` 下无对应脚本；方案明写「脚本可后续补，本稿先定口径」（[§3.6](../minimal-loop2/explore-plan.md)） | 覆盖率判据（>80%）无法出数，只能目测 | P1 |
 | G7 | `/map` 录包 QoS 覆盖文件无 | 仓内 `find` 只命中 `doc/ros2-qos-dds.md`，无 `--qos-profile-overrides-path` 用的 yaml；而方案 §3.5 要求录 `/map`（transient_local） | 首测 bag 可能录不到 `/map`，事后无法复算覆盖率 | P1 |
 | G8 | `nav2.rviz` 未被安装到 share（**存量缺陷**） | `setup.py` 只 glob `config/*.yaml` 与 `config/dds/*`（[L15-L16](../../r2_bringup/setup.py#L15-L16)）；源文件 `r2_bringup/config/nav2.rviz` 存在，但 VM/N97 的 `install/.../share/r2_bringup/config/` 均**无该文件**（实测 `ls` 不存在），而 launch 用 `-d <share>/config/nav2.rviz`（[nav2.launch.py:91](../../r2_bringup/launch/nav2.launch.py#L91)） | `rviz:=true` 加载不到配置（具体表现未记录）；explore 若也要 RViz 会先撞这条 | P1 |
@@ -85,7 +88,7 @@
 | udev 四路固定名（N97） | ✅ | `/dev/r2_g354` / `r2_can` / `r2_ld06_a` / `r2_ld06_b` 均核到 serial（[ld06-dual-lidar §P3](ld06-dual-lidar.md)） |
 | LD06 双实例 10Hz | ✅ | 2026-11-06 19:21 N97 实测 `10.000` / `10.002 Hz`，frame/Publisher 均正确（[P6-3](ld06-dual-lidar.md)） |
 | slam_toolbox 已装 | ✅ | VM 与 N97 `ros2 pkg list` 均有 `slam_toolbox`；官方母本 `mapper_params_online_async.yaml` 在位 |
-| N97 能拉 GitHub | ✅ | `git ls-remote m-explore-ros2` 返回 `326cf8a`（与方案引用的 commit 一致），exit 0 |
+| N97 能拉 GitHub | ✅ | `git ls-remote m-explore-ros2` 返回 `326cf8a`（与方案引用的 commit 一致），exit 0。**前提 = 代理 TUN 在线**（`Meta 198.18.0.1/30` + fake-ip）；11-07 曾因未开代理记为"超时"，已复核纠正 |
 | N97 构建环境 | ✅ | `cmake 3.22.1` 仅在 `/usr/bin`（无 pip cmake 抢占），磁盘余量 54G |
 | N97 仓库版本 | ✅ | 已在 `1e4accb`（本次文档批次已同步） |
 | LD06 launch 参数化 | ✅ | 9 参数（node/topic/frame/port/baud/z/yaw/pitch/roll），可单实例起 |
