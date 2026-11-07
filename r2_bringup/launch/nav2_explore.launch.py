@@ -11,9 +11,11 @@
 #
 # 关键适配：
 #   - /odom remap → /odometry/filtered（EKF 里程计）
-#   - 默认参数文件是**降额版** nav2_params_low.yaml（安全默认），与 nav2.launch.py 不同
+#   - 默认参数文件是**老车 LD06 版** nav2_params_ld06.yaml（安全默认，降额 + 已删低带源），
+#     与 nav2.launch.py 不同。
+#     原默认（2026-11-07 前）: 降额版 nav2_params_low.yaml —— 其 velodyne_low 源老车不可用（G4）
 #   - 不要点 "2D Pose Estimate"：map→odom 由 slam_toolbox 提供，AMCL 未启动
-#   - nav2_params_low.yaml 里的 amcl / map_server 段不会被使用，不需要删
+#   - 参数文件里的 amcl / map_server 段不会被使用，不需要删
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -28,7 +30,9 @@ from launch_ros.descriptions import ParameterFile
 def generate_launch_description():
     pkg_dir = get_package_share_directory('r2_bringup')
     # 安全默认：降额参数。nav2.launch.py 默认是全速版，explore 不沿用那个默认。
-    default_params = os.path.join(pkg_dir, 'config', 'nav2_params_low.yaml')
+    # 2026-11-07 改默认：low 版含 velodyne_low 低带源（老车无 /velodyne_points，G4）→ 用 LD06 版
+    # 原行（保留备查）：default_params = os.path.join(pkg_dir, 'config', 'nav2_params_low.yaml')
+    default_params = os.path.join(pkg_dir, 'config', 'nav2_params_ld06.yaml')
 
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
@@ -79,7 +83,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument('params_file', default_value=default_params,
-                              description='Nav2 参数文件（默认降额版）'),
+                              description='Nav2 参数文件（默认 LD06 降额版 nav2_params_ld06.yaml）'),
         DeclareLaunchArgument('use_sim_time', default_value='false'),
         DeclareLaunchArgument('autostart', default_value='true'),
         DeclareLaunchArgument('rviz', default_value='false'),
