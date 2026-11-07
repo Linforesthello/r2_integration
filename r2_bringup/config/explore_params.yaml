@@ -1,0 +1,48 @@
+# explore_lite 参数（老车 S1：LD06 + slam_toolbox + Nav2）
+#
+# 母本：m-explore-ros2 `326cf8a` 的 explore/config/params_costmap.yaml（官方参数文件）
+#       —— 是 costmap 版，不是 params.yaml（后者订阅 /map 直连，绕过 Nav2 代价地图）
+# 来源核实：N97 实机构建产物 install/explore_lite/share/explore_lite/config/params_costmap.yaml（2026-11-07）
+#
+# 启动方式（不要用官方 launch：它写死 params.yaml 且 use_sim_time 默认 true）：
+#   ros2 run explore_lite explore --ros-args \
+#     --params-file $HOME/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/explore_params.yaml
+#
+# ⚠️ 段名 `explore_node` 必须与节点实际名一致，否则参数静默失效
+#    （ros2-ops.md §6 配置失效三查 #2）。官方 launch 用 name="explore_node" 强制指定。
+#
+# 2026-11-07 N97 冒烟实测（`ros2 run` + 本文件语义的 params_costmap.yaml）：
+#   ✅ 节点默认名 = explore_node；✅ costmap_topic 生效（日志 "Waiting for costmap ... /global_costmap/costmap"）
+#   ✅ use_sim_time 已声明，可被覆盖
+#   ⚠️ `ros2 param list` 只显示 5 个显式声明的键：
+#      robot_base_frame / costmap_topic / costmap_updates_topic / transform_tolerance / use_sim_time
+#      下列 7 项**未在代码中 declare**（get_parameter_or 读取），因此 param list / param get 查不到：
+#      visualize / planner_frequency / progress_timeout / potential_scale / orientation_scale /
+#      gain_scale / min_frontier_size
+#      → 值未必没生效（启动无 "not declared" 报错），但**改这些值无法用 param get 验证**，
+#        只能看运行期日志与行为。调参时务必用「一次只加一个变量 + 记录期望/实际」。
+#   ✅ `return_to_init` 不在声明列表中 → 确认不存在，已注释，勿写入
+#   原始输出：doc/raw_data/raw_explore_smoke_n97_2026-11-07_1253.txt（本地，不入 git）
+explore_node:
+  ros__parameters:
+    robot_base_frame: base_link
+
+    # 用 Nav2 全局代价地图做前沿检测：含未知区 + 膨胀代价
+    costmap_topic: /global_costmap/costmap
+    costmap_updates_topic: /global_costmap/costmap_updates
+
+    visualize: true
+    planner_frequency: 0.15      # 约 6.7s 重规划一次
+    progress_timeout: 30.0       # 30s 无进展弃目标；0.2m/s 低速频繁超时则改 60.0
+    potential_scale: 3.0
+    orientation_scale: 0.0
+    gain_scale: 1.0
+    transform_tolerance: 0.3
+    min_frontier_size: 0.5       # 小于 0.5m 的前沿忽略，防抖动
+
+    # 实车必须 false（官方 launch 默认 true，实车会因无 /clock 卡住）
+    use_sim_time: false
+
+    # return_to_init：2026-11-07 冒烟实测确认**节点未声明该参数**（不在 param list 中），
+    # 写入会报 "parameter has not been declared" → 保持注释，不要取消。
+    # return_to_init: false

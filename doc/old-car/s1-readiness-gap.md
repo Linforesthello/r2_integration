@@ -10,6 +10,15 @@
 > **更新（2026-11-07 晚，纠错）**：G5 的取包路径此前被记为"GitHub 超时、原因未定位"，复核后**不成立**——
 > 根因是代理 TUN 未开；开启后 VM/N97 `git ls-remote` 均 exit=0。G5 缺口仍在（两机本地确无副本），但**不构成阻塞**，
 > 仅需 clone 前确认代理在线。gitee 镜像路线实测不稳（2/3 次 SSL eof），不采用。见 [07-handover §五](../07-handover.md)。
+> **更新（2026-11-07 13:00，G5 销项）**：explore_lite 已在 N97 落地——`~/Lin_workspace/explore_ws/src/m-explore-ros2`
+> clone 到 `326cf8a`（= 方案引用版本），`colcon build --packages-up-to explore_lite` 成功（2 包 23.7s，仅 CMake 弃用警告）；
+> `ros2 pkg executables explore_lite` = `explore_lite explore`。同时实测确认官方 launch 的两处陷阱（详见 [explore-plan Step 3.1](../minimal-loop2/explore-plan.md)）。
+> 原始输出 `doc/raw_data/raw_explore_build_n97_2026-11-07_1240.txt`（本地，不入 git）。
+>
+> **更新（2026-11-07 13:00，G1/G2/G3 落文件）**：三份软件资产已按方案写出——
+> `slam_toolbox_mapping.yaml`（G1）、`nav2_explore.launch.py`（G2）、`explore_params.yaml`（G3）。
+> explore_lite 节点冒烟通过（节点名 `explore_node`、参数读取正常），但 **slam_toolbox / Nav2 / explore 三者
+> 从未联合起过**，三份配置均未实测运行；G4（老车 Nav2 参数文件）仍未动。
 > 相关：[two-car-architecture.md §三](../two-car-architecture.md)（S1 判据）｜[07-handover.md §五](../07-handover.md)（老车接手注意）｜
 > [ld06-dual-lidar.md](ld06-dual-lidar.md)（雷达接入执行计划）
 
@@ -35,11 +44,11 @@
 
 | ID | 缺口 | 现状证据（2026-11-06 核对） | 影响 | 级别 |
 |:---|:---|:---|:---|:---:|
-| G1 | `r2_bringup/config/slam_toolbox_mapping.yaml` 不存在 | VM 与 N97 的 `r2_bringup/config/` 均只有 `dds/ ekf.yaml nav2_params_low.yaml nav2_params.yaml r2_params.yaml`；方案给出参数草案（[Step 1.1](../minimal-loop2/explore-plan.md)），**未实测** | 无建图参数，slam_toolbox 只能用官方默认（`base_footprint` + `use_sim_time: true`，R2 会直接不工作） | P0 |
-| G2 | `r2_bringup/launch/nav2_explore.launch.py` 不存在 | launch 目录只有 `chassis` / `ekf` / `nav2` 三个 | 无法起"去定位层"的 Nav2 | P0 |
-| G3 | `r2_bringup/config/explore_params.yaml` 不存在 | 同上 config 列表；方案给草案（[Step 3.2](../minimal-loop2/explore-plan.md)） | explore_lite 只能吃官方 `params.yaml`（订阅 `/map` 直连，与 Nav2 代价地图链路不匹配） | P0 |
+| G1 | `r2_bringup/config/slam_toolbox_mapping.yaml` 不存在 | VM 与 N97 的 `r2_bringup/config/` 均只有 `dds/ ekf.yaml nav2_params_low.yaml nav2_params.yaml r2_params.yaml`；方案给出参数草案（[Step 1.1](../minimal-loop2/explore-plan.md)），**未实测** | 无建图参数，slam_toolbox 只能用官方默认（`base_footprint` + `use_sim_time: true`，R2 会直接不工作）。**11-07 已建**：按官方 `mapper_params_online_async.yaml` 整份复制 + 6 项改动（`base_frame→base_link`、`use_sim_time: false`、`map_update_interval 2.0`、`transform_publish_period 0.05`、`enable_interactive_mode false`），**未实测运行** | ~~P0~~ 🟡 待实测 |
+| G2 | `r2_bringup/launch/nav2_explore.launch.py` 不存在 | launch 目录只有 `chassis` / `ekf` / `nav2` 三个 | 无法起"去定位层"的 Nav2。**11-07 已建**：由 `nav2.launch.py` 删 map_server/AMCL/lifecycle_manager_localization，默认参数改 `nav2_params_low.yaml`，**未实测运行** | ~~P0~~ 🟡 待实测 |
+| G3 | `r2_bringup/config/explore_params.yaml` 不存在 | 同上 config 列表；方案给草案（[Step 3.2](../minimal-loop2/explore-plan.md)） | explore_lite 只能吃官方 `params.yaml`（订阅 `/map` 直连，与 Nav2 代价地图链路不匹配）。**11-07 已建 + 冒烟通过**：节点名 `explore_node` 与 `costmap_topic` 读取已实测确认；`return_to_init` 确认不存在已注释；7 项未声明参数（`visualize`/`planner_frequency` 等）**不可用 `param get` 验证**（[§3.1.2](../minimal-loop2/explore-plan.md)）。仍未接真实 Nav2 costmap 跑过 | ~~P0~~ 🟡 待联调 |
 | G4 | **老车专用 Nav2 参数文件缺失**（方案口径冲突） | 现有 `nav2_params_low.yaml` 的 local `voxel_layer` 与 global `obstacle_low_layer` 均订阅 `/velodyne_points`（[L250](../../r2_bringup/config/nav2_params_low.yaml#L250)、[L269](../../r2_bringup/config/nav2_params_low.yaml#L269)、[L322-L324](../../r2_bringup/config/nav2_params_low.yaml#L322-L324)）；老车已无 VLP-16。而 explore-plan [Step 2.1](../minimal-loop2/explore-plan.md) 仍写「两种模式共用同一份参数文件」，与 [07-handover §五-2](../07-handover.md)「必须另建参数；不要直接改历史文件」**直接冲突** | 低带源无输入（是否持续告警未实测）；S1 也不做低物验收，留着纯属噪声 | P0 |
-| G5 | explore_lite 源码与构建产物均无 | VM 无 `~/explore_ws`；N97 无 `~/explore_ws`；`ros2 pkg list` 两侧均无 `explore_lite`；**11-07 复核**：两机 `dpkg -l \| grep -i explore` 与 `find *m-explore*` 均为空 → 确认无本地副本，须 clone（取包路径已通，见文首纠错） | 无前沿探索节点 | P0 |
+| G5 | explore_lite 源码与构建产物均无 | VM 无 `~/explore_ws`；N97 无 `~/explore_ws`；`ros2 pkg list` 两侧均无 `explore_lite`；**11-07 复核**：两机 `dpkg -l \| grep -i explore` 与 `find *m-explore*` 均为空 → 确认无本地副本，须 clone（取包路径已通，见文首纠错） | 无前沿探索节点。**11-07 13:00 已销**：N97 `~/Lin_workspace/explore_ws` 建好，clone `326cf8a` + 构建成功，可执行 `install/explore_lite/lib/explore_lite/explore` 在位 | ~~P0~~ ✅ 已销 |
 | G6 | 覆盖率统计脚本无 | `bags/analysis/` 下无对应脚本；方案明写「脚本可后续补，本稿先定口径」（[§3.6](../minimal-loop2/explore-plan.md)） | 覆盖率判据（>80%）无法出数，只能目测 | P1 |
 | G7 | `/map` 录包 QoS 覆盖文件无 | 仓内 `find` 只命中 `doc/ros2-qos-dds.md`，无 `--qos-profile-overrides-path` 用的 yaml；而方案 §3.5 要求录 `/map`（transient_local） | 首测 bag 可能录不到 `/map`，事后无法复算覆盖率 | P1 |
 | G8 | `nav2.rviz` 未被安装到 share（**存量缺陷**） | `setup.py` 只 glob `config/*.yaml` 与 `config/dds/*`（[L15-L16](../../r2_bringup/setup.py#L15-L16)）；源文件 `r2_bringup/config/nav2.rviz` 存在，但 VM/N97 的 `install/.../share/r2_bringup/config/` 均**无该文件**（实测 `ls` 不存在），而 launch 用 `-d <share>/config/nav2.rviz`（[nav2.launch.py:91](../../r2_bringup/launch/nav2.launch.py#L91)） | `rviz:=true` 加载不到配置（具体表现未记录）；explore 若也要 RViz 会先撞这条 | P1 |
@@ -94,6 +103,10 @@
 | LD06 launch 参数化 | ✅ | 9 参数（node/topic/frame/port/baud/z/yaw/pitch/roll），可单实例起 |
 | 新 yaml/launch 自动安装 | ✅ | `setup.py` glob `config/*.yaml` + `launch/*.launch.py`，新增文件不必改 setup（`.rviz` 例外，见 G8） |
 | LD06 `/scan` 规格与 crop 实测 | ✅ | 2026-11-07 N97：beam 455/452/454、角分辨率 0.793~0.798°、10 Hz；crop 90° 掩盖实测通过（[P7](ld06-dual-lidar.md)） |
+| explore_lite 构建（N97） | ✅ | 2026-11-07 13:00：`~/Lin_workspace/explore_ws`，clone `326cf8a`（main HEAD，= 方案引用版本）；`colcon build --packages-up-to explore_lite` → `explore_lite_msgs` 4.99s + `explore_lite` 18.3s，仅 CMake 弃用警告；`ros2 pkg executables explore_lite` = `explore_lite explore`；参数母本已装 `share/explore_lite/config/params_costmap.yaml`。原始输出 `doc/raw_data/raw_explore_build_n97_2026-11-07_1240.txt`（本地，不入 git） |
+
+> G5 销项后的连带发现（影响 G2/G3 写法）：上游 `explore.launch.py` **写死 `params.yaml`（`/map` 源）且 `use_sim_time` 默认 `true`**，
+> 且未暴露 `params_file` 参数 → 不能用上游 launch，须自写 launch 或 `ros2 run` 直挂参数。详见 [explore-plan Step 3.1/3.3](../minimal-loop2/explore-plan.md)。
 
 ---
 

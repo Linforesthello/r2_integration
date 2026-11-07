@@ -147,11 +147,14 @@ r2_integration/
 │   ├── launch/chassis.launch.py      底盘启动文件
 │   ├── launch/ekf.launch.py          EKF 融合启动文件
 │   ├── launch/nav2.launch.py         Nav2 启动文件（map_server+amcl+MPPI 全栈）
+│   ├── launch/nav2_explore.launch.py Nav2 启动文件（去 map_server/AMCL，slam_toolbox 模式用，11-07）
 │   ├── config/r2_params.yaml         实车标定参数
 │   ├── config/ekf.yaml               EKF 融合配置
 │   ├── config/nav2_params.yaml       Nav2 参数（全速版）
 │   ├── config/nav2_params_low.yaml   Nav2 参数（降额版，首次实机用）
 │   ├── config/nav2.rviz              Nav2 RViz 配置
+│   ├── config/slam_toolbox_mapping.yaml  slam_toolbox 2D 建图参数（老车 S1，11-07）
+│   ├── config/explore_params.yaml    explore_lite 参数（global_costmap 源，11-07）
 │   └── config/dds/                   DDS 跨机配置（fastdds_peer_n97/wellknown + README）
 │
 ├── r2_sensors/                        ← ROS2 传感器外设包（包名 r2_sensors，08-15 从 r2_bringup 抽出）

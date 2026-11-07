@@ -8,6 +8,11 @@
 >
 > **2026-11-06 平台适配注记**：老车已撤 VLP-16，改 LD06 串口 2D 雷达；本文的 VLP-16/`velodyne_low` 前提按
 > §十 替换，**2D 探索骨架（slam_toolbox + Nav2 + explore_lite）不变**。两车架构见 [two-car-architecture.md](../two-car-architecture.md)。
+>
+> **2026-11-07 进展**：Step 3.1 构建通过 + [冒烟实测](#312-冒烟实测2026-11-07-n97无-nav2-环境)（节点名 / 参数读取 / `return_to_init` 三项已钉死），
+> 官方 launch 的两处陷阱实锤——见 [§3.1.1](#311-实测记录2026-11-07-n97) 与 [§3.3](#33-启动终端-d)。
+> Step 1（`slam_toolbox_mapping.yaml`）、Step 2（`nav2_explore.launch.py`）、Step 3.2（`explore_params.yaml`）
+> 的配置文件与 launch **已全部落文件，但均未实测**——slam_toolbox / Nav2 / explore 三者从未联合起过。
 
 ---
 
@@ -283,6 +288,58 @@ ros2 pkg executables explore_lite     # 应看到 explore_lite explore
 - N97 若遇 pip 安装的 cmake 抢占 PATH，用 `PATH=/usr/bin:$PATH colcon build ...`（[ros2-ops.md §2](../ros2-ops.md)）。
 - VM 可另建一份做配置检查；实车运行必须在 N97 本机构建。
 
+##### 3.1.1 实测记录（2026-11-07 N97）
+
+上述命令在 N97 一次跑通，实测数据：
+
+| 项 | 实测 |
+|:---|:---|
+| 落位 | `~/Lin_workspace/explore_ws/src/m-explore-ros2`（独立工作区，未嵌套 r2_integration） |
+| 版本 | `326cf8a (HEAD -> main, origin/main, origin/HEAD)` —— 与本文引用一致，clone 后无需 checkout |
+| 构建 | `explore_lite_msgs` 4.99s + `explore_lite` 18.3s，`Summary: 2 packages finished [23.7s]` |
+| stderr | **只有警告，无 error**：`cmake_minimum_required` 版本弃用 + `Policy CMP0148`（Humble `rosidl_generator_py` 在较新 CMake 下的策略提示）——上游代码卫生问题，不影响产物 |
+| 验证 | `ros2 pkg executables explore_lite` → `explore_lite explore`；`install/explore_lite/lib/explore_lite/explore` 在位 |
+| 参数文件 | 已随包安装：`install/explore_lite/share/explore_lite/config/params_costmap.yaml` 与 `params.yaml` |
+| launch | 已安装：`install/explore_lite/share/explore_lite/launch/explore.launch.py` |
+
+**两点实测补充**（方案原文未涉及）：
+
+1. **`map_merge` 在 src 里但不构建**。仓库含 `explore` / `explore_lite_msgs` / `map_merge` 三个包，`--packages-up-to explore_lite` 只编前两个。
+   → **后续在 `explore_ws` 里一律带 `--packages-up-to explore_lite`**，裸跑 `colcon build` 会把 `map_merge` 一起编（依赖更多，易报错）。
+2. **安装路径按包名分层**：`install/<包名>/share/<包名>/config/`，不是按源码目录名（`explore/`）。
+   查产物用 `find ~/Lin_workspace/explore_ws/install/explore_lite/share -type f`。
+
+> 原始终端输出（含完整 CMake 警告与 `tree`）留档 `doc/raw_data/raw_explore_build_n97_2026-11-07_1240.txt`（本地，不入 git）。
+
+##### 3.1.2 冒烟实测（2026-11-07 N97，无 Nav2 环境）
+
+目标：在起 Nav2/slam_toolbox 之前，先钉死**节点名**与**参数是否真被读取**两件事。
+
+```bash
+# 终端 1：加 timeout 让它自己退，不留孤儿进程
+source /opt/ros/humble/setup.bash && source ~/Lin_workspace/explore_ws/install/setup.bash && \
+  timeout 30 ros2 run explore_lite explore --ros-args \
+  --params-file /home/lin/Lin_workspace/explore_ws/install/explore_lite/share/explore_lite/config/params_costmap.yaml
+
+# 终端 2：30 秒内执行
+source /opt/ros/humble/setup.bash; ros2 node list; \
+  ros2 param get /explore_node costmap_topic; ros2 param list /explore_node
+```
+
+| 结论 | 实测证据 | 影响 |
+|:---|:---|:---|
+| ✅ 节点默认名 = `explore_node` | `ros2 node list` → `/explore_node` | §3.2 参数段名正确，无需 remap |
+| ✅ 参数被正确读取 | 日志 `Waiting for costmap to become available, topic: /global_costmap/costmap`；`param get` 同值 | 参数文件路径 + 解析链正常 |
+| ✅ `use_sim_time` 可覆盖 | 出现在 `param list` 声明列表 | 实车 `false` 生效 |
+| ✅ `return_to_init` **不存在** | 不在 `param list` 中 | 参数文件里保持注释，写入会报未声明 |
+| ⚠️ 另 7 项**未声明** | `visualize` / `planner_frequency` / `progress_timeout` / `potential_scale` / `orientation_scale` / `gain_scale` / `min_frontier_size` 均不在 `param list` | 代码用 `get_parameter_or` 读取、未 declare。**值未必没生效**（启动无 `not declared` 报错），但 `param get` 查不到 → **调这些参数只能看运行期日志/行为，不能用 param get 验证** |
+| ℹ️ 退出时 abort | `timeout` 发 SIGTERM 时 `failed to create guard condition ... rcl_shutdown() was called` | 功能期 30s 正常；**是否 SIGTERM 特有、Ctrl-C 是否复现，未测** |
+
+> 终端 1 全程只有「等 costmap」一条日志——**这是预期**：没起 Nav2 与 slam_toolbox，节点拿不到输入。
+> 冒烟只回答「能起来 / 名字对 / 参数读得进」，不覆盖任何运行时行为。
+>
+> 原始输出留档 `doc/raw_data/raw_explore_smoke_n97_2026-11-07_1253.txt`（本地，不入 git）。
+
 #### 3.2 参数文件 `r2_bringup/config/explore_params.yaml`
 
 以官方 `explore/config/params_costmap.yaml` 为母本（**不要用 `params.yaml`**——后者订阅 `/map` 直连，不经过 Nav2 代价地图），改/补如下：
@@ -329,6 +386,16 @@ ros2 run explore_lite explore --ros-args \
 ```
 
 > **不要直接 `ros2 launch explore_lite explore.launch.py`**：官方 launch 固定加载 `params.yaml`（`/map` 源）且 `use_sim_time` 默认 `true`，与 R2 的 Nav2 代价地图链路不匹配。若要用 launch，需另建包装 launch 覆盖参数文件与 `use_sim_time`。
+>
+> **2026-11-07 实测确认（`326cf8a`）**：官方 launch **未暴露 `params_file` 参数**——`config` 是硬编码的
+> `os.path.join(get_package_share_directory("explore_lite"), "config", "params.yaml")`，不接受 `LaunchConfiguration`。
+> 所以「命令行传 `params_file:=...` 覆盖」这条路**走不通**，只剩三条：
+> ① `ros2 run explore_lite explore --ros-args --params-file <我们的.yaml>`（本文采用）；
+> ② 自写包装 launch（= Step 2.1 的 `nav2_explore.launch.py` 顺带承担）；
+> ③ 覆盖 `install/.../config/params.yaml`——**不采用**，rebuild 即丢且不可版本管理。
+>
+> 另记：`use_sim_time` 官方 launch 用 `DeclareLaunchArgument` 暴露（默认 `true`），可传 `use_sim_time:=false` 覆盖；
+> 走 `ros2 run` 时该参数默认 `false`，天然正确。
 
 #### 3.4 运行观察与停止/恢复
 
@@ -469,6 +536,10 @@ coverage = ROI 内已知栅格数 / ROI 总栅格数
 ## 八、来源（2026-11-05 核实）
 
 > 核实方式：官方仓库 shallow clone（`m-explore-ros2` commit `326cf8a`）+ 本机 Humble 安装文件；**未在 N97 实机运行，所有运行时行为标“未实测”**。
+>
+> **2026-11-07 增量核实**：`explore_lite` 已在 N97 实机构建（clone `326cf8a` → `colcon build --packages-up-to explore_lite` 成功）。
+> 此次实测**只覆盖构建与安装产物**（包名/可执行名/参数文件落位/launch 内容），**运行时行为（无前沿日志、目标发送、
+> 与 Nav2 的交互）仍未实测**。构建实录见 §3.1.1，原始输出 `doc/raw_data/raw_explore_build_n97_2026-11-07_1240.txt`（本地，不入 git）。
 
 | 结论 | 来源 |
 |:---|:---|
@@ -490,6 +561,8 @@ coverage = ROI 内已知栅格数 / ROI 总栅格数
 |:---|:---|:---|
 | 2026-11-05 | 初稿 | 方案梳理（未实测）；explore_lite 参数按官方 `params_costmap.yaml` 母本；明确不改现有 Nav2 launch/config |
 | 2026-11-06 | 平台适配 | 老车撤 VLP-16 换 LD06；增 §十 平台适配（扫描源/TF/低带源/验收），探索骨架不变 |
+| 2026-11-07 | Step 3.1 实测落地 | explore_lite 在 N97 构建通过（clone `326cf8a`、2 包 23.7s、仅 CMake 弃用警告）；增 §3.1.1 实测记录（含 `map_merge` 不构建提醒、安装路径按包名分层）；§3.3 补「官方 launch 无 `params_file` 参数」实测结论。**Step 1 / Step 2 / Step 3.2 仍未实测** |
+| 2026-11-07 | 节点冒烟 + 三个配置文件落地 | 增 §3.1.2 冒烟实测（节点名 `explore_node`、参数读取正常、`return_to_init` 不存在、7 项未声明参数不可用 `param get` 验证）；新增 `slam_toolbox_mapping.yaml`（Step 1）、`nav2_explore.launch.py`（Step 2）、`explore_params.yaml`（Step 3.2）。**三份配置均未实测运行** |
 
 ---
 
