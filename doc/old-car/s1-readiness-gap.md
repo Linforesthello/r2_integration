@@ -26,6 +26,16 @@
 > 原始数据 `doc/raw_data/raw_explore_p1_retest_n97_2026-11-07_2010.txt`（本地，不入 git）。
 > 相关：[two-car-architecture.md §三](../two-car-architecture.md)（S1 判据）｜[07-handover.md §五](../07-handover.md)（老车接手注意）｜
 > [ld06-dual-lidar.md](ld06-dual-lidar.md)（雷达接入执行计划）
+>
+> **更新（2026-11-07 六项定夺 + G4/G8 落地）**：用户定夺 §六 全部六项——
+> ① G4 文件名 **`nav2_params_ld06.yaml`**（按实际硬件外设命名，不用 oldcar 这类模糊词）；
+> ② 继承范围 = **只删低带源**，其余逐字照抄 low 版（inflation 0.30、降额速度不动）；
+> ③ G10 等实车实测（**含雷达 0° 方向是否合适**）；④ G12 首版跑 **`r2_ld06_a`**；
+> ⑤ G8 **本轮修复**（`setup.py` 原行注释保留）；⑥ G17 **IMU 未更换**、基线仍有效，
+> **雷达 URDF/TF 关系待重写**——等 G10 一起做，本轮只登记。
+> 落地：G4 → [nav2_params_ld06.yaml](../../r2_bringup/config/nav2_params_ld06.yaml) 已建，
+> `nav2_explore.launch.py` 默认参数已切至该文件；G8 → [setup.py](../../r2_bringup/setup.py) 增 `config/*.rviz`，
+> VM 构建验证 install 已含 `nav2.rviz`（两处改动均**未在 N97 实测运行**）。
 
 ---
 
@@ -52,20 +62,20 @@
 | G1 | `r2_bringup/config/slam_toolbox_mapping.yaml` 不存在 | VM 与 N97 的 `r2_bringup/config/` 均只有 `dds/ ekf.yaml nav2_params_low.yaml nav2_params.yaml r2_params.yaml`；方案给出参数草案（[Step 1.1](../minimal-loop2/explore-plan.md)），**未实测** | 无建图参数，slam_toolbox 只能用官方默认（`base_footprint` + `use_sim_time: true`，R2 会直接不工作）。**11-07 已建**：按官方 `mapper_params_online_async.yaml` 整份复制 + 6 项改动（`base_frame→base_link`、`use_sim_time: false`、`map_update_interval 2.0`、`transform_publish_period 0.05`、`enable_interactive_mode false`），**未实测运行** | ~~P0~~ 🟡 待实测 |
 | G2 | `r2_bringup/launch/nav2_explore.launch.py` 不存在 | launch 目录只有 `chassis` / `ekf` / `nav2` 三个 | 无法起"去定位层"的 Nav2。**11-07 已建**：由 `nav2.launch.py` 删 map_server/AMCL/lifecycle_manager_localization，默认参数改 `nav2_params_low.yaml`，**未实测运行** | ~~P0~~ 🟡 待实测 |
 | G3 | `r2_bringup/config/explore_params.yaml` 不存在 | 同上 config 列表；方案给草案（[Step 3.2](../minimal-loop2/explore-plan.md)） | explore_lite 只能吃官方 `params.yaml`（订阅 `/map` 直连，与 Nav2 代价地图链路不匹配）。**11-07 已建 + 冒烟通过**：节点名 `explore_node` 与 `costmap_topic` 读取已实测确认；`return_to_init` 确认不存在已注释；7 项未声明参数（`visualize`/`planner_frequency` 等）**不可用 `param get` 验证**（[§3.1.2](../minimal-loop2/explore-plan.md)）。仍未接真实 Nav2 costmap 跑过。**11-07 晚复核订正**：`return_to_init` 与 7 参数**并非未声明**——干净复测证明二者均为 `declare_parameter`、`param get` 可取，原冒烟是构造期阻塞造成的假阴性（[§3.1.3](../minimal-loop2/explore-plan.md)） | ~~P0~~ 🟡 待联调 |
-| G4 | **老车专用 Nav2 参数文件缺失**（方案口径冲突） | 现有 `nav2_params_low.yaml` 的 local `voxel_layer` 与 global `obstacle_low_layer` 均订阅 `/velodyne_points`（[L250](../../r2_bringup/config/nav2_params_low.yaml#L250)、[L269](../../r2_bringup/config/nav2_params_low.yaml#L269)、[L322-L324](../../r2_bringup/config/nav2_params_low.yaml#L322-L324)）；老车已无 VLP-16。而 explore-plan [Step 2.1](../minimal-loop2/explore-plan.md) 仍写「两种模式共用同一份参数文件」，与 [07-handover §五-2](../07-handover.md)「必须另建参数；不要直接改历史文件」**直接冲突** | 低带源无输入（是否持续告警未实测）；S1 也不做低物验收，留着纯属噪声 | P0 |
+| G4 | **老车专用 Nav2 参数文件缺失**（方案口径冲突） | 现有 `nav2_params_low.yaml` 的 local `voxel_layer` 与 global `obstacle_low_layer` 均订阅 `/velodyne_points`（[L250](../../r2_bringup/config/nav2_params_low.yaml#L250)、[L269](../../r2_bringup/config/nav2_params_low.yaml#L269)、[L322-L324](../../r2_bringup/config/nav2_params_low.yaml#L322-L324)）；老车已无 VLP-16。而 explore-plan [Step 2.1](../minimal-loop2/explore-plan.md) 仍写「两种模式共用同一份参数文件」，与 [07-handover §五-2](../07-handover.md)「必须另建参数；不要直接改历史文件」**直接冲突** | 低带源无输入（是否持续告警未实测）；S1 也不做低物验收，留着纯属噪声。**11-07 定夺 + 落地**：命名 `nav2_params_ld06.yaml`（按硬件外设，不用 oldcar 类模糊词）；继承范围 = **只删低带源**，inflation 0.30 与降额速度逐字照抄；`nav2_explore.launch.py` 默认参数已切至该文件。**未实测** | ~~P0~~ ✅ 已建（11-07） |
 | G5 | explore_lite 源码与构建产物均无 | VM 无 `~/explore_ws`；N97 无 `~/explore_ws`；`ros2 pkg list` 两侧均无 `explore_lite`；**11-07 复核**：两机 `dpkg -l \| grep -i explore` 与 `find *m-explore*` 均为空 → 确认无本地副本，须 clone（取包路径已通，见文首纠错） | 无前沿探索节点。**11-07 13:00 已销**：N97 `~/Lin_workspace/explore_ws` 建好，clone `326cf8a` + 构建成功，可执行 `install/explore_lite/lib/explore_lite/explore` 在位 | ~~P0~~ ✅ 已销 |
 | G6 | 覆盖率统计脚本无 | `bags/analysis/` 下无对应脚本；方案明写「脚本可后续补，本稿先定口径」（[§3.6](../minimal-loop2/explore-plan.md)） | 覆盖率判据（>80%）无法出数，只能目测 | P1 |
 | G7 | `/map` 录包 QoS 覆盖文件无 | 仓内 `find` 只命中 `doc/ros2-qos-dds.md`，无 `--qos-profile-overrides-path` 用的 yaml；而方案 §3.5 要求录 `/map`（transient_local） | 首测 bag 可能录不到 `/map`，事后无法复算覆盖率 | P1 |
-| G8 | `nav2.rviz` 未被安装到 share（**存量缺陷**） | `setup.py` 只 glob `config/*.yaml` 与 `config/dds/*`（[L15-L16](../../r2_bringup/setup.py#L15-L16)）；源文件 `r2_bringup/config/nav2.rviz` 存在，但 VM/N97 的 `install/.../share/r2_bringup/config/` 均**无该文件**（实测 `ls` 不存在），而 launch 用 `-d <share>/config/nav2.rviz`（[nav2.launch.py:91](../../r2_bringup/launch/nav2.launch.py#L91)） | `rviz:=true` 加载不到配置（具体表现未记录）；explore 若也要 RViz 会先撞这条 | P1 |
+| G8 | `nav2.rviz` 未被安装到 share（**存量缺陷**） | `setup.py` 只 glob `config/*.yaml` 与 `config/dds/*`（[L15-L16](../../r2_bringup/setup.py#L15-L16)）；源文件 `r2_bringup/config/nav2.rviz` 存在，但 VM/N97 的 `install/.../share/r2_bringup/config/` 均**无该文件**（实测 `ls` 不存在），而 launch 用 `-d <share>/config/nav2.rviz`（[nav2.launch.py:91](../../r2_bringup/launch/nav2.launch.py#L91)） | `rviz:=true` 加载不到配置（具体表现未记录）；explore 若也要 RViz 会先撞这条。**11-07 已修**：`setup.py` 增 `('share/<pkg>/config', glob('config/*.rviz'))`，原 `glob('config/*.yaml')` 行**注释保留备查**；VM `colcon build --packages-select r2_bringup` 后 install 目录已见 `nav2.rviz`（构建验证，未在 N97 实跑 rviz） | ✅ 已修（11-07） |
 | G9 | `explore.rviz` / `explore_all.launch.py`（可选） | 方案 [§六](../minimal-loop2/explore-plan.md) 列为可选 | 仅影响操作便捷性 | P2 |
 
 ### 2.2 参数与几何
 
 | ID | 缺口 | 现状证据 | 影响 | 级别 |
 |:---|:---|:---|:---|:---:|
-| G10 | LD06 实车安装几何未回填 | `ld06.launch.py` 默认 `z=0.18`（标注占位）、`yaw/pitch/roll=0`（[L37-L43](../../ldlidar_stl_ros2/launch/ld06.launch.py#L37-L43)）；方案要求实车量测后替换，勿沿用 0.18 | 静态 TF 与真实安装不符 → 障碍投影/地图尺度偏 | P1 |
+| G10 | LD06 实车安装几何未回填 | `ld06.launch.py` 默认 `z=0.18`（标注占位）、`yaw/pitch/roll=0`（[L37-L43](../../ldlidar_stl_ros2/launch/ld06.launch.py#L37-L43)）；方案要求实车量测后替换，勿沿用 0.18 | 静态 TF 与真实安装不符 → 障碍投影/地图尺度偏。**11-07 定夺**：必须实车实测，**等这步再动**；范围除高度/前后左右/俯仰/朝向，**另含「雷达 0° 方向是否合适」**（`ld06.launch.py` 的 angle crop 语义依赖 0° 朝向，方向反了 crop 也随之错）；同时**雷达 URDF/TF 关系一并重写**（现 `r2_sensors/config/r2.urdf` 仍是 base_link→velodyne 0.655m，属 VLP-16 时代） | P1（待实车） |
 | G11 | LD06 量程与 `slam max_laser_range: 20.0` 未对齐 | 方案 [Step 1.1](../minimal-loop2/explore-plan.md) 的 20.0 抄自 VLP-16 母本；驱动消息里 `range_max=25`（[demo.cpp:167](../../ldlidar_stl_ros2/src/demo.cpp#L167)）只是**消息字段**，不是传感器规格；LD06 实际量程本仓未落档。**2026-11-07 补测**：0.02/25 均为驱动常量，室内有效回波最大 6.08 m；**空旷场地量程/地面杂波仍未测**（[ld06-dual-lidar P7](ld06-dual-lidar.md)） | 远端边界行为不确定（截断/噪点） | P2 |
-| G12 | 首测用哪颗雷达未指定 | A/B 两颗均已在 N97 跑通（[ld06-dual-lidar P6](ld06-dual-lidar.md)），S1 只需一颗 | 选错端口 → 启动即错 | P2 |
+| G12 | 首测用哪颗雷达未指定 | A/B 两颗均已在 N97 跑通（[ld06-dual-lidar P6](ld06-dual-lidar.md)），S1 只需一颗 | 选错端口 → 启动即错。**11-07 定夺**：首版跑 **`r2_ld06_a`**（`/dev/r2_ld06_a`，udev 固定名已在 N97 落） | ~~P2~~ ✅ 已定 |
 
 ### 2.3 硬件与现场
 
@@ -80,7 +90,7 @@
 
 | ID | 缺口 | 现状证据 | 影响 | 级别 |
 |:---|:---|:---|:---|:---:|
-| G17 | "EKF 输出与基线一致"**没有量化阈值** | 现有基线：[startup §4.2](../startup.md)（`/odometry/filtered ~30Hz`）、[§4.3](../startup.md)（静止四元数 0.0226/0.0283/0.0172/0.9992、`z=0`、`odom→base_link` 单发布者）；S1 判据只写"一致" | 验收时无法判合格/不合格，易变成"看着差不多" | P1 |
+| G17 | "EKF 输出与基线一致"**没有量化阈值** | 现有基线：[startup §4.2](../startup.md)（`/odometry/filtered ~30Hz`）、[§4.3](../startup.md)（静止四元数 0.0226/0.0283/0.0172/0.9992、`z=0`、`odom→base_link` 单发布者）；S1 判据只写"一致" | 验收时无法判合格/不合格，易变成"看着差不多"。**11-07 定夺**：**IMU 未更换** → G354/EKF 基线（[startup §4.2/§4.3](../startup.md)）仍有效，阈值按现有基线提；**但雷达侧 URDF/TF 关系需重写**（VLP-16 → LD06），故雷达相关验收项须待 G10 几何实测后一并定 | P1（阈值待提，随 G10） |
 | G18 | 复测场景未排 | [standards §1.15](../standards.md) 要求单场景 PASS 后至少换起点/换场地复测一次；方案 §四 亦注明 | 首跑 PASS 不等于收口 | P1 |
 | G19 | 首测 bag 话题清单未按老车改 | 方案 §3.5 清单仍含 VLP-16 语境（"`/velodyne_points` 体积大，先不录"），老车该话题根本不存在 | 录包清单需重列，否则易漏 `/scan` 之外的探索证据 | P2 |
 
@@ -142,16 +152,16 @@ G13 → G10 的前提；G15 现场就位 → 首跑；首跑后 G6/G7/G17 → �
 
 ---
 
-## 六、待用户定夺
+## 六、定夺记录（2026-11-07 用户已全部定夺）
 
-| # | 事项 | 选项 | 影响 |
-|:--|:---|:---|:---|
-| 1 | G4 新参数文件命名 | `nav2_params_ld06.yaml` / `nav2_params_oldcar.yaml` / 其他 | 决定后续文档引用名；不影响功能 |
-| 2 | G4 继承范围 | 只删低带源（其余照抄 low 版）/ 同时调膨胀与速度 | 只删源 = 变量最少，推荐作为首跑起点 |
-| 3 | G10 安装几何由谁测、何时 | 你实车量测后给我数值 / 先按占位值跑 | 占位值会让障碍位置偏，首跑仍可端到端 |
-| 4 | G12 首跑用哪颗 | A（`r2_ld06_a`）/ B | 两颗均验证过，任选 |
-| 5 | G8 是否本轮修 | 修 `setup.py` 加 `config/*.rviz` / 暂不修（rviz 另开） | 修了 `rviz:=true` 才有意义 |
-| 6 | G17 EKF 对照阈值 | 由我按现有基线提一版供你定 / 你直接给 | 不定阈值 = 验收判不了 |
+| # | 事项 | 选项（原） | 影响（原） | **用户定夺（2026-11-07）** |
+|:--|:---|:---|:---|:---|
+| 1 | G4 新参数文件命名 | `nav2_params_ld06.yaml` / `nav2_params_oldcar.yaml` / 其他 | 决定后续文档引用名；不影响功能 | ✅ **`nav2_params_ld06.yaml`**——按实际硬件外设命名，尽量不用 oldcar 这类模糊词 |
+| 2 | G4 继承范围 | 只删低带源（其余照抄 low 版）/ 同时调膨胀与速度 | 只删源 = 变量最少，推荐作为首跑起点 | ✅ **只删低带源**，其余照抄 low 版（膨胀 0.30 / 降额速度不动） |
+| 3 | G10 安装几何由谁测、何时 | 你实车量测后给我数值 / 先按占位值跑 | 占位值会让障碍位置偏，首跑仍可端到端 | ✅ **实车实测后给数值，等到这步再进行**；范围**另含雷达 0° 方向是否合适** |
+| 4 | G12 首跑用哪颗 | A（`r2_ld06_a`）/ B | 两颗均验证过，任选 | ✅ **`r2_ld06_a`** |
+| 5 | G8 是否本轮修 | 修 `setup.py` 加 `config/*.rviz` / 暂不修（rviz 另开） | 修了 `rviz:=true` 才有意义 | ✅ **本轮修**，旁边注释**保留原版** |
+| 6 | G17 EKF 对照阈值 | 由我按现有基线提一版供你定 / 你直接给 | 不定阈值 = 验收判不了 | ✅ **IMU 未更换**（基线仍有效，阈值按现有基线提）；**雷达 URDF/TF 关系需重写**，随 G10 一起做 |
 
 > 双雷达拓扑（S2）、低物兜底（L4）等 S1 之外的事项不在此列，见 [pending-tasks §⓪](../pending-tasks.md) 与
 > [explore-plan §七](../minimal-loop2/explore-plan.md)。

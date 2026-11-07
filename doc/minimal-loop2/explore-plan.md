@@ -225,7 +225,7 @@ ros2 run nav2_map_server map_saver_cli -f $HOME/maps/explore_map_$(date +%m%d_%H
 |:---|:---|
 | 删除 | `map` 参数、`RewrittenYaml` 的 `yaml_filename` 注入、`map_server`、`amcl`、`lifecycle_manager_localization` |
 | 保留 | `planner_server`、`controller_server`、`smoother_server`、`behavior_server`、`bt_navigator`、`velocity_smoother`、`lifecycle_manager_navigation` |
-| 默认参数 | `params_file` 默认改为 `nav2_params_low.yaml`（**安全默认**；现有 `nav2.launch.py` 默认是全速版，explore 不沿用这个默认） |
+| 默认参数 | ~~`params_file` 默认改为 `nav2_params_low.yaml`（**安全默认**；现有 `nav2.launch.py` 默认是全速版，explore 不沿用这个默认）~~ → **2026-11-07 G4 定夺后改为 `nav2_params_ld06.yaml`**（low 版含 `velodyne_low` 低带源，老车无 `/velodyne_points`；LD06 版 = low 版只删低带源，膨胀与降额速度不动） |
 
 保留原有 remap：
 
@@ -235,7 +235,9 @@ remappings = [('/odom', '/odometry/filtered'),
               ('/tf_static', 'tf_static')]
 ```
 
-> 不启动 `map_server`/`amcl`，所以 `nav2_params_low.yaml` 里这两段参数不会被使用，**不需要删配置**；两种模式共用同一份参数文件。
+> 不启动 `map_server`/`amcl`，所以参数文件里这两段参数不会被使用，**不需要删配置**；
+> ~~两种模式共用同一份参数文件~~ → **2026-11-07 订正**：老车导航模式与 explore 模式**共用 `nav2_params_ld06.yaml`**
+> （G4 定夺：按硬件外设命名），`nav2_params_low.yaml` 保留作 VLP-16 历史基线/新车参考，不再作老车默认。
 
 #### 2.2 启动（终端 C）
 
@@ -243,8 +245,10 @@ remappings = [('/odom', '/odometry/filtered'),
 source /opt/ros/humble/setup.bash
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch r2_bringup nav2_explore.launch.py \
-  params_file:=$HOME/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_low.yaml \
+  params_file:=$HOME/Lin_workspace/r2_integration/install/r2_bringup/share/r2_bringup/config/nav2_params_ld06.yaml \
   rviz:=true
+# 注：默认值已是 nav2_params_ld06.yaml（11-07），此参数可省略；
+#     原示例用 nav2_params_low.yaml，老车无 /velodyne_points，会持续报低带源缺失。
 ```
 
 #### 2.3 验证
@@ -631,7 +635,7 @@ coverage = ROI 内已知栅格数 / ROI 总栅格数
 |:---|:---|:---|
 | `/scan` 来自 `velodyne_laserscan`（VLP-16） | `/scan` 来自 LD06 驱动（`ldlidar_stl_ros2`，230400，`/dev/r2_ld06_a` udev 固定名） | 启动 LD06 launch；先 `ros2 topic info -v /scan` 核对 QoS/frame/频率 |
 | `base_link→velodyne`（z=0.655） | `base_link→base_laser`（LD06 launch 的 z=0.18 是**占位值**） | 实车量安装高度后改静态 TF；不要沿用 0.655/0.18 |
-| `nav2_params_low.yaml` 的 `velodyne_low` 低带源 | 老车无 `/velodyne_points` | 老车另建参数：首期先跑无低带源的 2D explore；二期用 `/scan_low` 或按 §十.2 处理 |
+| `nav2_params_low.yaml` 的 `velodyne_low` 低带源 | 老车无 `/velodyne_points` | 老车另建参数：首期先跑无低带源的 2D explore；二期用 `/scan_low` 或按 §十.2 处理。**2026-11-07 已落地**：`nav2_params_ld06.yaml`（只删低带源，G4） |
 | 低物盲区 1.59m（VLP-16 几何） | 换雷达后几何全变 | 旧数字不适用；首测避开低物；低物验收另立 |
 | `slam_toolbox` + Nav2 + explore_lite | 不变 | 继续用本文 Step 1~3；`base_frame` 仍 `base_link` |
 
@@ -684,7 +688,7 @@ ros2 node list | grep -E "amcl|map_server" || echo "OK: no AMCL/map_server"
 | LD06 端口漂移/两颗互换 | 启动报错或数据错车 | udev 固定名；launch 用符号链接；启动前 `ls -l` |
 | 低装地面杂波 | costmap 假障碍、地图脏 | 调高度/俯仰；角度裁剪；先静态测；必要时地面过滤 |
 | 双雷达互扰 | 偶发噪点/丢帧 | 同开/单开对比；错开/遮挡；必要时分时 |
-| 旧参数残留 `velodyne_low` | 启动报找不到源/低带层空 | 老车另建参数文件；不要直接改历史 `nav2_params_low.yaml` |
+| 旧参数残留 `velodyne_low` | 启动报找不到源/低带层空 | 老车用 `nav2_params_ld06.yaml`（11-07 已建）；不要直接改历史 `nav2_params_low.yaml` |
 | 静态 TF 沿用占位 0.18 | 地图尺度/障碍位置偏 | 实车量测后改 launch/URDF；用 `tf2_echo` 核对 |
 
 ### 10.6 来源（本节）

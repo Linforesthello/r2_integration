@@ -163,6 +163,7 @@ Phase 0  Phase 1    Phase 2+3    Phase 4+5
 
 - **驱动/规格** ✅：LD06 单/双实例 10 Hz、`/scan` beam 452~455/圈、角分辨率 ~0.795°、crop 机制实测 — [ld06-dual-lidar P7](old-car/ld06-dual-lidar.md)
 - **软件依赖** 🟢：slam_toolbox / Nav2 已装；explore_lite 无 apt 包、需源码构建。**11-07 纠错**：此前记的"网络阻塞"不成立——根因是代理 TUN 未开，开启后 VM/N97 `git ls-remote` 均 exit=0（两机本地仍无副本，须 clone）。**11-07 13:00 已构建**：N97 `~/Lin_workspace/explore_ws` clone `326cf8a` + `colcon build --packages-up-to explore_lite` 成功，`explore_lite explore` 可执行在位（G5 销项）；**同日三份配置落文件**（`slam_toolbox_mapping.yaml` / `nav2_explore.launch.py` / `explore_params.yaml`，G1/G2/G3），**均未实测运行**；**11-07 晚复核订正**：`return_to_init` 与 7 参数实为 `declare_parameter` 已声明（原冒烟系构造期阻塞假阴性）— [explore-plan §3.1.3](minimal-loop2/explore-plan.md)
-- **安装几何** ❌：待实车量测（[sensor-mount §六](phase0/sensor-mount.md)）；`ld06.launch.py` 缺 x/y 参数、z 为占位
+- **老车 Nav2 参数 + rviz 配置（11-07 六项定夺落地）** ✅ 已落文件：G4 新建 `nav2_params_ld06.yaml`（按定夺 = low 版**只删低带源** `velodyne_low`/`obstacle_low_layer`，膨胀 0.30 与降额速度照抄），`nav2_explore.launch.py` 默认改指它（原行注释留档）；G8 修复 `setup.py` 只 `glob('config/*.yaml')` 致 `nav2.rviz` 不进 install（`rviz:=true` 加载不到配置，原行注释留档）。`colcon build --packages-select r2_bringup` 已验证 install 副本含两文件。**均未实测运行**
+- **安装几何** ❌：待实车量测（[sensor-mount §六](phase0/sensor-mount.md)）；`ld06.launch.py` 缺 x/y 参数、z 为占位。**11-07 定夺**：实际测算（含雷达 0° 朝向是否合适）等到 G10 再动，届时 LD06 的 URDF/TF 关系一并重写（现 `r2_sensors/config/r2.urdf` 仍是 VLP-16 的 `base_link→velodyne` z=0.655）
 - **S1 首跑** ❌：等几何 + explore_lite；缺口全表见 [s1-readiness-gap.md](old-car/s1-readiness-gap.md)（23 项，G11 部分销项）
 

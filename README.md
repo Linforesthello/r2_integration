@@ -153,7 +153,8 @@ r2_integration/
 │   ├── config/r2_params.yaml         实车标定参数
 │   ├── config/ekf.yaml               EKF 融合配置
 │   ├── config/nav2_params.yaml       Nav2 参数（全速版）
-│   ├── config/nav2_params_low.yaml   Nav2 参数（降额版，首次实机用）
+│   ├── config/nav2_params_low.yaml   Nav2 参数（降额版，VLP-16 时代基线/新车参考）
+│   ├── config/nav2_params_ld06.yaml  Nav2 参数（老车 LD06 版：low 版只删低带源，11-07 老车默认）
 │   ├── config/nav2.rviz              Nav2 RViz 配置
 │   ├── config/slam_toolbox_mapping.yaml  slam_toolbox 2D 建图参数（老车 S1，11-07）
 │   ├── config/explore_params.yaml    explore_lite 参数（global_costmap 源，11-07）
