@@ -187,7 +187,8 @@ r2_integration/
     ├── map_chassis.py                CAN ID → 物理位置映射
     ├── calibrate_direction.py        运动方向标定（8组测试）
     ├── check_doc_links.py            文档链接完整性校验器（doc 工程闸门，见 doc-engineering.md）
-    └── probe_laserscan.py            LaserScan 规格探针（波束数/角分辨率/连续 NaN 段，11-07）
+    ├── probe_laserscan.py            LaserScan 规格探针（波束数/角分辨率/连续 NaN 段，11-07）
+    └── net_diag.sh                   网络可达性分层诊断（只读，VM/N97 通用，11-07）
 ```
 
 ---

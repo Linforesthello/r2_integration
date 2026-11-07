@@ -291,6 +291,34 @@
 - **纠正动作**：状态文档保留旧表述并划删除线 → 紧跟实测结论与前提条件（翻案留痕，见
   [doc-engineering §十](doc-engineering.md)）；不静默改写旧句。
 
+### L5 代理环境下 GitHub 推送：SSH 22 不通改 SSH over 443
+
+- **症状**：`git push` 报
+  `kex_exchange_identification: Connection closed by remote host` /
+  `Connection closed by 198.18.0.4 port 22`。解析到 `198.18.x.x` 说明流量走代理，
+  **代理通常不放行 22 端口**——这不是密钥/权限问题，`https://github.com` 与 `ssh -p 443` 都正常。
+- **判据**：`ssh -T -p 443 git@ssh.github.com` 认证通过，而默认 22 端口的 `git push` 失败
+  → 结论是端口级阻断，**不要去重配 SSH key**（2026-11-07 首轮排障方向就是错的）。
+- **一次性做法（不改全局配置，推荐）**：
+
+  ```bash
+  git -C <repo> -c url."ssh://git@ssh.github.com:443/".insteadOf="git@github.com:" push origin main
+  ```
+
+  `insteadOf` 只改写本次命令的 URL，仓库 `remote.origin.url` 保持原样。
+- **永久做法（属全局配置变更，需用户确认后再做）**：`~/.ssh/config` 增加
+
+  ```text
+  Host github.com
+    HostName ssh.github.com
+    Port 443
+    User git
+  ```
+
+- **案例**：2026-11-07 双仓推送，Obsidian 镜像与 r2_integration 均报同一错误；
+  改 443 后两仓一次推成功，远端 HEAD 与本地一致。
+- **配套工具**：网络层诊断用 [scripts/net_diag.sh](../scripts/net_diag.sh)（只读、单文件、两机通用）。
+
 ## 抽取状态跟踪表
 
 | 条款 | 状态 | 落点 | 注 |
@@ -347,6 +375,7 @@
 | L2 TUN/fake-ip 指纹 | 沉淀（未抽，11-07 新增） | ros2-ops §1/§7 邻域 | 同上 |
 | L3 控制变量对照 | 沉淀（未抽，11-07 新增） | ros2-ops §7 邻域 | 同上 |
 | L4 阻塞须知生效条件 | 沉淀（未抽，11-07 新增） | ros2-ops §7 邻域 | 同上 |
+| L5 代理下 SSH 22 不通改 443 | 沉淀（未抽，11-07 新增） | ros2-ops §1 邻域 | 复用 2+ 次（双仓同日各一次）；工具 net_diag.sh 已入仓 |
 
 > 盘点节奏：**方案 A 已定稿**（09-04，阶段收尾即盘点，首个 = 09-10 A1 收口；分层架构与决策全文见
 > [retrospect/2026-09-04_experience-layer-decision.md](retrospect/2026-09-04_experience-layer-decision.md)）——
