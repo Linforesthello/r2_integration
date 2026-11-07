@@ -205,6 +205,41 @@
 - **案例**：`ldlidar.rviz` 的 `Yaw=3.1354`（179.6°）+ Intensity 彩虹（22–245）+ Flat Squares 3px；
   TF 旋转为单位四元数，`laser_scan_dir=True`，数据方向未被反转。
 
+## 主题 K：LaserScan 规格/裁剪实测与一次性探针工具（未抽取，全文保留；11-07 新增）
+
+> 来源事件：2026-11-07 N97 LD06 补测。数据落档 [old-car/ld06-dual-lidar.md P7](old-car/ld06-dual-lidar.md)，
+> 原始数据 `doc/raw_data/raw_ld06_scan_spec_2026-11-07_1133.txt` / `raw_ld06_crop_2026-11-07_1141.txt`（本地，不入 git）。
+> 候选去向：[ros2-ops.md §5.1](ros2-ops.md)（scan 数值分析）/ [§7](ros2-ops.md)（排障）/ [§10](ros2-ops.md)（进程卫生）邻域，成熟后抽。
+> 说明：单事件新经验，按四层制先落 draft，不直写规则层。
+
+### K1 一次性订阅探针：别在回调里 shutdown，用硬退出 + SIGKILL 兜底
+
+- **规则**：抓 N 帧就退的 rclpy 探针，用 `spin_once(timeout_sec=...)` 轮询 + 每行 `flush=True`；
+  抓够后 `os._exit(0)` 硬退出。**不要**在订阅回调里调 `rclpy.shutdown()`。
+- **原因**：Humble 单线程 executor 下回调内 shutdown 会死锁（实测进程睡眠、无任何输出）；rclpy 初始化时
+  安装了 SIGINT/SIGTERM handler，外部 `timeout` 的 SIGTERM 只触发"优雅关闭"、杀不死进程（实测卡 100s+）。
+- **清理**：外层用 `timeout -k 5 30 python3 ...` 做 SIGKILL 兜底；`ros2 run` 是 wrapper + 子进程两段，
+  按精确模式（bracket 防自杀匹配）或分别按 PID 清理，结束后 `ps` 复核。
+- **案例**：2026-11-07 首版探针在回调里 shutdown → 卡死 100s+，`kill -TERM` 无效、只能 `kill -9`；
+  改 `spin_once` + `os._exit` 后两轮实测均退出码 0。工具入仓 [scripts/probe_laserscan.py](../scripts/probe_laserscan.py)。
+
+### K2 传感器规格：消息字段/驱动常量 ≠ 实测值，逐帧变化量单列
+
+- **规则**：回答"波束数/角分辨率/量程"时先分三层——① 消息字段/驱动常量（如 `range_max=25.0`）；
+  ② 驱动按数据反推的派生量（如 `angle_increment=2π/(beam_size−1)`，逐帧变）；
+  ③ 实测观测量（本圈点数、有效回波最大距离、帧间隔）。只把 ③ 与可核实的 ① 写成结论，② 标"派生/逐帧变"。
+- **判据**：`len(ranges)` 与 `angle_increment` 必须多帧采样看一致性；只抓 1 帧会把逐帧变化误当固定值。
+- **案例**：LD06 三帧 `len(ranges)=455/452/454`、`angle_increment=0.7930/0.7982/0.7947°`；
+  `range_max=25.0` 是驱动常量；室内有效回波最大 6.08 m（不当作量程结论）。
+
+### K3 angle crop 的坐标约定要用非对称带实测钉死
+
+- **规则**：驱动裁剪参数若按原始角计算、输出又做了方向反转，裁剪带在发布侧会镜像；
+  **对称带会掩盖两种约定**，必须用非对称带（如 `[0,90]`）实测一次，才能钉死映射。
+- **案例**：LD06 `crop[135,225] → 发布角[134.3,225.7]`（对称，无法区分）；`crop[0,90] → 发布角[269.4,360.8]`
+  ⇒ 发布角 = 360° − 原始角。换算：掩盖发布角 `[α1,α2]` 设 crop `[360−α2, 360−α1]`。
+- **附带事实**：crop 只把值置 NaN，消息长度与 `angle_min/angle_max` 不变，下游按"无回波"处理。
+
 ## 抽取状态跟踪表
 
 | 条款 | 状态 | 落点 | 注 |
@@ -254,6 +289,9 @@
 | J2 冒烟六判据 + 进程路径 | 沉淀（未抽，11-06 新增） | ros2-ops §2/§7 邻域 | 同上 |
 | J3 串口掉电/接触判定 | 沉淀（未抽，11-06 新增） | ros2-ops §7 邻域 | 同上 |
 | J4 RViz 显示差异判读 | 沉淀（未抽，11-06 新增） | 各传感器手册邻域 | 同上 |
+| K1 探针回调死锁/硬退出 | 沉淀（未抽，11-07 新增） | ros2-ops §5.1/§10 邻域 | 单事件未成熟；工具已入仓 |
+| K2 规格三层拆分 | 沉淀（未抽，11-07 新增） | ros2-ops §5.1 邻域 | 同上 |
+| K3 crop 非对称带实测 | 沉淀（未抽，11-07 新增） | ros2-ops §5.1 邻域 | 同上 |
 
 > 盘点节奏：**方案 A 已定稿**（09-04，阶段收尾即盘点，首个 = 09-10 A1 收口；分层架构与决策全文见
 > [retrospect/2026-09-04_experience-layer-decision.md](retrospect/2026-09-04_experience-layer-decision.md)）——

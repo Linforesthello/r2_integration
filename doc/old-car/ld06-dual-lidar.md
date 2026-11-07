@@ -2,8 +2,8 @@
 
 > 日期：2026-11-06
 > 任务：老车平替 S1/S2 的 LD06 接入——**先在 VM 完成双雷达基本功能与串口固定**，再交 N97 部署
-> 状态：✅ VM 阶段验收完成（2026-11-06，V1~V6 通过）；✅ N97 交接前置完成（udev 四路固定 + 构建，2026-11-06）；✅ N97 双实例运行实测 10Hz（2026-11-06 19:21，`/scan_a` 10.000 Hz / `/scan_b` 10.002 Hz）；⏳ N97 供电长跑待测
-> 回填：2026-11-06（VM 执行结果、参数快照、已知限制；N97 udev/构建实测）
+> 状态：✅ VM 阶段验收完成（2026-11-06，V1~V6 通过）；✅ N97 交接前置完成（udev 四路固定 + 构建，2026-11-06）；✅ N97 双实例运行实测 10Hz（2026-11-06 19:21，`/scan_a` 10.000 Hz / `/scan_b` 10.002 Hz）；✅ N97 重启复验（2026-11-07 11:25，udev 四路仍指向正确 serial）；✅ LD06 `/scan` 规格与 angle crop 实测（2026-11-07，见 P7）；⏳ N97 供电长跑待测
+> 回填：2026-11-06（VM 执行结果、参数快照、已知限制；N97 udev/构建实测）；2026-11-07（N97 重启复验 + `/scan` 规格/crop 实测，见 P7）
 > 上位文档：[two-car-architecture.md §三/§八](../two-car-architecture.md)
 > 事件记录：[2026-11-06 LD06 VM 接入与冒烟](../retrospect/2026-11-06_ld06_vm_bringup_smoke.md)
 > 原始数据：`doc/raw_data/raw_ld06_*`（本地，不入 git）
@@ -190,14 +190,16 @@ ls -l /dev/r2_ld06_a /dev/r2_ld06_b
 - [x] `ls -l /dev/r2_ld06_a /dev/r2_ld06_b` 符号链接存在，分别指向 serial `...8672` / `...8647`；
 - [x] 单颗拔插后不串号（用户实测 PASS）；
 - [x] launch 使用 `r2_ld06_a/b` 双路正常（P2）；
-- [ ] 重启复验未单独记录（规则已落盘，可补一次 reboot 验证）。
+- [ ] 重启复验未单独记录（规则已落盘，可补一次 reboot 验证）；**N97 已复验（2026-11-07，见下），VM 未单独复验**。
 
 **N97 实测（2026-11-06）**：
 
 - [x] `/etc/udev/rules.d/99-r2-serial.rules` 已装，含 4 条规则（G354 / CANable2 / LD06 A / LD06 B）；
 - [x] `ls -l /dev/r2_*` 四条链接均存在，指向正确 serial（对照表见 §二）；
 - [x] 规则按本机 serial 重写，未直接照搬 VM 文件（N97 的 G354/CAN serial 与 VM 不同）；
-- [ ] N97 重启复验待补。
+- [x] **N97 重启复验（2026-11-07 11:25）**：重启后四条链接仍存在且指向正确 serial（G354 `...8613`、
+  CAN `208C37AF4845`、LD06-A `...8672`、LD06-B `...8647`）；ACM 编号再次变化——G354=ACM2、CAN=ACM3、
+  LD06-A=ACM0、LD06-B=ACM1（与 2026-11-06 的 ACM0/1/2/3 完全不同）→ **固定名方案有效，禁止按 ttyACM 编号写死**。
 
 **坑位**：
 
@@ -248,6 +250,53 @@ VM 摆位不代表实车，实车安装后按同法复验（或标注为 VM 初�
 4. [ ] **供电长跑 ≥30 min**：带载测 PSV 4.5~5.5V、查 GND/接头/5V 来源；不要依赖 J-Link 的 5V 给雷达供电，
    建议雷达独立 5V + 共地；
 5. [ ] 通过后再进 S1（slam_toolbox + Nav2 + explore_lite）。
+
+### P7 LD06 `/scan` 规格与 angle crop 实测（✅ 已完成，2026-11-07，N97）
+
+**动机**：S1 的 `slam_toolbox` / Nav2 / 覆盖率脚本需要真实波束数、角分辨率与量程边界；此前只有驱动消息字段
+（`range_max=25`），不能当传感器规格（[standards §1.8](../standards.md)）。
+
+**方法**：N97 本地直接 `ros2 run ldlidar_stl_ros2 ldlidar_stl_ros2_node`（不带 launch 静态 TF），
+探针抓 3 帧；工具已入仓 [scripts/probe_laserscan.py](../../scripts/probe_laserscan.py)。
+原始数据：`doc/raw_data/raw_ld06_scan_spec_2026-11-07_1133.txt`、`raw_ld06_crop_2026-11-07_1141.txt`（本地，不入 git）。
+
+```bash
+# 终端 1：起驱动（crop 关闭；测 crop 时改 enable_angle_crop_func:=true 并加 angle_crop_min/max，单位度）
+ros2 run ldlidar_stl_ros2 ldlidar_stl_ros2_node --ros-args \
+  -p product_name:=LDLiDAR_LD06 -p topic_name:=scan -p frame_id:=base_laser \
+  -p port_name:=/dev/r2_ld06_a -p port_baudrate:=230400 \
+  -p laser_scan_dir:=true -p enable_angle_crop_func:=false
+# 终端 2：抓 3 帧（外层加 timeout -k 兜底，见下）
+timeout -k 5 30 python3 scripts/probe_laserscan.py --topic /scan --count 3
+```
+
+**规格实测（crop 关闭）**：
+
+| 项 | 实测（3 帧） | 说明 |
+|:---|:---|:---|
+| beam 数/圈 | **455 / 452 / 454** | **逐帧变化**；452~455 点/圈 × 10 Hz ≈ 4.5k 点/s |
+| 角分辨率（消息字段） | **0.7930° / 0.7982° / 0.7947°** | 驱动按 `360/(beam_size−1)` 逐帧反推，不是固定常数 |
+| 帧率 | `scan_time` 99.97/99.99/100.02 ms；stamp 间隔 99.99/100.02 ms | 10 Hz 确认（N97） |
+| angle_min / angle_max | 0° / 360° | 0° 与 360° 方向重复 → 唯一角格 = `beam_size−1` |
+| range_min / range_max | 0.02 / 25.0 m | **25 是驱动常量**（[demo.cpp:166-167](../../ldlidar_stl_ros2/src/demo.cpp#L166-L167)），不是 LD06 规格 |
+| 室内有效回波最大 | 5.94~6.08 m（3 帧） | 室内环境限制，**不构成量程结论**；空旷场地量程仍待测 |
+| NaN | 80~85 个/圈（≈18%） | 无回波 bin（crop 关闭时） |
+| `distance=0 且 intensity≠0` | 以 `range=0.0` 发布 | 驱动只过滤 `distance==0 && intensity==0`（[L194](../../ldlidar_stl_ros2/src/demo.cpp#L194)）；下游需容忍 0 距离点 |
+
+**angle crop 实测（两用例，验证掩盖行为与坐标约定）**：
+
+| 用例（crop 原始角，度） | 发布角下的连续 NaN 带 | 宽度 |
+|:---|:---|:---|
+| 关闭（基线） | 无 ~90° 连续带；散点 NaN 80~85 个/圈 | — |
+| `[135, 225]` | 134.3~225.7° | 89.2~90.6°（112~114 bin） |
+| `[0, 90]` | 269.4~360.8° | 90.6~91.4°（114~115 bin） |
+
+- crop 参数按**雷达原始角**（度、闭区间）计算；`laser_scan_dir=true` 时**发布角 = 360° − 原始角**
+  （驱动反向填数组，[demo.cpp:214-225](../../ldlidar_stl_ros2/src/demo.cpp#L214-L225)）→ 非对称带在发布侧镜像。
+- crop 只把 `ranges/intensities` 置 NaN，**消息长度与 `angle_min/angle_max` 不变**；下游按"无回波"处理。
+- 换算：要掩盖发布角 `[α1, α2]`，设 crop `[360−α2, 360−α1]`；对称于 180° 的带两种写法一致。
+- 与 S1 的关系：`向内的 90° 不扫` 可用该机制实现，但**区间需按实车安装朝向确定**（车体系 ↔ 雷达原始角）；
+  当前安装几何未测（本文件 §六-3 / [s1-readiness-gap.md](s1-readiness-gap.md) G10）。
 
 ---
 
@@ -304,3 +353,5 @@ VM 摆位不代表实车，实车安装后按同法复验（或标注为 VM 初�
 - 验收边界：[standards.md §1.15](../standards.md)
 - 驱动与 launch：[ldlidar_stl_ros2/launch/ld06.launch.py](../../ldlidar_stl_ros2/launch/ld06.launch.py)、[README_R2.md](../../ldlidar_stl_ros2/README_R2.md)
 - 设备基线：2026-11-06 16:20 VM `lsusb` / `udevadm info` 实测；2026-11-06 18:49~18:52 N97 实测（本文件 §二）
+- LD06 `/scan` 规格与 crop：2026-11-07 N97 实测（本文件 P7），原始数据 `doc/raw_data/raw_ld06_scan_spec_2026-11-07_1133.txt` / `raw_ld06_crop_2026-11-07_1141.txt`（本地，不入 git）；探针工具 [scripts/probe_laserscan.py](../../scripts/probe_laserscan.py)
+- N97 重启复验：2026-11-07 11:25 重启后 `ls -l /dev/r2_*` + `udevadm info` 核对（本文件 P3）

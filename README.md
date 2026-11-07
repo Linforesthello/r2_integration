@@ -35,7 +35,8 @@ r2_integration/
 │   ├── two-car-architecture.md    两车架构与接口（老车平替 + 新车升级 + 共用/分叉，11-06 建）
 │   │
 │   ├── old-car/  ← 老车平替专题（11-06 建）
-│   │   └── ld06-dual-lidar.md     LD06 单/双雷达执行计划（VM 验收 V1–V6 完成；N97 udev/构建/双实例 10Hz 完成，供电长跑待测）
+│   │   ├── ld06-dual-lidar.md     LD06 单/双雷达执行计划（VM 验收 V1–V6 完成；N97 udev/构建/双实例 10Hz + /scan 规格/crop 实测完成（11-07），供电长跑待测）
+│   │   └── s1-readiness-gap.md    S1 就绪差距清单（23 项缺口分级 P0/P1/P2 + 已完成前置 + 待定夺，11-06 盘点）
 │   │
 │   ├── minimal-loop/        最小闭环执行史（plan + w1/w2/w3-operation.md + Nav2 bringup + 审计数据）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan.md + execution/relog/costmap 执行卡 + explore-plan.md 工作稿）
@@ -185,7 +186,8 @@ r2_integration/
     ├── measure_r2_ticks.py           编码器 ticks/圈 测量
     ├── map_chassis.py                CAN ID → 物理位置映射
     ├── calibrate_direction.py        运动方向标定（8组测试）
-    └── check_doc_links.py            文档链接完整性校验器（doc 工程闸门，见 doc-engineering.md）
+    ├── check_doc_links.py            文档链接完整性校验器（doc 工程闸门，见 doc-engineering.md）
+    └── probe_laserscan.py            LaserScan 规格探针（波束数/角分辨率/连续 NaN 段，11-07）
 ```
 
 ---

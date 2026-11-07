@@ -525,7 +525,7 @@ coverage = ROI 内已知栅格数 / ROI 总栅格数
 ls -l /dev/r2_ld06_a 2>/dev/null   # udev 固定名优先；没有则先确认实际端口
 ros2 launch ldlidar_stl_ros2 ld06.launch.py          # 端口/frame 按实车改
 ros2 topic info -v /scan                             # 看 QoS、frame_id、发布者
-ros2 topic hz /scan                                  # 预期 ~10Hz（待实测）
+ros2 topic hz /scan                                  # 预期 ~10Hz（2026-11-07 N97 实测 10.00Hz）
 ros2 run tf2_ros tf2_echo base_link base_laser       # 静态 TF 是否按实车高度
 
 # 仍要确认
@@ -539,6 +539,8 @@ ros2 node list | grep -E "amcl|map_server" || echo "OK: no AMCL/map_server"
 - [ ] LD06 串口权限（`dialout` 组）与设备名稳定；两颗雷达不互换。
 - [ ] `frame_id` 与静态 TF 一致（`base_laser`）；不要同时保留 VLP-16 的 `base_link→velodyne`。
 - [ ] LD06 的 `range_min/range_max`、角度裁剪与场地匹配；低装时先测地面回波。
+  **2026-11-07 已测**：消息 `0.02/25 m` 为驱动常量（非传感器规格），室内有效回波 ≤6.08 m；
+  crop 90° 掩盖实测通过（详见 [ld06-dual-lidar.md P7](../old-car/ld06-dual-lidar.md)）——地面杂波/低装仍待实车。
 - [ ] 首测场地无低矮障碍（低物验收放 S2）。
 
 ### 10.4 验收口径调整
@@ -564,3 +566,5 @@ ros2 node list | grep -E "amcl|map_server" || echo "OK: no AMCL/map_server"
 - 平台分叉与首期单雷达：用户 2026-11-06 决策，见 [决策记录](../retrospect/2026-11-06_platform_split_old_retrofit.md)。
 - 2D 探索链路/参数：本文 §一~§九（2026-11-05，未实测）。
 - 未实测项：LD06 实际频率/量程/地面杂波、双雷达互扰、低装建图质量——S1/S2 实车回填。
+- **2026-11-07 补测**：频率 10 Hz、beam 数/角分辨率、angle crop 掩盖已实测（[ld06-dual-lidar.md P7](../old-car/ld06-dual-lidar.md)）；
+  剩余未实测 = 空旷场地量程、地面杂波、双雷达互扰、低装建图质量。

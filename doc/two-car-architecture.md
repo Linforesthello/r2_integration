@@ -66,7 +66,7 @@
 | G354（串口 IMU） | **STM32 + MPU6050** | `/imu/data`（`sensor_msgs/Imu`） | MPU6050 无磁力计，yaw 只能靠陀螺积分 + 轮速修正，漂移需实测；协方差/时间戳必须正确填充；**S1/S2 保留 G354，S3 才替换** |
 | 无 | **GO-M8010-6 击球机构** | `/striker/trigger`、`/striker/state` | 新增执行器；控制时序与安全见 §七 |
 
-**LD06 现有资产**：VM 外部 `~/ldlidar_ros2_ws`（参考，不随 r2 同步）；r2 仓内 [ldlidar_stl_ros2/](../ldlidar_stl_ros2/) 为上游 `bf668a8` vendor 入仓版本（去掉内层 `.git`，来源/本地改动见包内 [README_R2.md](../ldlidar_stl_ros2/README_R2.md)）。2026-11-06 launch 已参数化（9 个参数：`node_name` / `topic_name` / `frame_id` / `port_name` / `port_baudrate` / `z` / `yaw` / `pitch` / `roll`）：单雷达默认 `topic_name=scan`、`frame_id=base_laser`、`port_name=/dev/r2_ld06_a`（udev 符号链接）、`port_baudrate=230400`、`z=0.18`（**占位值**，实车按安装高度重标）；双实例用 `/scan_a` + `laser_a`、`/scan_b` + `laser_b` + `/dev/r2_ld06_a/b`；驱动参数 `product_name=LDLiDAR_LD06`、`laser_scan_dir=True` 不变。VM 已验收 V1–V6（双实例各 ~10Hz、数据隔离、udev 插拔不穿号、互扰初筛；详见 [old-car/ld06-dual-lidar.md](old-car/ld06-dual-lidar.md)）；首测 18m36s 掉电根因已确认 = **接线端子松动掉出**（用户 2026-11-06 实测）。N97 侧已完成 2026-11-06 交接前置：`git pull` 4860c2c + `colcon build` 通过，udev 四路固定（`r2_g354` / `r2_can` / `r2_ld06_a` / `r2_ld06_b`，serial 见 [执行计划 §二](old-car/ld06-dual-lidar.md)）；双实例运行 2026-11-06 19:21 实测通过（`/scan_a` 10.000 Hz、`/scan_b` 10.002 Hz，frame `laser_a`/`laser_b`，各 Publisher 1），**供电长跑仍待实测**。
+**LD06 现有资产**：VM 外部 `~/ldlidar_ros2_ws`（参考，不随 r2 同步）；r2 仓内 [ldlidar_stl_ros2/](../ldlidar_stl_ros2/) 为上游 `bf668a8` vendor 入仓版本（去掉内层 `.git`，来源/本地改动见包内 [README_R2.md](../ldlidar_stl_ros2/README_R2.md)）。2026-11-06 launch 已参数化（9 个参数：`node_name` / `topic_name` / `frame_id` / `port_name` / `port_baudrate` / `z` / `yaw` / `pitch` / `roll`）：单雷达默认 `topic_name=scan`、`frame_id=base_laser`、`port_name=/dev/r2_ld06_a`（udev 符号链接）、`port_baudrate=230400`、`z=0.18`（**占位值**，实车按安装高度重标）；双实例用 `/scan_a` + `laser_a`、`/scan_b` + `laser_b` + `/dev/r2_ld06_a/b`；驱动参数 `product_name=LDLiDAR_LD06`、`laser_scan_dir=True` 不变。VM 已验收 V1–V6（双实例各 ~10Hz、数据隔离、udev 插拔不穿号、互扰初筛；详见 [old-car/ld06-dual-lidar.md](old-car/ld06-dual-lidar.md)）；首测 18m36s 掉电根因已确认 = **接线端子松动掉出**（用户 2026-11-06 实测）。N97 侧已完成 2026-11-06 交接前置：`git pull` 4860c2c + `colcon build` 通过，udev 四路固定（`r2_g354` / `r2_can` / `r2_ld06_a` / `r2_ld06_b`，serial 见 [执行计划 §二](old-car/ld06-dual-lidar.md)）；双实例运行 2026-11-06 19:21 实测通过（`/scan_a` 10.000 Hz、`/scan_b` 10.002 Hz，frame `laser_a`/`laser_b`，各 Publisher 1），**供电长跑仍待实测**；2026-11-07 补测 `/scan` 规格（beam 452~455/圈、角分辨率 0.793~0.798°、10 Hz）与 angle crop 掩盖（90° 带实测通过，发布角 = 360°−雷达原始角），详见 [执行计划 P7](old-car/ld06-dual-lidar.md)。
 
 **STM32 IMU 的传输方式未定**（见 §十）：无论 micro-ROS 还是「STM32 串口帧 + 主机桥接」，ROS 侧都必须稳定产出 `sensor_msgs/Imu`，且 `frame_id=imu_link`、协方差非零、时间戳可用。IMU 固件细节不在本文展开。
 
@@ -209,7 +209,7 @@ Nav2 ──→ /cmd_vel ──→ 新底盘
 
 | 话题 | 类型 | frame | 期望频率 | 发布者 | 主要订阅者 | 备注 |
 |:---|:---|:---|:---|:---|:---|:---|
-| `/scan` | `sensor_msgs/LaserScan` | `base_laser`（老车首期） | ~10Hz（VM 已验证，2026-11-06；N97 待实测） | LD06 驱动 | slam_toolbox、Nav2 | 老车 2D 主感知；QoS 以驱动实际为准，启动后 `ros2 topic info -v` 核对 |
+| `/scan` | `sensor_msgs/LaserScan` | `base_laser`（老车首期） | ~10Hz（VM 2026-11-06 验证；N97 2026-11-07 实测 10.00Hz，beam 452~455/圈、角分辨率 ~0.795°） | LD06 驱动 | slam_toolbox、Nav2 | 老车 2D 主感知；QoS 以驱动实际为准，启动后 `ros2 topic info -v` 核对 |
 | `/scan_low` | `sensor_msgs/LaserScan` | `laser_low`（待定） | ~10Hz | 第二颗 LD06（二期） | Nav2 低带障碍层 | 不喂 slam_toolbox；避免低平面污染建图 |
 | `/imu/data` | `sensor_msgs/Imu` | `imu_link` | 100~200Hz | G354（S1/S2）/ STM32 桥（S3 后） | EKF | 协方差必须非零；时间戳可用；orientation 可信度按传感器标 |
 | `/odom_wheels` | `nav_msgs/Odometry` | `odom` | ~50Hz | 底盘 | EKF | 现有契约不变 |
