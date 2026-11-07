@@ -1,6 +1,6 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-11-06（平台分叉：老车 LD06 2D 平替 + 新车 3D/视觉升级入 §〇；上文 Phase 状态为 VLP-16 时代基线）
+> 最后更新: 2026-11-07（§〇 增 LD06 `/scan` 规格 + crop 实测条目；11-06 平台分叉口径不变；上文 Phase 状态为 VLP-16 时代基线）
 > 内容: 当前完成状态快照——Phase 进度、近期完成、现役技术状态。
 > 交接总览 → [07-handover.md](07-handover.md)；事件详细索引 → [retrospect/README.md](retrospect/README.md)；待办 → [pending-tasks.md](pending-tasks.md)
 
@@ -10,6 +10,7 @@
 
 | 事项 | 详情 |
 |:-----|:-----|
+| **LD06 /scan 规格 + crop 实测（11-07）** | N97 实测：beam 452~455/圈、角分辨率 0.793~0.798°、10.00 Hz；range 0.02/25 为驱动常量（室内有效回波 ≤6.08m）；crop 只 NaN 掩盖，参数用**原始雷达角**，因 `laser_scan_dir=true` 发布角 = 360°−原始角（非对称用例钉死）。N97 重启后 udev 四路固定名仍正确。探针 [probe_laserscan.py](../scripts/probe_laserscan.py)，详见 [ld06-dual-lidar P7](old-car/ld06-dual-lidar.md) |
 | **平台分叉决策（11-06）** | 老车结构无法进一步升级 → **低成本平替**：VLP-16 撤下换 LD06 串口 2D（首期单颗，二期低装/双颗）、G354 后续换 STM32+MPU6050（S3 实施）、加入 GO-M8010-6 击球机构；软件走 2D slam_toolbox + Nav2 + explore_lite。新车在本项目基础上做底盘/上层/传感器升级（D435、MID-70、后续 MID-360、单点激光），走 3D LIO + 视觉。两车共用接口/分叉清单见 [two-car-architecture.md](two-car-architecture.md)，决策记录见 [retrospect 11-06](retrospect/2026-11-06_platform_split_old_retrofit.md)。**实施顺序（B 方案）**：S1/S2 保留 G354 + 现有 EKF，S3 才换 STM32；G8010 台架独立，S4 装车 |
 | Nav2 降额过缝验证（08-17） | inflation_radius 0.55→0.30（local/global）修复窄缝 costmap 全灰过不去，实车验证**基本无碰撞、能通过过道**，见 [retrospect](retrospect/2026-08-17_nav2_initialpose_inflation_fix.md) |
 | 全速验证决策（08-17） | **暂缓，保持降额现状**；切全速版前须先同步其膨胀参数（仍 0.55） |
