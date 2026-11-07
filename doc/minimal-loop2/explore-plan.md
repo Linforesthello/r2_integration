@@ -13,6 +13,9 @@
 > 官方 launch 的两处陷阱实锤——见 [§3.1.1](#311-实测记录2026-11-07-n97) 与 [§3.3](#33-启动终端-d)。
 > Step 1（`slam_toolbox_mapping.yaml`）、Step 2（`nav2_explore.launch.py`）、Step 3.2（`explore_params.yaml`）
 > 的配置文件与 launch **已全部落文件，但均未实测**——slam_toolbox / Nav2 / explore 三者从未联合起过。
+>
+> **2026-11-07 晚订正**：§3.1.2 关于 `return_to_init`「不存在」与 7 参数「未声明」的结论**已被推翻**
+> ——干净复测证明二者都存在且可取，原观测是构造期阻塞导致的假阴性（见 §3.1.3）。
 
 ---
 
@@ -339,6 +342,56 @@ source /opt/ros/humble/setup.bash; ros2 node list; \
 > 冒烟只回答「能起来 / 名字对 / 参数读得进」，不覆盖任何运行时行为。
 >
 > 原始输出留档 `doc/raw_data/raw_explore_smoke_n97_2026-11-07_1253.txt`（本地，不入 git）。
+>
+> ⚠️ **订正**：本表第 4、5 行（`return_to_init` 不存在 / 7 项未声明）已被 §3.1.3 的干净复测推翻，
+> 以 §3.1.3 为准。
+
+##### 3.1.3 P1 复核：return_to_init 与 7 参数的结论订正（2026-11-07 晚，N97）
+
+> 按 [doc-engineering §十](../doc-engineering.md) 翻案留痕：§3.1.2 原文保留不动，此处另立修正块 + 互指。
+> 原始数据 `doc/raw_data/raw_explore_p1_retest_n97_2026-11-07_2010.txt`（本地，不入 git）。
+
+**触发**：另一 session 核对上游 `326cf8a` 源码，指出 `explore.cpp:65-72` 是 `declare_parameter`
+8 项（含 `return_to_init`），与 §3.1.2 的「不存在 / 未声明」矛盾。
+
+**实测定论**（N97，同一进程内 A/B 对照）：
+
+| 阶段 | 条件 | `param list` 结果 |
+|:---|:---|:---|
+| A | 只起节点（无 Nav2） | 9 项：costmap 侧 4 + `use_sim_time` + qos_overrides×4 —— **复现 §3.1.2 的观测** |
+| B | 补 costmap + 静态 TF + 假 `NavigateToPose` action server | 17 项：**8 项全部出现** |
+
+B 腿取证（与 `params_costmap.yaml` 一致）：
+
+```text
+ros2 param get /explore_node return_to_init     → Boolean value is: False
+ros2 param get /explore_node planner_frequency  → Double value is: 0.15
+ros2 param get /explore_node visualize          → Boolean value is: True
+ros2 param get /explore_node potential_scale    → Double value is: 3.0
+```
+
+**订正内容**：
+
+| 原结论（§3.1.2） | 实测事实 |
+|:---|:---|
+| `return_to_init` 不存在 | **存在**：`explore.cpp:72` declare，默认 `false`，`param get` 可取 |
+| 7 项未声明、代码用 `get_parameter_or` 读取 | **已声明**：`explore.cpp:65-71` `declare_parameter`，`param get` 可取 |
+
+**假阴性根因**（比"参数不存在"重要得多）——构造期三段串行阻塞，参数声明被挡在后段：
+
+| 阻塞点 | 位置 | 等待对象 |
+|:---:|:---|:---|
+| ① | `costmap_client.cpp:89` | `/global_costmap/costmap` 首帧 |
+| ② | `costmap_client.cpp` TF 段 | `map → base_link` |
+| ③ | `explore.cpp:112` | `/navigate_to_pose` action server（**无超时**） |
+
+①② 在 `Costmap2DClient` 构造函数内（它是 `Explore` 的成员、先于构造函数体执行）→
+`explore.cpp:65-72` 的 8 个 declare 不执行；③ 在 declare 之后，但节点不 spin → 参数服务不响应。
+
+> **运维含义**：explore_lite **不能在"只有雷达"的裸环境下用 `param list` 验参数**——
+> 必须给齐 costmap + TF + action server。首跑时这三者由 slam_toolbox + Nav2 提供，属正常路径；
+> 只有孤立冒烟才需要伪造。复测命令见原始数据第六节。
+> 另一坑：`ros2 topic pub --once` 在 DDS 发现完成前会丢消息（volatile），对已在等待的订阅者要用 `-r 1` 连续发。
 
 #### 3.2 参数文件 `r2_bringup/config/explore_params.yaml`
 
@@ -563,6 +616,7 @@ coverage = ROI 内已知栅格数 / ROI 总栅格数
 | 2026-11-06 | 平台适配 | 老车撤 VLP-16 换 LD06；增 §十 平台适配（扫描源/TF/低带源/验收），探索骨架不变 |
 | 2026-11-07 | Step 3.1 实测落地 | explore_lite 在 N97 构建通过（clone `326cf8a`、2 包 23.7s、仅 CMake 弃用警告）；增 §3.1.1 实测记录（含 `map_merge` 不构建提醒、安装路径按包名分层）；§3.3 补「官方 launch 无 `params_file` 参数」实测结论。**Step 1 / Step 2 / Step 3.2 仍未实测** |
 | 2026-11-07 | 节点冒烟 + 三个配置文件落地 | 增 §3.1.2 冒烟实测（节点名 `explore_node`、参数读取正常、`return_to_init` 不存在、7 项未声明参数不可用 `param get` 验证）；新增 `slam_toolbox_mapping.yaml`（Step 1）、`nav2_explore.launch.py`（Step 2）、`explore_params.yaml`（Step 3.2）。**三份配置均未实测运行** |
+| 2026-11-07 | P1 复核订正 | N97 干净复测（同进程 A/B）：`return_to_init` 与 7 参数**实为 `declare_parameter` 已声明**，上一行「不存在/未声明」作废；根因 = 构造期三段串行阻塞（costmap → TF → action server）。增 §3.1.3；`explore_params.yaml` 放开 `return_to_init` |
 
 ---
 

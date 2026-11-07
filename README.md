@@ -105,7 +105,8 @@ r2_integration/
 │   │   ├── 2026-09-16_a1_item1_extraction.md              A1 收口盘点项 1 执行：30 条抽入规则层 + E5 裁定落 ros2-ops §12（09-16）
 │   │   ├── 2026-09-16_checker_codespan_fix.md             校验器代码跨度排除：缺失 14→0（其中 12 条系误报）+ 闸门集合比对验证（09-16）
 │   │   ├── 2026-11-06_platform_split_old_retrofit.md      平台分叉决策：老车平替 + 新车升级 + G8010 击球（11-06）
-│   │   └── 2026-11-06_ld06_vm_bringup_smoke.md            LD06 VM 接入冒烟 + 18m36s 掉电定位 + RViz 差异 + vendor 入仓（11-06）
+│   │   ├── 2026-11-06_ld06_vm_bringup_smoke.md            LD06 VM 接入冒烟 + 18m36s 掉电定位 + RViz 差异 + vendor 入仓（11-06）
+│   │   └── 2026-11-07_explore_p1_param_declaration.md    explore_lite 参数声明假阴性：构造期三段阻塞根因 + 工具/思路全清单 + 可复现命令/诊断卡（11-07）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）
@@ -126,7 +127,8 @@ r2_integration/
 │   │   ├── 3d-lidar-2d-navigation-survey.md           低矮障碍感知手段调研（09-05；09-06 实车更新 §三B：物理边界实锤）
 │   │   ├── navigation-behavior-safety-survey.md       导航行为病×安全设计调研（Q1 灰格/Q2 转弯 margin/Q5 IMU 安全，09-06）
 │   │   ├── chassis-kinematics-controller-survey.md    底盘运动学×控制器选型调研（Q3 全向轮行为/Q4 舵轮 MPPI 路线，09-06）
-│   │   └── sensor-mounting-layout-survey.md           MID-70+D435 安装位置与倾角评价（拟定装法覆盖包络/应用评价：FAST-LIO2·explore·视觉栈，09-16）
+│   │   ├── sensor-mounting-layout-survey.md           MID-70+D435 安装位置与倾角评价（拟定装法覆盖包络/应用评价：FAST-LIO2·explore·视觉栈，09-16）
+│   │   └── exploration-prior-map-survey.md            自主探索×离线先验方案调研与文档核验（2D/3D 方案对比 + 硬件可行性 + P1~P5 核验，11-07）
 │   │
 │   ├── profiles/  ← 对象档案层（实体为中心横切视图：spec v0.1 + README，09-04 建）
 │   │   ├── spec.md              对象档案规范（建档门槛/模板/纪律，v0.1 试行）

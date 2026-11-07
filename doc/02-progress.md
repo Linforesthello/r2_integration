@@ -162,7 +162,7 @@ Phase 0  Phase 1    Phase 2+3    Phase 4+5
 ### 6.1 S1 进度快照（2026-11-07）
 
 - **驱动/规格** ✅：LD06 单/双实例 10 Hz、`/scan` beam 452~455/圈、角分辨率 ~0.795°、crop 机制实测 — [ld06-dual-lidar P7](old-car/ld06-dual-lidar.md)
-- **软件依赖** 🟢：slam_toolbox / Nav2 已装；explore_lite 无 apt 包、需源码构建。**11-07 纠错**：此前记的"网络阻塞"不成立——根因是代理 TUN 未开，开启后 VM/N97 `git ls-remote` 均 exit=0（两机本地仍无副本，须 clone）。**11-07 13:00 已构建**：N97 `~/Lin_workspace/explore_ws` clone `326cf8a` + `colcon build --packages-up-to explore_lite` 成功，`explore_lite explore` 可执行在位（G5 销项）；**同日三份配置落文件**（`slam_toolbox_mapping.yaml` / `nav2_explore.launch.py` / `explore_params.yaml`，G1/G2/G3），**均未实测运行**
+- **软件依赖** 🟢：slam_toolbox / Nav2 已装；explore_lite 无 apt 包、需源码构建。**11-07 纠错**：此前记的"网络阻塞"不成立——根因是代理 TUN 未开，开启后 VM/N97 `git ls-remote` 均 exit=0（两机本地仍无副本，须 clone）。**11-07 13:00 已构建**：N97 `~/Lin_workspace/explore_ws` clone `326cf8a` + `colcon build --packages-up-to explore_lite` 成功，`explore_lite explore` 可执行在位（G5 销项）；**同日三份配置落文件**（`slam_toolbox_mapping.yaml` / `nav2_explore.launch.py` / `explore_params.yaml`，G1/G2/G3），**均未实测运行**；**11-07 晚复核订正**：`return_to_init` 与 7 参数实为 `declare_parameter` 已声明（原冒烟系构造期阻塞假阴性）— [explore-plan §3.1.3](minimal-loop2/explore-plan.md)
 - **安装几何** ❌：待实车量测（[sensor-mount §六](phase0/sensor-mount.md)）；`ld06.launch.py` 缺 x/y 参数、z 为占位
 - **S1 首跑** ❌：等几何 + explore_lite；缺口全表见 [s1-readiness-gap.md](old-car/s1-readiness-gap.md)（23 项，G11 部分销项）
 

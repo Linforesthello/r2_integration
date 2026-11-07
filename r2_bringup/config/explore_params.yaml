@@ -23,6 +23,15 @@
 #        只能看运行期日志与行为。调参时务必用「一次只加一个变量 + 记录期望/实际」。
 #   ✅ `return_to_init` 不在声明列表中 → 确认不存在，已注释，勿写入
 #   原始输出：doc/raw_data/raw_explore_smoke_n97_2026-11-07_1253.txt（本地，不入 git）
+#
+# ⚠️ 2026-11-07 20:10 复核订正（推翻上方 12:53 冒烟结论）
+#   根因：节点构造有三段串行阻塞（costmap → TF → action server），12:53 只起了节点，
+#   参数声明根本没执行到 → param list 只看到 costmap 侧 4 项 + use_sim_time，属假阴性。
+#   干净复测（补 costmap + 静态 TF + 假 NavigateToPose server）后 8 项全部出现：
+#     return_to_init → False / planner_frequency → 0.15 / visualize → True / potential_scale → 3.0
+#   → 上述「7 项未声明」与「return_to_init 不存在」两条作废；param get 可验证全部参数。
+#   原始数据：doc/raw_data/raw_explore_p1_retest_n97_2026-11-07_2010.txt（本地，不入 git）
+#   ⚠️ 但「裸环境验不了参数」仍成立——首跑须起齐 slam_toolbox + Nav2 后再用 param get。
 explore_node:
   ros__parameters:
     robot_base_frame: base_link
@@ -46,3 +55,5 @@ explore_node:
     # return_to_init：2026-11-07 冒烟实测确认**节点未声明该参数**（不在 param list 中），
     # 写入会报 "parameter has not been declared" → 保持注释，不要取消。
     # return_to_init: false
+    # ↑ 上述判断已被 2026-11-07 晚复核推翻（见文件头订正块）。该参数存在且可取，下面这行生效。
+    return_to_init: false

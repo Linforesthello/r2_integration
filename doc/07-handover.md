@@ -101,7 +101,7 @@
 | 层面 | 状态 | 说明 |
 |:---|:---:|:---|
 | LD06 驱动/规格 | ✅ | N97 双实例 10 Hz；`/scan` beam 452~455/圈、角分辨率 0.793~0.798°；crop 机制实测（发布角 = 360°−原始角）— [ld06-dual-lidar P7](old-car/ld06-dual-lidar.md) |
-| 软件依赖 | 🟢 | slam_toolbox 2.6.10 + Nav2 1.1.20 已装；**explore_lite 已构建（11-07 13:00）**——N97 `~/Lin_workspace/explore_ws` clone `326cf8a` + `colcon build --packages-up-to explore_lite` 成功（2 包 23.7s），`ros2 pkg executables explore_lite` = `explore_lite explore`。**三份配置已落文件（11-07）**：`slam_toolbox_mapping.yaml`(G1) / `nav2_explore.launch.py`(G2) / `explore_params.yaml`(G3)，**均未实测运行**；explore 节点冒烟通过（节点名/参数读取已确认） |
+| 软件依赖 | 🟢 | slam_toolbox 2.6.10 + Nav2 1.1.20 已装；**explore_lite 已构建（11-07 13:00）**——N97 `~/Lin_workspace/explore_ws` clone `326cf8a` + `colcon build --packages-up-to explore_lite` 成功（2 包 23.7s），`ros2 pkg executables explore_lite` = `explore_lite explore`。**三份配置已落文件（11-07）**：`slam_toolbox_mapping.yaml`(G1) / `nav2_explore.launch.py`(G2) / `explore_params.yaml`(G3)，**均未实测运行**；explore 节点冒烟通过（节点名/参数读取已确认）。**11-07 晚复核订正**：`return_to_init` 与 7 参数实为 `declare_parameter` 已声明（原"未声明"系构造期阻塞假阴性）— [explore-plan §3.1.3](minimal-loop2/explore-plan.md) |
 | 安装几何 | ❌ | 高度/前后左右/俯仰/朝向待实测；`ld06.launch.py` 的 `z=0.18` 为占位、x/y 写死为 0 — [sensor-mount §六](phase0/sensor-mount.md) |
 | S1 首跑 | ❌ | 等几何标定 + explore_lite；六项待定夺见 [s1-readiness-gap §六](old-car/s1-readiness-gap.md) |
 

@@ -19,6 +19,11 @@
 > `slam_toolbox_mapping.yaml`（G1）、`nav2_explore.launch.py`（G2）、`explore_params.yaml`（G3）。
 > explore_lite 节点冒烟通过（节点名 `explore_node`、参数读取正常），但 **slam_toolbox / Nav2 / explore 三者
 > 从未联合起过**，三份配置均未实测运行；G4（老车 Nav2 参数文件）仍未动。
+>
+> **更新（2026-11-07 晚，P1 复核）**：13:00 冒烟中「`return_to_init` 不存在 / 7 参数未声明」的结论**已推翻**——
+> N97 干净复测证明二者和其余参数一样都是 `declare_parameter`，`param get` 可取；原观测是节点构造期
+> 三段串行阻塞（costmap → TF → action server）造成的假阴性。详见 [explore-plan §3.1.3](../minimal-loop2/explore-plan.md)、
+> 原始数据 `doc/raw_data/raw_explore_p1_retest_n97_2026-11-07_2010.txt`（本地，不入 git）。
 > 相关：[two-car-architecture.md §三](../two-car-architecture.md)（S1 判据）｜[07-handover.md §五](../07-handover.md)（老车接手注意）｜
 > [ld06-dual-lidar.md](ld06-dual-lidar.md)（雷达接入执行计划）
 
@@ -46,7 +51,7 @@
 |:---|:---|:---|:---|:---:|
 | G1 | `r2_bringup/config/slam_toolbox_mapping.yaml` 不存在 | VM 与 N97 的 `r2_bringup/config/` 均只有 `dds/ ekf.yaml nav2_params_low.yaml nav2_params.yaml r2_params.yaml`；方案给出参数草案（[Step 1.1](../minimal-loop2/explore-plan.md)），**未实测** | 无建图参数，slam_toolbox 只能用官方默认（`base_footprint` + `use_sim_time: true`，R2 会直接不工作）。**11-07 已建**：按官方 `mapper_params_online_async.yaml` 整份复制 + 6 项改动（`base_frame→base_link`、`use_sim_time: false`、`map_update_interval 2.0`、`transform_publish_period 0.05`、`enable_interactive_mode false`），**未实测运行** | ~~P0~~ 🟡 待实测 |
 | G2 | `r2_bringup/launch/nav2_explore.launch.py` 不存在 | launch 目录只有 `chassis` / `ekf` / `nav2` 三个 | 无法起"去定位层"的 Nav2。**11-07 已建**：由 `nav2.launch.py` 删 map_server/AMCL/lifecycle_manager_localization，默认参数改 `nav2_params_low.yaml`，**未实测运行** | ~~P0~~ 🟡 待实测 |
-| G3 | `r2_bringup/config/explore_params.yaml` 不存在 | 同上 config 列表；方案给草案（[Step 3.2](../minimal-loop2/explore-plan.md)） | explore_lite 只能吃官方 `params.yaml`（订阅 `/map` 直连，与 Nav2 代价地图链路不匹配）。**11-07 已建 + 冒烟通过**：节点名 `explore_node` 与 `costmap_topic` 读取已实测确认；`return_to_init` 确认不存在已注释；7 项未声明参数（`visualize`/`planner_frequency` 等）**不可用 `param get` 验证**（[§3.1.2](../minimal-loop2/explore-plan.md)）。仍未接真实 Nav2 costmap 跑过 | ~~P0~~ 🟡 待联调 |
+| G3 | `r2_bringup/config/explore_params.yaml` 不存在 | 同上 config 列表；方案给草案（[Step 3.2](../minimal-loop2/explore-plan.md)） | explore_lite 只能吃官方 `params.yaml`（订阅 `/map` 直连，与 Nav2 代价地图链路不匹配）。**11-07 已建 + 冒烟通过**：节点名 `explore_node` 与 `costmap_topic` 读取已实测确认；`return_to_init` 确认不存在已注释；7 项未声明参数（`visualize`/`planner_frequency` 等）**不可用 `param get` 验证**（[§3.1.2](../minimal-loop2/explore-plan.md)）。仍未接真实 Nav2 costmap 跑过。**11-07 晚复核订正**：`return_to_init` 与 7 参数**并非未声明**——干净复测证明二者均为 `declare_parameter`、`param get` 可取，原冒烟是构造期阻塞造成的假阴性（[§3.1.3](../minimal-loop2/explore-plan.md)） | ~~P0~~ 🟡 待联调 |
 | G4 | **老车专用 Nav2 参数文件缺失**（方案口径冲突） | 现有 `nav2_params_low.yaml` 的 local `voxel_layer` 与 global `obstacle_low_layer` 均订阅 `/velodyne_points`（[L250](../../r2_bringup/config/nav2_params_low.yaml#L250)、[L269](../../r2_bringup/config/nav2_params_low.yaml#L269)、[L322-L324](../../r2_bringup/config/nav2_params_low.yaml#L322-L324)）；老车已无 VLP-16。而 explore-plan [Step 2.1](../minimal-loop2/explore-plan.md) 仍写「两种模式共用同一份参数文件」，与 [07-handover §五-2](../07-handover.md)「必须另建参数；不要直接改历史文件」**直接冲突** | 低带源无输入（是否持续告警未实测）；S1 也不做低物验收，留着纯属噪声 | P0 |
 | G5 | explore_lite 源码与构建产物均无 | VM 无 `~/explore_ws`；N97 无 `~/explore_ws`；`ros2 pkg list` 两侧均无 `explore_lite`；**11-07 复核**：两机 `dpkg -l \| grep -i explore` 与 `find *m-explore*` 均为空 → 确认无本地副本，须 clone（取包路径已通，见文首纠错） | 无前沿探索节点。**11-07 13:00 已销**：N97 `~/Lin_workspace/explore_ws` 建好，clone `326cf8a` + 构建成功，可执行 `install/explore_lite/lib/explore_lite/explore` 在位 | ~~P0~~ ✅ 已销 |
 | G6 | 覆盖率统计脚本无 | `bags/analysis/` 下无对应脚本；方案明写「脚本可后续补，本稿先定口径」（[§3.6](../minimal-loop2/explore-plan.md)） | 覆盖率判据（>80%）无法出数，只能目测 | P1 |
