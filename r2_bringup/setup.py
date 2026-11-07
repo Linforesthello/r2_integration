@@ -12,7 +12,12 @@ setup(
          ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob('launch/*.launch.py')),
+        # 原版（G8 修复前，2026-11-07 注释保留备查）：
+        # ('share/' + package_name + '/config', glob('config/*.yaml')),
         ('share/' + package_name + '/config', glob('config/*.yaml')),
+        # G8 修复（2026-11-07）：launch 用 -d <share>/config/nav2.rviz，但原 glob 只收 *.yaml，
+        # 源文件存在而 install 无该文件 → rviz:=true 加载不到配置。
+        ('share/' + package_name + '/config', glob('config/*.rviz')),
         ('share/' + package_name + '/config/dds', glob('config/dds/*')),
     ],
     install_requires=['setuptools'],
