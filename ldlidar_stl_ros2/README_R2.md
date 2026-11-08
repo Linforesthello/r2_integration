@@ -18,9 +18,17 @@
   静态 TF 节点名随 `frame_id` 派生（`base_link_to_<frame_id>_ld06`）；`port_baudrate` 用
   `ParameterValue(..., value_type=int)` 显式转 int。**默认端口改为 `/dev/r2_ld06_a`**（udev 符号链接；
   上游默认 CP2102 套件的 `/dev/ttyUSB0`，R2 首版曾改 `/dev/ttyACM0`）。
+- `launch/ld06.launch.py` + `config/ld06_scan_filter.yaml` + `CMakeLists.txt` + `package.xml`：
+  **自车回波过滤链（2026-11-08，方案 B）**——驱动默认话题由 `scan` 改为 **`scan_raw`**，另起
+  `laser_filters` 的 `scan_to_scan_filter_chain` 节点（`LaserScanPolygonFilter`，车体多边形内波束置 NaN），
+  输出 **`scan`**；下游 slam_toolbox / Nav2 / explore 读的话题名不变，配置零改动。
+  新增 launch 参数 `filtered_topic_name`（默认 `scan`）；`package.xml` 增 `exec_depend` laser_filters/tf2_ros；
+  `CMakeLists.txt` 增装 `config/`。原因：LD06 光学中心离地 16 cm 落在车体包络内，31% 光束打自身，
+  导致 explore 零前沿（见 [retrospect 2026-11-08](../doc/retrospect/2026-11-08_oldcar_s1_chain_rerun_selfocclusion.md)、
+  [sensor-mount §6.1.2](../doc/phase0/sensor-mount.md)）。**依赖系统包 `ros-humble-laser-filters`**。
 - 其余文件未改。
 
-**默认参数**：`node_name=LD06`、`topic_name=scan`、`frame_id=base_laser`、`port_name=/dev/r2_ld06_a`、
+**默认参数**：`node_name=LD06`、`topic_name=scan_raw`、`filtered_topic_name=scan`、`frame_id=base_laser`、`port_name=/dev/r2_ld06_a`、
 `port_baudrate=230400`；静态 TF `x=0.275`、`y=0.29`、`z=0.04`、`yaw=-1.5708`、`pitch/roll=0.0`
 （2026-11-08 实车实测，见 [sensor-mount §6.1](../doc/phase0/sensor-mount.md)）；驱动参数 `product_name=LDLiDAR_LD06`、
 `laser_scan_dir=True`（ROS 逆时针）保持不变。
@@ -30,13 +38,17 @@
 ```bash
 # A（默认端口 /dev/r2_ld06_a）
 ros2 launch ldlidar_stl_ros2 ld06.launch.py \
-  node_name:=ld06_a topic_name:=scan_a frame_id:=laser_a
+  node_name:=ld06_a topic_name:=scan_a frame_id:=laser_a \
+  filtered_topic_name:=scan_a_filtered
 
 # B（显式 udev 符号链接）
 ros2 launch ldlidar_stl_ros2 ld06.launch.py \
   node_name:=ld06_b topic_name:=scan_b frame_id:=laser_b \
-  port_name:=/dev/r2_ld06_b
+  port_name:=/dev/r2_ld06_b filtered_topic_name:=scan_b_filtered
 ```
+
+> ⚠️ 2026-11-08 起 launch 内含过滤节点，**双实例必须显式给 `filtered_topic_name`**，
+> 否则两个实例都发 `/scan` 会互相覆盖。
 
 完整验收记录（双实例 10Hz、udev 固定名、互扰初筛）见
 [doc/old-car/ld06-dual-lidar.md](../doc/old-car/ld06-dual-lidar.md)。

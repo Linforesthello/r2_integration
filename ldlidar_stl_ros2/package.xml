@@ -14,6 +14,10 @@
 
   <exec_depend>ros2launch</exec_depend>
 
+  <!-- R2 2026-11-08：ld06.launch.py 起 scan_to_scan_filter_chain 做自车回波过滤 -->
+  <exec_depend>laser_filters</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

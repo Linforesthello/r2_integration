@@ -1,0 +1,44 @@
+# LD06 自车回波过滤链（R2 老车 S1，2026-11-08）
+#
+# 为什么需要：
+#   LD06 光学中心离地 16 cm（z=+0.040，见 doc/phase0/sensor-mount.md §6.1.2），落在车体包络内。
+#   实测 406 束有效回波中 128 束（31%）的端点在车体矩形（±0.40/±0.30）内，最近距车心 0.09 m ——
+#   是机器人自身结构，不是外部障碍。自车回波被 slam_toolbox 写进 /map 成 lethal，再经 0.30 m 膨胀
+#   罩住机器人自身，自由空间被切成 55 个连通域，explore 可达自由区只剩 18 格 → "No frontiers found"。
+#   事件记录：doc/retrospect/2026-11-08_oldcar_s1_chain_rerun_selfocclusion.md
+#
+# 做法（方案 B，用户 2026-11-08 定）：
+#   laser_filters 官方包 LaserScanPolygonFilter —— 端点落在车体多边形内的波束置 NaN，
+#   车体外（含后方远景）原样保留。不改雷达安装位置。
+#
+# 数据流：
+#   ldlidar_stl_ros2_node（发 scan_raw）→ scan_to_scan_filter_chain（本配置，发 scan）
+#     → slam_toolbox 建图 / Nav2 local costmap 障碍源 / explore_lite（读 global costmap←/map）
+#   ⚠️ 过滤必须挂在 /scan 最上游：explore 的 static_layer 来自 slam 的 /map，只在 costmap
+#      层做参数过滤绕不过去（见事件记录 §一-3）。
+#
+# 参数依据：
+#   - 车体物理 0.80×0.60 → 半长 0.40 / 半宽 0.30（与 nav2_params_ld06.yaml:250 注释同源：
+#     nav2 footprint ±0.42/±0.33 = 车体 + 0.02 buffer）
+#   - polygon_padding: 0.03 → 生效范围 ±0.43/±0.33，约等于 nav2 footprint 再加 1 cm，
+#     与避障口径一致（机器人本就不会进入 0.34 m 内切圆，故不会吃掉可用障碍信息）
+#   - polygon_frame: base_link（车体几何系）；scan 的 frame_id 是 base_laser，两者由
+#     ld06.launch.py 发布的静态 TF 关联
+#   - invert: false = 过滤「多边形内」的点（默认语义；true 则反过来只留车内，勿用）
+#
+# ⚠️ 联动项：改车体尺寸或 nav2 footprint 时，本文件 polygon 需同步（三方对账：
+#    nav2_params_ld06.yaml:250 / 本文件 / sensor-mount §6.1.2 实测值）
+#
+# 节点名 scan_to_scan_filter_chain 必须与下方 yaml 顶层键一致（参数段名 = 节点全名，
+# 见 doc/ros2-ops.md §6「配置失效三查」第 2 条）。
+
+scan_to_scan_filter_chain:
+  ros__parameters:
+    filter1:
+      name: self_occlusion_polygon
+      type: laser_filters/LaserScanPolygonFilter
+      params:
+        polygon_frame: base_link
+        polygon: '[[0.40, 0.30], [-0.40, 0.30], [-0.40, -0.30], [0.40, -0.30]]'
+        polygon_padding: 0.03
+        invert: false

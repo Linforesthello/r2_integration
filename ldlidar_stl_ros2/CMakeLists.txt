@@ -70,5 +70,10 @@ install(DIRECTORY launch rviz2
   DESTINATION share/${PROJECT_NAME}/
 )
 
+# R2 2026-11-08：自车回波过滤链配置（scan_to_scan_filter_chain 参数）
+install(DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 
 ament_package()
