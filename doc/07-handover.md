@@ -30,7 +30,7 @@
 |:---|:---|
 | 底盘定义（坐标系/CAN 映射/运动学/参数） | [phase0/chassis_definition.md](phase0/chassis_definition.md)（唯一权威） |
 | 传感器安装/朝向/轴定义（IMU/VLP-16，含 08-24 复测） | [phase0/sensor-mount.md](phase0/sensor-mount.md) |
-| **启动命令（全栈唯一权威，按模式选终端）** | **[doc/startup.md](startup.md)** |
+| **启动命令（全栈唯一权威，按模式选终端）** | **[doc/startup.md](startup.md)**（VLP-16 时代基线 / 新车参考）｜**老车见 [old-car/startup.md](old-car/startup.md)**（11-08 建，两车分文件） |
 | FAST-LIO2 部署/外参/启动/排障 | [n97/fastlio2-n97-deploy.md](n97/fastlio2-n97-deploy.md) |
 | N97 运维（部署清单/风扇/VNC/监测） | [n97/](n97/) 各手册 |
 | 近期待办入口 | [pending-tasks.md](pending-tasks.md)（每条一句话 + 源文档） |

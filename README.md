@@ -35,6 +35,7 @@ r2_integration/
 │   ├── two-car-architecture.md    两车架构与接口（老车平替 + 新车升级 + 共用/分叉，11-06 建）
 │   │
 │   ├── old-car/  ← 老车平替专题（11-06 建）
+│   │   ├── startup.md             老车启动手册（LD06 2D 栈唯一权威，11-08 建；与原 startup.md 两车分文件，未实测）
 │   │   ├── ld06-dual-lidar.md     LD06 单/双雷达执行计划（VM 验收 V1–V6 完成；N97 udev/构建/双实例 10Hz + /scan 规格/crop 实测完成（11-07），供电长跑待测）
 │   │   └── s1-readiness-gap.md    S1 就绪差距清单（23 项缺口分级 P0/P1/P2 + 已完成前置 + 待定夺，11-06 盘点）
 │   │
