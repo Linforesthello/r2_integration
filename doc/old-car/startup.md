@@ -60,10 +60,14 @@ ros2 node list | grep -i ld06               # 应只有 /LD06 一个
 #   从主页面运行 CanCmd → 选择串口设备 → 选择波特率(1M) → 确认
 python3 ~/Lin_workspace/command/can_command.py
 
-# 终端 1: LD06 雷达（A 路，/dev/r2_ld06_a，发布 /scan）
-#   默认即 S1 配置：port=/dev/r2_ld06_a、topic=scan、frame=base_laser
+# 终端 1: LD06 雷达（A 路，/dev/r2_ld06_a）
+#   默认即 S1 配置：port=/dev/r2_ld06_a、frame=base_laser
 #   安装几何已实车量测回填（2026-11-08，G10）：x=0.275 y=0.290 z=0.040 yaw=−1.5708（rad），
 #   见 phase0/sensor-mount.md §6.1；launch 已含 x/y 参数，双实例可覆盖
+#   话题（2026-11-08 起，自车回波过滤）：驱动发 /scan_raw → 过滤节点 → /scan（下游全读 /scan）
+#     依赖系统包 ros-humble-laser-filters（N97 首次部署须先装，否则本 launch 起不来）
+#     过滤配置 ldlidar_stl_ros2/config/ld06_scan_filter.yaml（车体多边形内波束置 NaN）
+#     诊断时想看原始数据用 /scan_raw；过滤原因见 phase0/sensor-mount.md §6.1.2
 #   ⚠️ 改过 package 或首次部署须先 colcon build（launch 加载 install 副本）
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch ldlidar_stl_ros2 ld06.launch.py

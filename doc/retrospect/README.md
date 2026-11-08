@@ -64,6 +64,7 @@
 | [2026-11-06_ld06_vm_bringup_smoke.md](2026-11-06_ld06_vm_bringup_smoke.md) | LD06 VM 首跑 + vendor 入仓 + 冒烟 PASS（10Hz/单发布者/base_laser/TF z=0.18）；18m36s 掉电定位供电/接触；RViz 180° 为保存相机视角非数据反转 |
 | [2026-11-07_explore_p1_param_declaration.md](2026-11-07_explore_p1_param_declaration.md) | explore_lite 参数「不存在/未声明」系假阴性：构造期三段阻塞（costmap→TF→action server）致 declare 未执行；A/B 同进程对照定因，8 参数全部可取；附工具/思路全清单 + 四张方法卡 + **A/B 17 项全量对照 / 可复现命令 / 源码摘录 / 一页纸诊断卡**（§七/§八） |
 | [2026-11-08_oldcar_s1_static_bringup.md](2026-11-08_oldcar_s1_static_bringup.md) | 老车 S1 静态联调（N97，静态 TF 顶替里程计、无 GUI）：链路 PASS（LD06→slam_toolbox→Nav2→explore，lifecycle 全激活/TF 通/explore 发目标）；规划全败未定因（worldToMap 越界=容差搜索撞地图右边界，非根因）；全命令+现象留档 |
+| [2026-11-08_oldcar_s1_chain_rerun_selfocclusion.md](2026-11-08_oldcar_s1_chain_rerun_selfocclusion.md) | ② 链路重跑 PASS（新几何）+ explore 零前沿根因实锤：**LD06 低装自车遮挡**（31% 光束打车体 → 自由区碎成 55 域 → 可达 18 格）；逐字复刻 explore 判定链复现一致；污染在 `/scan` 最上游，costmap 层过滤无效；附方法卡 5 张 + 经验点 E1~E7 |
 
 ## 专题（无日期前缀）
 

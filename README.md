@@ -108,7 +108,8 @@ r2_integration/
 │   │   ├── 2026-11-06_platform_split_old_retrofit.md      平台分叉决策：老车平替 + 新车升级 + G8010 击球（11-06）
 │   │   ├── 2026-11-06_ld06_vm_bringup_smoke.md            LD06 VM 接入冒烟 + 18m36s 掉电定位 + RViz 差异 + vendor 入仓（11-06）
 │   │   ├── 2026-11-07_explore_p1_param_declaration.md    explore_lite 参数声明假阴性：构造期三段阻塞根因 + 工具/思路全清单 + 可复现命令/诊断卡（11-07）
-│   │   └── 2026-11-08_oldcar_s1_static_bringup.md        老车 S1 静态联调（N97，静态 TF 顶替里程计）：链路 PASS + 规划全败未定因；全命令/现象留档（11-08）
+│   │   ├── 2026-11-08_oldcar_s1_static_bringup.md        老车 S1 静态联调（N97，静态 TF 顶替里程计）：链路 PASS + 规划全败未定因；全命令/现象留档（11-08）
+│   │   └── 2026-11-08_oldcar_s1_chain_rerun_selfocclusion.md  ② 链路重跑 PASS + explore 零前沿根因实锤：LD06 低装自车遮挡（31% 光束打车体，11-08）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）

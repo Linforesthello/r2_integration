@@ -135,13 +135,20 @@ source ~/Lin_workspace/r2_integration/install/setup.bash
 
 # 终端 1：A（使用默认 /dev/r2_ld06_a）
 ros2 launch ldlidar_stl_ros2 ld06.launch.py \
-  node_name:=ld06_a topic_name:=scan_a frame_id:=laser_a
+  node_name:=ld06_a topic_name:=scan_a frame_id:=laser_a \
+  filtered_topic_name:=scan_a_filtered
 
 # 终端 2：B（显式指定 udev 符号链接）
 ros2 launch ldlidar_stl_ros2 ld06.launch.py \
   node_name:=ld06_b topic_name:=scan_b frame_id:=laser_b \
-  port_name:=/dev/r2_ld06_b
+  port_name:=/dev/r2_ld06_b filtered_topic_name:=scan_b_filtered
 ```
+
+> ⚠️ **2026-11-08 起 `ld06.launch.py` 多起一个自车回波过滤节点**（`scan_to_scan_filter_chain`，
+> 输入 `topic_name`、输出 `filtered_topic_name`，默认 `scan`）。双实例必须显式给
+> `filtered_topic_name`，否则两个实例都发 `/scan` 互相打架——上面命令已按此补参。
+> 过滤原因与配置见 [sensor-mount §6.1.2](../phase0/sensor-mount.md)、
+> [ld06_scan_filter.yaml](../../ldlidar_stl_ros2/config/ld06_scan_filter.yaml)。
 
 验证：
 
