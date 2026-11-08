@@ -5,9 +5,11 @@
 > 老车**不得**套用 [startup.md](../startup.md) 的 `velodyne.launch.py` / KISS-ICP / FAST-LIO2 段（VLP-16 已撤下）。
 > 职责边界：命令在本文；启动纪律与坑见 [ros2-ops.md §3](../ros2-ops.md)；平台分叉与共用/分叉清单见 [two-car-architecture.md](../two-car-architecture.md)。
 >
-> ⚠️ **状态：未实测（2026-11-08 建）**——命令取自 G1/G2/G3/G4 配置文件的头注与
-> [explore-plan.md](../minimal-loop2/explore-plan.md) 的已定方案，**尚未整链实跑**。
-> 首次跑通后回填实测基线并去掉本标注；缺口见 [s1-readiness-gap.md](s1-readiness-gap.md)。
+> ✅ **状态：已整链实跑（2026-11-08 21:01~21:26，N97 实车）**——底盘 + IMU + EKF + slam_toolbox +
+> Nav2（`nav2_explore.launch.py`，**不含终端 8 explore_lite**）全链起身，**39 个导航目标 39 成功、0 失败**。
+> 本文终端 0~7 的命令即该轮实际使用序列，验证基线与异常见 §四/§六。
+> **仍未验证**：终端 8 explore_lite（当轮明确不跑；过滤放宽后尚未复测）、覆盖率量化、bag 录制。
+> 实录见 [retrospect 11-08](../retrospect/2026-11-08_oldcar_s1_fullchain_pass.md)；缺口见 [s1-readiness-gap.md](s1-readiness-gap.md)。
 
 ---
 
@@ -142,7 +144,9 @@ ros2 topic pub --once /explore/resume std_msgs/msg/Bool "{data: true}"
 ## 四、启动后验证基线（老车）
 
 > `/imu/data`、`/odometry/filtered`、`/odom_wheels` 三行**沿用 VLP-16 时代基线**——S1 保留 G354 + 现有 EKF，链路未变。
-> `/scan` 为 2026-11-07 N97 实测值。**整链未实跑**，首跑后回填。
+> `/scan` 为 2026-11-07 N97 实测值。
+> **2026-11-08 21:01~21:26 整链实跑**（含底盘/IMU/EKF）：链路项全部成立、39/39 目标成功；
+> 但该轮**未逐项采集 hz**（已停机），故下表频率列仍为历史基线，非当轮实测。
 
 | 话题 / 项 | 期望 | 备注 |
 |:---|:---|:---|
@@ -163,9 +167,15 @@ ros2 run tf2_ros tf2_echo odom base_link
 ros2 run tf2_ros tf2_echo base_link base_laser
 ```
 
-> **首次联调实录（2026-11-08）**：静态 TF 顶替里程计、无 GUI（SSH）条件下跑通 LD06 → slam_toolbox → Nav2 → explore_lite，
+> **首次联调实录（2026-11-08 17:27）**：静态 TF 顶替里程计、无 GUI（SSH）条件下跑通 LD06 → slam_toolbox → Nav2 → explore_lite，
 > 逐终端命令、实际输出与判读见 [retrospect/2026-11-08_oldcar_s1_static_bringup.md](../retrospect/2026-11-08_oldcar_s1_static_bringup.md)。
 > 该轮**未跑** `/imu/data`、`/odometry/filtered`、`/odom_wheels` 三行（无底盘/IMU），且**规划全败未定因**——首跑对照时留意。
+>
+> **✅ 全链实车首跑（2026-11-08 21:01~21:26，真实里程计 + RViz）**：终端 0~7 全起、**跳过终端 8**，
+> Nav2 目标 **39 发 39 成、0 失败**；`current location` 连续变化（真移动）。
+> 该轮**未跑 explore_lite**，故「过滤放宽后 explore 是否仍报零前沿」仍未验证。
+> 实录与三处非阻断异常（MOTOR_LOST 间歇 42% / RViz 崩溃 / 一次 FR 堵转）见
+> [retrospect/2026-11-08_oldcar_s1_fullchain_pass.md](../retrospect/2026-11-08_oldcar_s1_fullchain_pass.md)。
 
 ---
 
@@ -190,8 +200,11 @@ ros2 run tf2_ros tf2_echo base_link base_laser
 | **G14 供电** | 车体侧 5V 未带载长跑 | 历史掉电根因已定位为接线端子松动；首测仍须监视 |
 | **G16 双实例** | N97 曾同时跑 A+B 两路 | 同名节点抢话题；见 §一 单实例纪律 |
 | **G19 录包清单** | 老车版见 [explore-plan §3.5](../minimal-loop2/explore-plan.md) | 录包前先 `ros2 topic list` 核实话题存在（[ros2-ops.md §4](../ros2-ops.md)） |
-| **整链未实测** | G1/G2/G3 配置均未联跑 | 首跑即本手册的首次验证，出错按上面各终端的注记逐段隔离 |
-| **链路联调现状（11-08）** | 已用静态 TF 顶替里程计完成 LD06→slam_toolbox→Nav2→explore_lite 联跑：**链路 PASS**（lifecycle 全激活/TF 通/explore 发目标），**规划全败未定因** | 不含底盘/IMU/EKF 与导航质量；复现清单与证据见 [retrospect 11-08](../retrospect/2026-11-08_oldcar_s1_static_bringup.md) |
+| **整链实跑** | ✅ **2026-11-08 21:01~21:26 全链起身**（终端 0~7，跳过 8） | 该轮为本文的首次整链验证；命令即本文序列 |
+| **导航实测（11-08）** | ✅ **39 目标 39 成功、0 失败**（真实 EKF 里程计 + RViz Nav2 Goal） | 目标集中在开阔区（x −1.0~+1.4 m），**未覆盖窄缝/低物/远距离**；覆盖率未量化 |
+| **explore_lite 未复测** | 11-08 19:12 报 `No frontiers found`；同日 20:30 放宽过滤 polygon 后**尚未跑 explore** | 终端 8 能否起步仍是开口项 — [G24](s1-readiness-gap.md) |
+| **电机中断（人为测试）** | 11-08 21:18 用户**主动注入**电机中断，四电机状态帧 42% 命中告警（末帧 21:23:19）；**期间 5 个目标仍全成功** | **上层不受影响**（CAN 反馈链路 ≠ 指令链路）；看到成片 `MOTOR_LOST` 不等于失控 — [retrospect 11-08](../retrospect/2026-11-08_oldcar_s1_fullchain_pass.md) §4.1 |
+| **RViz2 崩溃** | 当轮 2 次（21:02:45 −6 / 21:26:17 −11），均未影响 Nav2 | 长跑须单独确认 RViz 存活；RViz 挂了不影响车走 |
 
 ---
 

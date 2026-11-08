@@ -1,6 +1,6 @@
 # R2 外设集成 · 全局进度总览
 
-> 最后更新: 2026-11-07（§六 增 S1 进度快照：LD06 `/scan` 规格/crop 实测完成；**同日纠错：explore_lite 的"网络阻塞"不成立，根因是代理 TUN 未开**；**同日晚 explore_lite 已在 N97 构建成功（`326cf8a`），软件依赖转 🟢**；仅安装几何未实测。11-06 平台分叉口径不变；上文 Phase 进度为 VLP-16 时代基线）
+> 最后更新: 2026-11-08（**老车 S1 全链实车首跑 PASS**：底盘 + IMU + EKF + slam_toolbox + Nav2 全链起身，**39 个目标 39 成功 / 0 失败**（真实 EKF 里程计，跳过 explore_lite）— [retrospect 全链首跑](retrospect/2026-11-08_oldcar_s1_fullchain_pass.md)；上文 Phase 进度仍为 VLP-16 时代基线。11-07 记录保留：§六 增 S1 进度快照：LD06 `/scan` 规格/crop 实测完成；**同日纠错：explore_lite 的"网络阻塞"不成立，根因是代理 TUN 未开**；**同日晚 explore_lite 已在 N97 构建成功（`326cf8a`），软件依赖转 🟢**；仅安装几何未实测。11-06 平台分叉口径不变；上文 Phase 进度为 VLP-16 时代基线）
 > 内容: 全项目进度一览，每个 Phase 的完成度、依赖关系、下一步
 
 ---
@@ -166,4 +166,11 @@ Phase 0  Phase 1    Phase 2+3    Phase 4+5
 - **老车 Nav2 参数 + rviz 配置（11-07 六项定夺落地）** ✅ 已落文件：G4 新建 `nav2_params_ld06.yaml`（按定夺 = low 版**只删低带源** `velodyne_low`/`obstacle_low_layer`，膨胀 0.30 与降额速度照抄），`nav2_explore.launch.py` 默认改指它（原行注释留档）；G8 修复 `setup.py` 只 `glob('config/*.yaml')` 致 `nav2.rviz` 不进 install（`rviz:=true` 加载不到配置，原行注释留档）。`colcon build --packages-select r2_bringup` 已验证 install 副本含两文件。**均未实测运行**
 - **安装几何** ❌：待实车量测（[sensor-mount §六](phase0/sensor-mount.md)）；`ld06.launch.py` 缺 x/y 参数、z 为占位。**11-07 定夺**：实际测算（含雷达 0° 朝向是否合适）等到 G10 再动，届时 LD06 的 URDF/TF 关系一并重写（现 `r2_sensors/config/r2.urdf` 仍是 VLP-16 的 `base_link→velodyne` z=0.655）
 - **S1 首跑** ❌：等几何 + explore_lite；缺口全表见 [s1-readiness-gap.md](old-car/s1-readiness-gap.md)（23 项，G11 部分销项）
+
+### 6.2 S1 进度快照（2026-11-08，不改 §6.1 历史行）
+
+- **安装几何** ✅ G10 已实车量测回填（x=0.275 / y=0.290 / z=0.040 / yaw=−1.5708，yaw 同日实物复核 ≲2°）— [sensor-mount §6.1](phase0/sensor-mount.md)
+- **自车遮挡 → 方案 B 过滤链** ✅ 上车：`/scan_raw` → `scan_to_scan_filter_chain` → `/scan`；polygon 晚修订 `x[−0.45,+0.40] y±0.34`（生效 ±0.48/±0.37）— [ld06_scan_filter.yaml](../ldlidar_stl_ros2/config/ld06_scan_filter.yaml)、[G24](old-car/s1-readiness-gap.md)
+- **全链实车首跑（导航侧）** ✅ **39 目标 39 成功 / 0 失败**（真实 EKF 里程计 + RViz Nav2 Goal，21:01~21:26，跳过 explore）— [retrospect 全链首跑](retrospect/2026-11-08_oldcar_s1_fullchain_pass.md)
+- **explore 闭环** ⬜ 未复测：过滤放宽后 `No frontiers found` 是否消失未知；覆盖率 >80% 未量化（未存图/未录包）— [explore-plan §3.5](minimal-loop2/explore-plan.md)
 

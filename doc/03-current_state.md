@@ -1,6 +1,6 @@
 # R2 集成 · 当前完成状态
 
-> 最后更新: 2026-11-07（§〇 增 explore_lite 构建落地条目 + LD06 `/scan` 规格 + crop 实测条目；11-06 平台分叉口径不变；上文 Phase 状态为 VLP-16 时代基线）
+> 最后更新: 2026-11-08（§〇 增「老车 S1 全链实车首跑 PASS」条目：39 目标 39 成功 / 0 失败；11-07 记录保留；11-06 平台分叉口径不变；上文 Phase 状态为 VLP-16 时代基线）
 > 内容: 当前完成状态快照——Phase 进度、近期完成、现役技术状态。
 > 交接总览 → [07-handover.md](07-handover.md)；事件详细索引 → [retrospect/README.md](retrospect/README.md)；待办 → [pending-tasks.md](pending-tasks.md)
 
@@ -10,6 +10,7 @@
 
 | 事项 | 详情 |
 |:-----|:-----|
+| **S1 全链实车首跑 PASS（11-08 21:01~21:26）** | 老车首次带**真实里程计**的整链实跑：LD06（过滤链）→ 底盘 → IMU → EKF → slam_toolbox → Nav2（`nav2_explore.launch.py`，无 map_server/AMCL）→ RViz Nav2 Goal。**39 个导航目标 39 成功、0 失败**，`current location` 在目标间持续变化（真移动，非静止空转）。跳过 explore_lite（当轮不做自动探索）。**电机中断 = 用户主动注入的测试**（目的：验证中断后上层是否受影响）：21:18 起四电机状态帧 42% 命中告警（末帧 21:23:19），**期间 5 个目标仍全部成功 → 上层不受影响**（正向结论）。另有两处非阻断异常：RViz2 崩溃 ×2（−6/−11）、FR 堵转 ×1。RViz 工具栏含 `nav2_rviz_plugins/GoalTool`。**未量化**：覆盖率、hz、bag — [retrospect 全链首跑](retrospect/2026-11-08_oldcar_s1_fullchain_pass.md) |
 | **S1 三份配置落文件（11-07）** | G1 `r2_bringup/config/slam_toolbox_mapping.yaml`（官方 `mapper_params_online_async.yaml` 整份复制 + 6 项改动：`base_frame→base_link`、`use_sim_time:false`、`map_update_interval:2.0`、`transform_publish_period:0.05`、`enable_interactive_mode:false`）；G2 `r2_bringup/launch/nav2_explore.launch.py`（删 map_server/AMCL，默认降额参数）；G3 `r2_bringup/config/explore_params.yaml`（global_costmap 源，冒烟确认节点名/参数读取正常、`return_to_init` 不存在）。**三者均未实测运行**，G4（老车 Nav2 参数文件）未动 — [explore-plan §3.1.2/§3.2](minimal-loop2/explore-plan.md)、[s1-readiness-gap](old-car/s1-readiness-gap.md)。**11-07 晚补**：G4 已落地 `r2_bringup/config/nav2_params_ld06.yaml`（按用户定夺 = low 版**只删低带源**，膨胀/速度照抄），`nav2_explore.launch.py` 默认已切；G8 同轮修复（`setup.py` 补 `config/*.rviz`，原 `glob('config/*.yaml')` 致 `rviz:=true` 加载不到 nav2.rviz），`colcon build --packages-select r2_bringup` 已验证 install 副本在位。**11-07 晚复核订正**：`return_to_init` 与 7 参数**并非未声明**（干净复测 `param get` 可取），原冒烟结论作废，根因 = 构造期三段串行阻塞 → [explore-plan §3.1.3](minimal-loop2/explore-plan.md) |
 | **explore_lite 构建落地（11-07）** | N97 独立工作区 `~/Lin_workspace/explore_ws`：clone `326cf8a`（= 方案引用版本）+ `colcon build --packages-up-to explore_lite` 成功（`explore_lite_msgs` 4.99s / `explore_lite` 18.3s，仅 CMake 弃用警告）；`ros2 pkg executables explore_lite` = `explore_lite explore`。**G5 销项**。连带实测：`map_merge` 在 src 但不随 `--packages-up-to explore_lite` 构建（后续勿裸跑 `colcon build`）；官方 launch **写死 `params.yaml`（`/map` 源）、`use_sim_time` 默认 `true`、且未暴露 `params_file` 参数** → 只能用 `ros2 run` 或自写 launch。详见 [explore-plan §3.1.1](minimal-loop2/explore-plan.md) |
 | **LD06 /scan 规格 + crop 实测（11-07）** | N97 实测：beam 452~455/圈、角分辨率 0.793~0.798°、10.00 Hz；range 0.02/25 为驱动常量（室内有效回波 ≤6.08m）；crop 只 NaN 掩盖，参数用**原始雷达角**，因 `laser_scan_dir=true` 发布角 = 360°−原始角（非对称用例钉死）。N97 重启后 udev 四路固定名仍正确。探针 [probe_laserscan.py](../scripts/probe_laserscan.py)，详见 [ld06-dual-lidar P7](old-car/ld06-dual-lidar.md) |
