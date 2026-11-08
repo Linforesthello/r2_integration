@@ -300,7 +300,9 @@ timeout -k 5 30 python3 scripts/probe_laserscan.py --topic /scan --count 3
 - crop 只把 `ranges/intensities` 置 NaN，**消息长度与 `angle_min/angle_max` 不变**；下游按"无回波"处理。
 - 换算：要掩盖发布角 `[α1, α2]`，设 crop `[360−α2, 360−α1]`；对称于 180° 的带两种写法一致。
 - 与 S1 的关系：`向内的 90° 不扫` 可用该机制实现，但**区间需按实车安装朝向确定**（车体系 ↔ 雷达原始角）；
-  当前安装几何未测（本文件 §六-3 / [s1-readiness-gap.md](s1-readiness-gap.md) G10）。
+  ✅ 安装几何已于 2026-11-08 实测（[sensor-mount §6.1](../phase0/sensor-mount.md)），
+  车体方向 ↔ 原始角/发布角对照（含 `laser_scan_dir=false`、其他安装朝向、crop 实例）见
+  [sensor-mount §6.1.1](../phase0/sensor-mount.md)。
 
 ---
 
@@ -342,7 +344,8 @@ timeout -k 5 30 python3 scripts/probe_laserscan.py --topic /scan --count 3
 1. ✅ 已定：A = serial `000063728672`，B = serial `000063728647`（udev 固定；物理外壳标签建议补贴）；
 2. ✅ 已定：采用 `scan_a` / `scan_b`；
 3. ✅ **已回填（2026-11-08，G10）**：x/y/z/yaw 实测值见 P1 参数表，推导与量测记录见
-   [sensor-mount §6.1](../phase0/sensor-mount.md)；**yaw 尚未用实物读数复核**（正前方目标应读 `/scan ≈ +90°`）；
+   [sensor-mount §6.1](../phase0/sensor-mount.md)；**yaw 已于 2026-11-08 实物复核通过**（350mm 箱 @≈1m：
+   箱面倾角 −2.1°、中心 +94°；注意 +90° 仅对"雷达光心正前方"成立，车体中线目标读 ≈73°）；
 4. ⏳ 未做（可选：VM 离线 slam_toolbox 验证，只验 launch/参数）；
 5. ✅ 已定：本轮由用户执行、AI 给指令与判据；
 6. ✅ 已收齐（2026-11-06 N97）：G354 `000063728613`、CANable2 `208C37AF4845`、LD06 A/B 同 VM

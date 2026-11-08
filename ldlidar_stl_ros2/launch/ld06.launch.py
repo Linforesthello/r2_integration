@@ -18,7 +18,8 @@ Launch arguments (R2 2026-11-06):
   故 base_laser 的 +x 对齐车体 −y。车头物体在雷达原始角为 270°，驱动发布角 = 360°−原始角
   → /scan 读 +90°，与 yaw = −π/2 一致（推导见 doc/old-car/ld06-dual-lidar.md §三 P7）
 - pitch / roll = 0：按水平安装（未单独量测）
-- ⚠️ yaw 由「手册 + 实车 △ 朝向」推导，尚未用实物读数复核；首跑可用正前方目标验证 /scan ≈ +90°
+- ✅ yaw 已于 2026-11-08 实物复核通过（350mm 箱 @≈1m：箱面倾角 −2.1°、中心 +94°）；
+  复核口径：+90° 仅对「雷达光心正前方」成立，车体中线目标读 ≈73°（见 sensor-mount §6.1）
 '''
 
 def generate_launch_description():

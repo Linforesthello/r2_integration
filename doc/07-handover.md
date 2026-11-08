@@ -1,6 +1,6 @@
 # R2 集成 · 状态交接
 
-> 最后更新: 2026-11-08（**G10 安装几何实车量测并回填**：LD06 #1 的 x/y/z/yaw 已入 launch 默认值并写进 [sensor-mount §6.1](phase0/sensor-mount.md)，yaw 待实物读数复核 → 11-07 记的「安装几何未实测」销项。以下为 11-07 记录：§五 增「S1 进度快照」：LD06 `/scan` 规格 + crop 实测完成；**同日纠错：explore_lite 取包不构成网络阻塞——根因是代理 TUN 未开，开启后 VM/N97 `git ls-remote` 均 exit=0**；**同日晚：explore_lite 已在 N97 clone `326cf8a` 并构建成功**，软件依赖转 ✅，仅安装几何未实测。11-06 平台分叉决策不变；正文 09-16 基线保留）
+> 最后更新: 2026-11-08（**G10 安装几何实车量测并回填 + yaw 实物复核**：LD06 #1 的 x/y/z/yaw 已入 launch 默认值并写进 [sensor-mount §6.1](phase0/sensor-mount.md)；**同日用 350mm 箱实测复核 yaw 通过（箱面倾角 −2.1°、中心 +94°，误差 ≲2°）** → 11-07 记的「安装几何未实测」销项。以下为 11-07 记录：§五 增「S1 进度快照」：LD06 `/scan` 规格 + crop 实测完成；**同日纠错：explore_lite 取包不构成网络阻塞——根因是代理 TUN 未开，开启后 VM/N97 `git ls-remote` 均 exit=0**；**同日晚：explore_lite 已在 N97 clone `326cf8a` 并构建成功**，软件依赖转 ✅，仅安装几何未实测。11-06 平台分叉决策不变；正文 09-16 基线保留）
 > 当前进度: Phase 0 ✅ 100%｜Phase 1 ✅ 95%（08-12 yaw 方案①通过）｜Phase 2 ✅ 100%（KISS 建图）｜Phase 3 ⏳ 25%（Nav2 首闭环 08-15 + 降额过缝 08-17；A1 避障实测进行中，低物盲区链路 09-04→09-08 闭环：修法 B 实车第一次接近有效、二次失效根因 = global 清空冲突实锤 → 09-08 决策机制精修收手、主线转 3D 规控，详见 §四/决策记录），全速验证暂缓保持降额
 > 下一阶段: A1 避障收口（判据 5/5）→ A2 FAST-LIO2 落地（排期与 09-10 收手线见 [recruitment-learning-plan.md §4.1](roadmaps/recruitment-learning-plan.md)）
 > 基础设施: 08-14 两机 git 同步统一（push→pull）；08-15 VLP-16 运行物抽包 r2_sensors；08-24 N97 风扇可命令行调速；09-04 bags 数据资产入仓
@@ -102,7 +102,7 @@
 |:---|:---:|:---|
 | LD06 驱动/规格 | ✅ | N97 双实例 10 Hz；`/scan` beam 452~455/圈、角分辨率 0.793~0.798°；crop 机制实测（发布角 = 360°−原始角）— [ld06-dual-lidar P7](old-car/ld06-dual-lidar.md) |
 | 软件依赖 | 🟢 | slam_toolbox 2.6.10 + Nav2 1.1.20 已装；**explore_lite 已构建（11-07 13:00）**——N97 `~/Lin_workspace/explore_ws` clone `326cf8a` + `colcon build --packages-up-to explore_lite` 成功（2 包 23.7s），`ros2 pkg executables explore_lite` = `explore_lite explore`。**三份配置已落文件（11-07）**：`slam_toolbox_mapping.yaml`(G1) / `nav2_explore.launch.py`(G2) / `explore_params.yaml`(G3)，**均未实测运行**；explore 节点冒烟通过（节点名/参数读取已确认）。**11-07 晚复核订正**：`return_to_init` 与 7 参数实为 `declare_parameter` 已声明（原"未声明"系构造期阻塞假阴性）— [explore-plan §3.1.3](minimal-loop2/explore-plan.md) |
-| 安装几何 | ✅ | **2026-11-08 实车实测并回填（G10）**：x=0.275 / y=0.290 / z=0.040 / yaw=−1.5708 rad（pitch/roll 按水平 0）；`ld06.launch.py` 已新增 x/y 参数、默认值=实测值。**yaw 未用实物读数复核**（正前方目标应读 `/scan ≈ +90°`）— [sensor-mount §6.1](phase0/sensor-mount.md) |
+| 安装几何 | ✅ | **2026-11-08 实车实测并回填（G10）**：x=0.275 / y=0.290 / z=0.040 / yaw=−1.5708 rad（pitch/roll 按水平 0）；`ld06.launch.py` 已新增 x/y 参数、默认值=实测值。**yaw 已实物复核通过（2026-11-08，350mm 箱 @≈1m：箱面倾角 −2.1°、中心 +94°，误差 ≲2°）** — [sensor-mount §6.1](phase0/sensor-mount.md) |
 | S1 首跑 | ❌ | 等几何标定 + explore_lite；六项待定夺见 [s1-readiness-gap §六](old-car/s1-readiness-gap.md) |
 
 **当前阻塞（2026-11-07，当晚纠错）**：
@@ -117,5 +117,5 @@
 
 ② ~~安装几何必须先实车量测（先量后写，禁止沿用 VLP-16 的 0.655 或占位 0.18）。~~
    ✅ **2026-11-08 已实测回填**：LD06 #1 几何 x=0.275 / y=0.290 / z=0.040 / yaw=−1.5708，
-   见 [sensor-mount §6.1](phase0/sensor-mount.md)；剩余待验 = yaw 的实物读数复核（车头目标应读 /scan ≈ +90°）。
+   见 [sensor-mount §6.1](phase0/sensor-mount.md)；✅ **yaw 已于 2026-11-08 实物复核通过**（箱面垂直于车体 +x，倾角 −2.1°；注意 +90° 仅对"雷达光心正前方"成立，车体中线目标读 ≈73°）。
    低装 LD06 #2 几何仍待测（二期）。

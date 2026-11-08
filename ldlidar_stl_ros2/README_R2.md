@@ -59,5 +59,8 @@ ros2 launch ldlidar_stl_ros2 ld06.launch.py \
 - 上游 `scripts/ldlidar.rules` 仅匹配 CP210x 的 `ttyUSB*`，不适用于 J-Link；R2 已按 serial 另建规则（`MODE="0666"`、`GROUP="dialout"`，见 [执行计划 P3](../doc/old-car/ld06-dual-lidar.md)），N97 侧待补。
 - ~~静态 TF `base_link→base_laser` 的 `z=0.18` 是占位值，实车必须按安装高度重标。~~
   ✅ **已完成（2026-11-08，G10）**：x/y/z/yaw 全部按实车量测回填，见 [sensor-mount §6.1](../doc/phase0/sensor-mount.md)；
-  yaw 由手册 0° 定义 + 实车 △ 朝向推导，**尚未用实物读数复核**（正前方目标应读 `/scan ≈ +90°`）。
+  yaw 由手册 0° 定义 + 实车 △ 朝向推导，**已于 2026-11-08 实物复核通过**（350mm 箱 @≈1m：箱面倾角 −2.1°、
+  中心 +94°；注意 +90° 仅对"雷达光心正前方"成立，车体中线目标读 ≈73°）。
+  **角度约定**（手册原始角顺时针 ↔ `/scan` 发布角逆时针、`laser_scan_dir` 语义、其他安装朝向与
+  错误配置对照、crop 的原始角口径）详见 [sensor-mount §6.1.1](../doc/phase0/sensor-mount.md)。
 - 原始外部工作区：`~/ldlidar_ros2_ws`（保留作参考，不随 r2 同步）。
