@@ -62,7 +62,8 @@ python3 ~/Lin_workspace/command/can_command.py
 
 # 终端 1: LD06 雷达（A 路，/dev/r2_ld06_a，发布 /scan）
 #   默认即 S1 配置：port=/dev/r2_ld06_a、topic=scan、frame=base_laser
-#   ⚠️ z=0.18 是占位值、x/y 写死 0（launch 无 x/y 参数）——安装几何待实车量测（G10）
+#   安装几何已实车量测回填（2026-11-08，G10）：x=0.275 y=0.290 z=0.040 yaw=−1.5708（rad），
+#   见 phase0/sensor-mount.md §6.1；launch 已含 x/y 参数，双实例可覆盖
 #   ⚠️ 改过 package 或首次部署须先 colcon build（launch 加载 install 副本）
 source ~/Lin_workspace/r2_integration/install/setup.bash
 ros2 launch ldlidar_stl_ros2 ld06.launch.py
@@ -180,7 +181,7 @@ ros2 run tf2_ros tf2_echo base_link base_laser
 
 | 项 | 现状 | 影响 |
 |:---|:---|:---|
-| **G10 安装几何** | `ld06.launch.py` 的 z=0.18 为占位、x/y 无参数写死 0、0° 朝向未定 | 障碍/地图位置整体偏移；首跑只验链路不验精度。量测时 LD06 的 URDF/TF 一并重写 |
+| **G10 安装几何** | ✅ **2026-11-08 已实车量测并回填**：`x=0.275`、`y=0.290`、`z=0.040`、`yaw=−1.5708` rad（pitch/roll 按水平 0）；launch 已新增 `x`/`y` 参数，默认值 = 实测值。**yaw 尚未用实物读数复核** | 若 yaw 判断有误 → 地图整体转 90°；首跑把目标放车正前方，`/scan` 应读 ≈ **+90°**。数值表与推导见 [sensor-mount §6.1](../phase0/sensor-mount.md)。老车无 URDF 雷达节点，TF 唯一来源 = launch |
 | **G11 量程** | `slam_toolbox max_laser_range: 20.0`（抄自 VLP-16 母本），LD06 室内有效 ≤6.08m | 只影响栅格化/匹配搜索范围，不截断输入；是否调小待实车评估 |
 | **G14 供电** | 车体侧 5V 未带载长跑 | 历史掉电根因已定位为接线端子松动；首测仍须监视 |
 | **G16 双实例** | N97 曾同时跑 A+B 两路 | 同名节点抢话题；见 §一 单实例纪律 |

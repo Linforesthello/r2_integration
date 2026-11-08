@@ -14,13 +14,15 @@
 
 - `launch/ld06.launch.py`：**参数化重写（2026-11-06，R2 双雷达）**——新增 9 个 `DeclareLaunchArgument`：
   `node_name` / `topic_name` / `frame_id` / `port_name` / `port_baudrate` / `z` / `yaw` / `pitch` / `roll`；
+  **2026-11-08 再补 `x` / `y`（共 11 个）**——平移原本写死 `'0','0'`，实车安装几何回填后必须可传；
   静态 TF 节点名随 `frame_id` 派生（`base_link_to_<frame_id>_ld06`）；`port_baudrate` 用
   `ParameterValue(..., value_type=int)` 显式转 int。**默认端口改为 `/dev/r2_ld06_a`**（udev 符号链接；
   上游默认 CP2102 套件的 `/dev/ttyUSB0`，R2 首版曾改 `/dev/ttyACM0`）。
 - 其余文件未改。
 
 **默认参数**：`node_name=LD06`、`topic_name=scan`、`frame_id=base_laser`、`port_name=/dev/r2_ld06_a`、
-`port_baudrate=230400`、`z=0.18`、`yaw/pitch/roll=0.0`；驱动参数 `product_name=LDLiDAR_LD06`、
+`port_baudrate=230400`；静态 TF `x=0.275`、`y=0.29`、`z=0.04`、`yaw=-1.5708`、`pitch/roll=0.0`
+（2026-11-08 实车实测，见 [sensor-mount §6.1](../doc/phase0/sensor-mount.md)）；驱动参数 `product_name=LDLiDAR_LD06`、
 `laser_scan_dir=True`（ROS 逆时针）保持不变。
 
 **双实例启动**（2026-11-06 VM 验收用）：
@@ -55,5 +57,7 @@ ros2 launch ldlidar_stl_ros2 ld06.launch.py \
 - launch 默认端口 `/dev/r2_ld06_a`，由 udev 按 J-Link serial 固定（VM 已建 `r2_ld06_a` / `r2_ld06_b`；N97 2026-11-06 已建四路 `r2_g354` / `r2_can` / `r2_ld06_a` / `r2_ld06_b`，避免与 G354/CAN 的 ACM 设备互换）。
 - 构建告警：上游 `CMakeLists.txt` 的 `cmake_minimum_required(VERSION 3.5)` 在 CMake 3.22 下产生弃用警告（stderr），**非错误**；保持 vendor 原样，未来 CMake 4 报错再评估改为 `3.10`。
 - 上游 `scripts/ldlidar.rules` 仅匹配 CP210x 的 `ttyUSB*`，不适用于 J-Link；R2 已按 serial 另建规则（`MODE="0666"`、`GROUP="dialout"`，见 [执行计划 P3](../doc/old-car/ld06-dual-lidar.md)），N97 侧待补。
-- 静态 TF `base_link→base_laser` 的 `z=0.18` 是占位值，实车必须按安装高度重标。
+- ~~静态 TF `base_link→base_laser` 的 `z=0.18` 是占位值，实车必须按安装高度重标。~~
+  ✅ **已完成（2026-11-08，G10）**：x/y/z/yaw 全部按实车量测回填，见 [sensor-mount §6.1](../doc/phase0/sensor-mount.md)；
+  yaw 由手册 0° 定义 + 实车 △ 朝向推导，**尚未用实物读数复核**（正前方目标应读 `/scan ≈ +90°`）。
 - 原始外部工作区：`~/ldlidar_ros2_ws`（保留作参考，不随 r2 同步）。

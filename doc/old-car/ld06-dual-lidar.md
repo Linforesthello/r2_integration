@@ -93,7 +93,8 @@
 **改动点（实际落地）**：
 
 - 新增 9 个 `DeclareLaunchArgument`：`node_name` / `topic_name` / `frame_id` / `port_name` /
-  `port_baudrate` / `z` / `yaw` / `pitch` / `roll`；
+  `port_baudrate` / `z` / `yaw` / `pitch` / `roll`；**2026-11-08 补 `x` / `y`（共 11 个）**——
+  此前平移 x/y 在 `arguments` 里写死 `'0','0'`，G10 实测后必须可传；
 - 静态 TF 节点名随 `frame_id` 派生（`base_link_to_<frame>_ld06`），避免两个 static TF 节点重名；
 - `port_baudrate` 用 `ParameterValue(..., value_type=int)` 传，避免 LaunchConfiguration
   的字符串类型不匹配；
@@ -109,8 +110,11 @@
 | `frame_id` | `base_laser` | 多实例必须覆盖 |
 | `port_name` | `/dev/r2_ld06_a` | udev 符号链接；B 实例需覆盖 |
 | `port_baudrate` | `230400` | int |
-| `z` | `0.18` | 占位，实车回填 |
-| `yaw` / `pitch` / `roll` | `0.0` | 弧度，实车回填 |
+| `x` | `0.275` | 2026-11-08 实车实测（G10） |
+| `y` | `0.29` | 2026-11-08 实车实测（G10） |
+| `z` | `0.04` | 2026-11-08 实车实测（光学中心离地 16cm − base_link 12cm）；原占位 `0.18` |
+| `yaw` | `-1.5708` | 2026-11-08 实测（模块 0° 指向车体 −y）；原占位 `0.0` |
+| `pitch` / `roll` | `0.0` | 按水平安装，未单独量测 |
 
 **验收结果（2026-11-06）**：
 
@@ -337,7 +341,8 @@ timeout -k 5 30 python3 scripts/probe_laserscan.py --topic /scan --count 3
 
 1. ✅ 已定：A = serial `000063728672`，B = serial `000063728647`（udev 固定；物理外壳标签建议补贴）；
 2. ✅ 已定：采用 `scan_a` / `scan_b`；
-3. ⏳ 待实车实测后回填（z / 俯仰 / 前后位置，替换占位 `0.18`）；
+3. ✅ **已回填（2026-11-08，G10）**：x/y/z/yaw 实测值见 P1 参数表，推导与量测记录见
+   [sensor-mount §6.1](../phase0/sensor-mount.md)；**yaw 尚未用实物读数复核**（正前方目标应读 `/scan ≈ +90°`）；
 4. ⏳ 未做（可选：VM 离线 slam_toolbox 验证，只验 launch/参数）；
 5. ✅ 已定：本轮由用户执行、AI 给指令与判据；
 6. ✅ 已收齐（2026-11-06 N97）：G354 `000063728613`、CANable2 `208C37AF4845`、LD06 A/B 同 VM
