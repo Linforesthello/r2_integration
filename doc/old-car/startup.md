@@ -158,6 +158,10 @@ ros2 run tf2_ros tf2_echo odom base_link
 ros2 run tf2_ros tf2_echo base_link base_laser
 ```
 
+> **首次联调实录（2026-11-08）**：静态 TF 顶替里程计、无 GUI（SSH）条件下跑通 LD06 → slam_toolbox → Nav2 → explore_lite，
+> 逐终端命令、实际输出与判读见 [retrospect/2026-11-08_oldcar_s1_static_bringup.md](../retrospect/2026-11-08_oldcar_s1_static_bringup.md)。
+> 该轮**未跑** `/imu/data`、`/odometry/filtered`、`/odom_wheels` 三行（无底盘/IMU），且**规划全败未定因**——首跑对照时留意。
+
 ---
 
 ## 五、停止与回退
@@ -182,6 +186,7 @@ ros2 run tf2_ros tf2_echo base_link base_laser
 | **G16 双实例** | N97 曾同时跑 A+B 两路 | 同名节点抢话题；见 §一 单实例纪律 |
 | **G19 录包清单** | 老车版见 [explore-plan §3.5](../minimal-loop2/explore-plan.md) | 录包前先 `ros2 topic list` 核实话题存在（[ros2-ops.md §4](../ros2-ops.md)） |
 | **整链未实测** | G1/G2/G3 配置均未联跑 | 首跑即本手册的首次验证，出错按上面各终端的注记逐段隔离 |
+| **链路联调现状（11-08）** | 已用静态 TF 顶替里程计完成 LD06→slam_toolbox→Nav2→explore_lite 联跑：**链路 PASS**（lifecycle 全激活/TF 通/explore 发目标），**规划全败未定因** | 不含底盘/IMU/EKF 与导航质量；复现清单与证据见 [retrospect 11-08](../retrospect/2026-11-08_oldcar_s1_static_bringup.md) |
 
 ---
 
@@ -191,3 +196,4 @@ ros2 run tf2_ros tf2_echo base_link base_laser
 - 方案与判据：[explore-plan.md](../minimal-loop2/explore-plan.md)（探索方案/验收 8 项/覆盖率口径）
 - 纪律与坑：[ros2-ops.md](../ros2-ops.md)（启动纪律 §3、bag §4）｜[ros2-qos-dds.md](../ros2-qos-dds.md)（大消息验证）
 - 新车/VLP-16 基线：[startup.md](../startup.md)（保持不动，仅作新车参考）
+- 首次联调证据：[2026-11-08_oldcar_s1_static_bringup.md](../retrospect/2026-11-08_oldcar_s1_static_bringup.md)（静态 TF 顶替里程计的全链实录 + 复现清单）
