@@ -183,6 +183,12 @@ r2_integration/
 │   ├── ldlidar_driver/               串口协议/解析实现
 │   └── rviz2/ldlidar.rviz            LD06 可视化配置
 │
+├── unitree_goM80106/                  ← GO-M8010-6 击球电机（vendor SDK 工程，纯 CMake 非 ROS2 包，11-09 并入）
+│   ├── CMakeLists.txt                构建（3 个可执行目标，链接 lib/ 预编译 SDK）
+│   ├── include/                      Unitree SDK 头文件（SerialPort / MotorCmd / MotorData / 协议定义）
+│   ├── lib/                          SDK 预编译库（Linux64 + Arm64，共 600K）
+│   └── src/                          可执行源码（locationMode / stopMode / example）+ doc/
+│
 ├── bags/                                ← 实验数据资产（N97 采集 + VM 分析副本，09-04 入仓）
 │   ├── README.md                       数据目录导航（bag 清单/maps 产物）
 │   ├── analysis/                       分析脚本 + 输出（入库；raw/maps 不入库，白名单见 .gitignore）

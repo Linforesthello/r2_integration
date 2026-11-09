@@ -323,6 +323,7 @@ r2_integration/
 │
 ├── r2_bringup/              ← ROS2 包（Phase 0 产物）
 ├── g354_driver/             ← ROS2 包（Phase 1 产物）*
+├── unitree_goM80106/        ← GO-M8010-6 击球电机（vendor SDK，纯 CMake 非 ROS2 包，11-09 并入）
 │
 └── scripts/                 ← 标定工具
 ```
