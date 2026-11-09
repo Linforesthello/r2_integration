@@ -24,3 +24,7 @@ target_link_libraries(stopMode_8010t1 ${EXTRA_LIBS})
 
 add_executable(example_goM8010_6_motor src/example_goM8010_6_motor.cpp)
 target_link_libraries(example_goM8010_6_motor ${EXTRA_LIBS})
+
+# 方案 A：命令行参数版（保留原 locationMode_8010t1.cpp 不动）
+add_executable(locationMode_cli src/locationMode_cli.cpp)
+target_link_libraries(locationMode_cli ${EXTRA_LIBS})

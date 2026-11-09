@@ -66,6 +66,7 @@
 | [2026-11-08_oldcar_s1_static_bringup.md](2026-11-08_oldcar_s1_static_bringup.md) | 老车 S1 静态联调（N97，静态 TF 顶替里程计、无 GUI）：链路 PASS（LD06→slam_toolbox→Nav2→explore，lifecycle 全激活/TF 通/explore 发目标）；规划全败未定因（worldToMap 越界=容差搜索撞地图右边界，非根因）；全命令+现象留档 |
 | [2026-11-08_oldcar_s1_chain_rerun_selfocclusion.md](2026-11-08_oldcar_s1_chain_rerun_selfocclusion.md) | ② 链路重跑 PASS（新几何）+ explore 零前沿根因实锤：**LD06 低装自车遮挡**（31% 光束打车体 → 自由区碎成 55 域 → 可达 18 格）；逐字复刻 explore 判定链复现一致；污染在 `/scan` 最上游，costmap 层过滤无效；附方法卡 5 张 + 经验点 E1~E7 |
 | [2026-11-08_oldcar_s1_fullchain_pass.md](2026-11-08_oldcar_s1_fullchain_pass.md) | **老车 S1 全链实车首跑 PASS**（真实 EKF 里程计）：底盘+IMU+EKF+slam_toolbox+Nav2 全链起身，**39 个目标 39 成功 / 0 失败**；附 `~/.ros/log` 黑匣子反推法 + 导航成功率统计口径；记录**电机中断人为测试**（上层未受影响）/ RViz 崩溃 / 规划恢复未拆变量 |
+| [2026-11-09_g8010_cli_param.md](2026-11-09_g8010_cli_param.md) | G8010 控制程序命令行参数化（**新建 `locationMode_cli.cpp`，实机基线原文件零改动**）+ 预读成功校验（`sendRecv` 返回 bool / `MotorData(){}` 空构造 → 未初始化 `q` 风险，3 次重试失败 exit 2）；VM dry-run 回归全绿、**真机路径未验**；附 4 张方法卡 + E1~E7 |
 
 ## 专题（无日期前缀）
 
