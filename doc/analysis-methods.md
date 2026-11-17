@@ -373,6 +373,61 @@ volatile QoS 下，`--once` 在 discovery 完成前发完即丢；对已在等�
 | 一页纸诊断决策树 + 三个"不要" | [事件档 §八](retrospect/2026-11-07_explore_p1_param_declaration.md) |
 | 原始终端输出（未改写） | `doc/raw_data/raw_explore_p1_retest_n97_2026-11-07_2010.txt` |
 
+## 主题 N：Ubuntu 22.04 / ROS2 开发中的 shell 使用边界（未抽取，全文保留；11-17 新增）
+
+> 来源：2026-11-17 会话问答（“Ubuntu 22.04 中用 shell 执行语句是否合适”）。
+> 依据：Ubuntu 22.04 默认 shell 行为（`/bin/sh` → dash）+ ROS2 Humble 常规工作流（`source` → `colcon build` → `ros2 launch/run`）+ 本项目脚本实践；未做外部检索。
+> 候选去向：[ros2-ops.md §2](ros2-ops.md)（构建/部署）/ [§7](ros2-ops.md)（排障纪律）邻域；若后续需要跨项目通用条款，再评估入 [standards.md](standards.md)。
+> 说明：不是单次排障事件，而是开发方式边界；按四层制先落 draft，不直写规则层。
+
+### N1 shell 是 Ubuntu/ROS2 开发的主入口，不是偏门
+
+- **规则**：在 Ubuntu 22.04 的正常开发流程中，构建、测试、启动、版本控制、环境加载都用 shell 是标准做法。
+  IDE 的 Run/Task、CI 的 workflow 本质也是调用同一组 shell 命令；不存在“必须用非 shell 方式”的通用替代路径。
+- **边界**：shell 负责**编排**（进入目录、source 环境、调用工具、串联步骤）；复杂数据处理/逻辑用 Python，
+  不要把长逻辑硬堆在 shell 里。
+- **案例**：本项目 `run_ros2_depth.sh`（source + env + `ros2 launch`）、`scripts/check_doc_links.py`
+  （Python 工具，由 shell 调用）都是正常形态。
+
+### N2 一次性命令 vs 可复现脚本：按复用次数分流
+
+| 场景 | 做法 | 理由 |
+|:---|:---|:---|
+| 一次性查询/排障 | 终端直接执行 | 快速、可交互；关键输出留档 |
+| 反复执行的构建/启动/验证 | 写成脚本并入库 | 可复现、可评审、避免长命令口口相传 |
+| 团队/CI | 脚本 + CI | CI 跑的应是同一套命令，避免“本地能跑、CI 不能跑” |
+| 复杂逻辑/数据解析 | Python | shell 不擅长结构化数据处理 |
+
+- **脚本纪律**：用 `#!/usr/bin/env bash`；开头 `set -euo pipefail`；变量加引号；脚本用
+  `root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"` 自定位，避免写死项目路径。
+- **文档纪律**：长命令在文档里用 `$PROJECT_ROOT` 之类的变量表示根目录；迁移时只改变量定义。
+
+### N3 Ubuntu 22.04 的具体坑
+
+- `/bin/sh` 是 **dash**，不是 bash：`sh script.sh` 可能不支持 `[[ ]]`、数组、`pipefail` 等；
+  统一用 `bash script.sh` 或可执行位 + bash shebang。
+- ROS 节点**不要用 `sudo`**；`sudo` 只用于 `apt`、udev、系统级配置。
+- 显式 `source /opt/ros/humble/setup.bash` 和工作区 `install/setup.bash`；不要依赖 `.bashrc` 里
+  多个工作区的隐式 source 顺序（同名包会被后面的工作区覆盖）。
+- 优先用 `colcon` / `cmake` / `ros2` CLI，不手写底层编译/启动命令。
+- 破坏性操作（`rm`/`mv`/`git reset --hard`）先确认/备份；杀进程用精确 PID/命令行特征，
+  不用宽泛 `pkill -f`。
+- 需要复现的终端输出落到 `doc/raw_data/`（不入 git），避免只留在会话里。
+
+### N4 区分“工具权限”与“开发规范”
+
+- Claude Code 的 Bash 工具被权限模式拦截，是**工具层**问题（安全校验不可用），
+  不等于 Ubuntu 开发不该用 shell，也不改变 N1~N3 的结论。
+- 正确处置：切换权限模式，或由用户在自己的终端执行后回贴输出；
+  **不要**用子代理/其他工具绕过被拒绝的 Bash 调用——那会绕过用户设置的权限边界。
+- 验收类命令（构建、测试、链接校验器）没有通用的“非 shell”等价物；IDE 终端/CI 仍是 shell。
+
+### N5 本项目判据
+
+- 文档整理：`Read`/`Write`/`Edit` 足够；在 Claude Code 里专用文件工具优先于 `cat`/`sed`。
+- 构建/启动/校验：`bash ./run_*.sh`、`python3 scripts/check_doc_links.py`、`git status/diff` 均属正常流程。
+- 判断“是否该写成脚本”的门槛：同一组命令预计执行 ≥2 次，或需要交接/CI 复现。
+
 ## 抽取状态跟踪表
 
 | 条款 | 状态 | 落点 | 注 |
@@ -436,6 +491,11 @@ volatile QoS 下，`--once` 在 discovery 完成前发完即丢；对已在等�
 | M4 伪造依赖件三件套 | 沉淀（未抽，11-07 新增） | ros2-ops §7.1 邻域 | 单事件未成熟 |
 | M5 `pub --once` 发现竞态 | 沉淀（未抽，11-07 新增） | ros2-qos-dds §三 邻域 | 单事件，暂不直写规则层 |
 | M6 复测方案先评审可证伪性 | 沉淀（未抽，11-07 新增） | ros2-ops §7 邻域 | 单事件未成熟 |
+| N1 shell 是 Ubuntu/ROS2 开发主入口 | 沉淀（未抽，11-17 新增） | ros2-ops §2/§7 邻域 | 非事件型，属开发方式边界 |
+| N2 一次性命令 vs 可复现脚本 | 沉淀（未抽，11-17 新增） | 同上 | 复用 2+ 次可抽 |
+| N3 Ubuntu 22.04 shell 具体坑 | 沉淀（未抽，11-17 新增） | ros2-ops §2/§7 邻域 | 待跨项目复用验证 |
+| N4 工具权限 vs 开发规范 | 沉淀（未抽，11-17 新增） | 协作流程类，暂留 draft | 与权限模式相关，规则层未定 |
+| N5 本项目判据 | 沉淀（未抽，11-17 新增） | 同上 | — |
 
 > 盘点节奏：**方案 A 已定稿**（09-04，阶段收尾即盘点，首个 = 09-10 A1 收口；分层架构与决策全文见
 > [retrospect/2026-09-04_experience-layer-decision.md](retrospect/2026-09-04_experience-layer-decision.md)）——

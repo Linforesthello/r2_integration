@@ -6,6 +6,18 @@
     {
       "name": "r2_integration",
       "path": "."
+    },
+    {
+      "path": "../../Lin_note/Open-Notes-Library"
+    },
+    {
+      "path": "../../Lin_Product_information"
+    },
+    {
+      "path": "../unitree_goM80106"
+    },
+    {
+      "path": "../../astra_ws"
     }
   ],
   "settings": {
@@ -20,6 +32,7 @@
       "build": true,
       "install": true,
       "log": true
-    }
+    },
+    "stm32cube-ide-clangd.path": "cube"
   }
 }
