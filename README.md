@@ -39,6 +39,12 @@ r2_integration/
 │   │   ├── ld06-dual-lidar.md     LD06 单/双雷达执行计划（VM 验收 V1–V6 完成；N97 udev/构建/双实例 10Hz + /scan 规格/crop 实测完成（11-07），供电长跑待测）
 │   │   └── s1-readiness-gap.md    S1 就绪差距清单（23 项缺口分级 P0/P1/P2 + 已完成前置 + 待定夺，11-06 盘点）
 │   │
+│   ├── camera/  ← 相机专题（11-17 建）
+│   │   ├── astra-pro-driver-guide.md  Astra Pro 驱动手册（启动/四路视图/RGB-D 融合/内参/USB 掉线崩溃，11-17）
+│   │   ├── astra-ws-migration-guide.md astra_ws 迁移部署手册（换机/换架构：依赖/编译/udev/验证，11-17）
+│   │   ├── tornado-d2-driver-guide.md   Tornado D2 兼容性测试与驱动手册（两套环境/可执行文件/接口/迁移，11-17）
+│   │   └── 1、环境搭建.md              厂商原始环境搭建记录（迁移手册 §8 已逐条核验）
+│   │
 │   ├── minimal-loop/        最小闭环执行史（plan + w1/w2/w3-operation.md + Nav2 bringup + 审计数据）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan.md + execution/relog/costmap 执行卡 + explore-plan.md 工作稿）
 │   │
@@ -111,7 +117,8 @@ r2_integration/
 │   │   ├── 2026-11-08_oldcar_s1_static_bringup.md        老车 S1 静态联调（N97，静态 TF 顶替里程计）：链路 PASS + 规划全败未定因；全命令/现象留档（11-08）
 │   │   ├── 2026-11-08_oldcar_s1_chain_rerun_selfocclusion.md  ② 链路重跑 PASS + explore 零前沿根因实锤：LD06 低装自车遮挡（31% 光束打车体，11-08）
 │   │   ├── 2026-11-08_oldcar_s1_fullchain_pass.md          老车 S1 全链实车首跑 PASS：底盘+IMU+EKF+Nav2，39 目标 39 成功（11-08）
-│   │   └── 2026-11-09_g8010_cli_param.md                  G8010 控制程序命令行参数化（新文件，基线零改动）+ 预读成功校验；VM 验证、真机待验（11-09）
+│   │   ├── 2026-11-09_g8010_cli_param.md                  G8010 控制程序命令行参数化（新文件，基线零改动）+ 预读成功校验；VM 验证、真机待验（11-09）
+│   │   └── 2026-11-17_astra_pro_tornado_scope.md         Astra Pro 核验 + Tornado 资产评估：R2 不纳入、不迁移，保持现状（11-17）
 │   │
 │   ├── n97/  ← N97 部署/运维手册
 │   │   ├── 02-deploy-checklist.md       N97 部署清单（已部署，保留作部署手册）

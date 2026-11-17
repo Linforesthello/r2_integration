@@ -308,6 +308,8 @@ r2_integration/
 │   │
 │   ├── old-car/             老车平替专题（LD06 双雷达执行计划，2026-11-06 起）
 │   │
+│   ├── camera/              相机专题（Astra Pro / Tornado D2 驱动/环境/迁移手册，2026-11-17 起）
+│   │
 │   ├── minimal-loop/        最小闭环 W1/W2 执行史（plan + w1/w2/w3-operation + Nav2 bringup + 审计）
 │   ├── minimal-loop2/       最小闭环 2·现行（plan + execution/relog/costmap 执行卡）
 │   ├── phase0/              ← Phase 0 专题（chassis_definition/sensor-mount/completion_report/debug_log）
