@@ -16,6 +16,12 @@
 >
 > **2026-11-07 晚订正**：§3.1.2 关于 `return_to_init`「不存在」与 7 参数「未声明」的结论**已被推翻**
 > ——干净复测证明二者都存在且可取，原观测是构造期阻塞导致的假阴性（见 §3.1.3）。
+>
+> **2026-11-09 进展**：slam_toolbox + Nav2 **已联合实跑通过**（11-08 21:01~21:26，`nav2_explore.launch.py`
+> + 真实 EKF 里程计，39 目标 39 成功 / 0 失败 — [retrospect 全链首跑](../retrospect/2026-11-08_oldcar_s1_fullchain_pass.md)）；
+> 因此上文「三者从未联合起过」对 slam_toolbox + Nav2 已不成立。**仍未实测的只剩 explore_lite 本体**
+> （终端 8 未跑；过滤 polygon 放宽后 `No frontiers found` 是否消失未知）。
+> §四 验收清单 8 项逐项现状见 [s1-readiness-gap §八](../old-car/s1-readiness-gap.md)。
 
 ---
 
