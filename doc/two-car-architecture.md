@@ -376,6 +376,8 @@ IDLE ──trigger──→ BURST（快速到击球角）──→ HOLD（短停
 | VLP-16 去向 | 新车 / 其他项目 / 备用 | 影响新车是否还有 360° 3D；不默认装回老车 |
 
 > 以上不在本文替选；确定后回填本文对应小节，并在决策记录追加一行。
+>
+> 双雷达兼容性的逐层核对（驱动/launch/TF/SLAM/Nav2/explore）、拓扑选项与待实测项，见 [dual-lidar-compatibility-survey.md](surveys/dual-lidar-compatibility-survey.md)（2026-11-18，调研稿）。
 
 ---
 
@@ -395,6 +397,7 @@ IDLE ──trigger──→ BURST（快速到击球角）──→ HOLD（短停
 | MID-70/D435 装法与纸面几何 | [sensor-mounting-layout-survey.md](surveys/sensor-mounting-layout-survey.md)（2026-09-16，未实测） |
 | TF/URDF 双父冲突与 `base_footprint` 删除 | [sensor-mount.md §四](phase0/sensor-mount.md) |
 | 启动/QoS/bag/实机安全纪律 | [startup.md](startup.md)、[ros2-ops.md](ros2-ops.md)、[ros2-qos-dds.md](ros2-qos-dds.md) |
+| 双雷达兼容性逐层核对/拓扑选项/待实测 | [dual-lidar-compatibility-survey.md](surveys/dual-lidar-compatibility-survey.md)（2026-11-18） |
 
 ---
 
@@ -404,3 +407,4 @@ IDLE ──trigger──→ BURST（快速到击球角）──→ HOLD（短停
 |:---|:---|:---|
 | 2026-11-06 | 初稿 | 两车架构/接口冻结；老车平替（LD06、STM32 IMU、G8010）+ 新车升级；共用/分叉清单；G8010 时序与复用栈 |
 | 2026-11-06 | 回填 | LD06 双实例 VM 验收 V1–V6 通过：launch 9 参数、`/dev/r2_ld06_a/b` udev 固定名、`scan_a/scan_b` + `laser_a/laser_b`；掉电根因 = 接线端子松动；N97 交接待执行 |
+| 2026-11-18 | 双雷达兼容调研落档 | §十 增兼容调研链接、§十一 增来源行；逐层核对/拓扑选项/待实测见 [dual-lidar-compatibility-survey.md](surveys/dual-lidar-compatibility-survey.md) |

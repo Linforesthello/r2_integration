@@ -32,7 +32,7 @@
 - 底盘运动结构/上层安装/传感器（D435、MID-70、后续 MID-360、单点激光）方案与算力核算 — [two-car-architecture.md §四](two-car-architecture.md)
 - 3D LIO + 视觉 + Nav2 的软件栈与标定（MID-70 倾角外参） — 同上
 
-**待用户定夺（不排期）**：LD06 数量/布置、双雷达融合拓扑、STM32 传输、G8010 触发接口、新车 360° 覆盖/算力、VLP-16 去向 — [two-car-architecture.md §十](two-car-architecture.md)
+**待用户定夺（不排期）**：LD06 数量/布置、双雷达融合拓扑、STM32 传输、G8010 触发接口、新车 360° 覆盖/算力、VLP-16 去向 — [two-car-architecture.md §十](two-car-architecture.md)；双雷达兼容性见 [dual-lidar-compatibility-survey.md](surveys/dual-lidar-compatibility-survey.md)
 
 ---
 

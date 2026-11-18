@@ -27,6 +27,7 @@
 > 原始数据 `doc/raw_data/raw_explore_p1_retest_n97_2026-11-07_2010.txt`（本地，不入 git）。
 > 相关：[two-car-architecture.md §三](../two-car-architecture.md)（S1 判据）｜[07-handover.md §五](../07-handover.md)（老车接手注意）｜
 > [ld06-dual-lidar.md](ld06-dual-lidar.md)（雷达接入执行计划）
+> 双雷达（S2）兼容性：[dual-lidar-compatibility-survey.md](../surveys/dual-lidar-compatibility-survey.md)（2026-11-18）
 >
 > **更新（2026-11-07 六项定夺 + G4/G8 落地）**：用户定夺 §六 全部六项——
 > ① G4 文件名 **`nav2_params_ld06.yaml`**（按实际硬件外设命名，不用 oldcar 这类模糊词）；

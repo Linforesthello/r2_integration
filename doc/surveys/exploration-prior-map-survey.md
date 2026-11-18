@@ -5,7 +5,8 @@
 > **状态**：调研完成（结论可回查；**未实测项逐条标注**，不写成已验证）。
 > **平台范围**：老车 R2-OLD（LD06 2D 线）+ 新车 R2-NEW（MID-70 / MID-360 / D435 3D 线）+ 硬件可行性。
 > **核实方式**：本地知识库优先（`doc/`、LocoWiki、既有 retrospect/survey）→ 缺口处 WebSearch/WebFetch 官方仓库、官方文档、论文与社区帖（2026-11-07）。
-> **关联**：[two-car-architecture.md](../two-car-architecture.md) ｜ [planning-control-roadmap.md](../roadmaps/planning-control-roadmap.md) ｜ [explore-plan.md](../minimal-loop2/explore-plan.md) ｜ [s1-readiness-gap.md](../old-car/s1-readiness-gap.md) ｜ [ld06-dual-lidar.md](../old-car/ld06-dual-lidar.md) ｜ [3d-lidar-2d-navigation-survey.md](3d-lidar-2d-navigation-survey.md)
+> **2026-11-18 更新**：双雷达拓扑细节迁出至 [dual-lidar-compatibility-survey.md](dual-lidar-compatibility-survey.md)；§5.1 保留同步结论与跳转链接。
+> **关联**：[two-car-architecture.md](../two-car-architecture.md) ｜ [planning-control-roadmap.md](../roadmaps/planning-control-roadmap.md) ｜ [explore-plan.md](../minimal-loop2/explore-plan.md) ｜ [s1-readiness-gap.md](../old-car/s1-readiness-gap.md) ｜ [ld06-dual-lidar.md](../old-car/ld06-dual-lidar.md) ｜ [3d-lidar-2d-navigation-survey.md](3d-lidar-2d-navigation-survey.md) ｜ [dual-lidar-compatibility-survey.md](dual-lidar-compatibility-survey.md)
 > **证据等级**：✅ 本地/实机实测 ｜ 📘 官方源码或官方文档核实 ｜ 🌐 论文/社区核实 ｜ 🧠 工程推理（未实测，不得当结论用）
 
 ---
@@ -33,7 +34,7 @@
 **3）"最适合 R2"（工程判断，🧠）：**
 
 - **老车 S1**：`LD06 → slam_toolbox → Nav2 → explore_lite`。现有三份配置方向正确，缺的是 G4 参数文件 + 实车安装几何 + 首跑。
-- **老车 S2**：双 LD06 **优先独立 `/scan` + `/scan_low`**，不合并成单帧——LD06 无硬件同步，合并会引入时间/高度语义混杂（§5.1）。
+- **老车 S2**：双 LD06 **优先独立 `/scan` + `/scan_low`**，不合并成单帧——LD06 无硬件同步，合并会引入时间/高度语义混杂（§5.1；逐层兼容性见 [dual-lidar-compatibility-survey.md](dual-lidar-compatibility-survey.md)）。
 - **新车**：**MID-70 的 70.4° 圆视场不适合 360° 前沿探索**；探索正解是 MID-360（360°×59°）。MID-70 适合前向稠密建图/避障。先验导航用 `FAST-LIO2 + 先验 PCD 定位`，再投影 2D 供 Nav2。
 - **VLP-16**：360°×30°，若新车在 MID-360 到位前需要探索，它比 MID-70 更合适；去向仍待用户定夺（§六 O7）。
 - **N97**：4C/4T、12W，老车 2D 栈可行；**不要同时叠 3D SLAM + Nav2 + 探索**。
@@ -422,20 +423,10 @@ MID-70 / MID-360 / VLP-16
 | range_min/max（消息） | 0.02 / 25.0 m | **25 是驱动常量，不是规格** |
 | 室内有效回波 | 5.94~6.08 m | 室内限制；空旷场地待测 |
 
-**多雷达同步（📘/🌐）：**
+**多雷达同步与双雷达拓扑（S2，2026-11-18 迁出）：**
 
-- LD06/LD19 只有 UART（TX 输出）+ PWM（电机调速）+ 5V/GND；**没有 PPS/触发/同步引脚**。
-- 多台雷达各自自由旋转，无法相位锁定；只能"各自时间戳 + TF 融合"。
-- 结论：**双 LD06 不存在硬件同步**；合并 scan 时要接受时间差与运动畸变。
-
-**双雷达拓扑（S2）：**
-
-| 方案 | 做法 | 优点 | 缺点 | 判断 |
-|:---|:---|:---|:---|:---|
-| A：独立话题 | `/scan` + `/scan_low`，各自 frame（`laser_a`/`laser_b` 或 `base_laser`/`laser_low`），costmap 分层订阅 | 保留高度语义；各层独立 clear/mark；排障清晰 | 需两套 costmap 源配置 | **优先**（与 two-car §6.1 契约一致） |
-| B：合并单帧 | `ira_laser_tools` 的 `laserscan_multi_merger`（社区 Humble 分支） | 下游只订一个 `/scan`；老 2D 算法兼容 | 时间不同步、高度混叠；QoS/`destination_frame` 坑；无官方二进制 | 备选；未实测 |
-
-> `ira_laser_tools` 官方仓库只有 ROS1；Humble 支持在社区 fork（[nakai-omer humble 分支](https://github.com/nakai-omer/ira_laser_tools/tree/humble)），无官方包，需源码构建（📘/🌐）。
+- 结论：LD06/LD19 只有 UART + PWM + 5V/GND，**没有 PPS/触发/同步引脚**；双 LD06 不存在硬件同步，合并 scan 要接受时间差与运动畸变。
+- 双雷达拓扑（分开 `/scan` + `/scan_low` vs 合并单帧）、逐层兼容性、`ira_laser_tools` Humble fork 现状、拓扑选项与待实测项，已单独成文 → [dual-lidar-compatibility-survey.md](dual-lidar-compatibility-survey.md)（2026-11-18）。
 
 **N97 算力（📘 Intel ARK；本地 [n97info.md](../n97/n97info.md) 只记录型号/风扇）：** Intel N97，4C/4T，12W TDP，6MB cache，最高 3.6 GHz。2D SLAM + Nav2 + explore_lite 可行；不要再叠 3D LIO/3D 探索。
 
@@ -478,7 +469,7 @@ MID-70 / MID-360 / VLP-16
 | 编号 | 选项 | 内容 | 影响/代价 | 前置 |
 |:---|:---|:---|:---|:---|
 | **O1** | 老车 S1 先跑通 explore_lite | 修 G4 参数 → 量安装几何 → 起 slam_toolbox + nav2_explore + explore | 打通 2D 探索最小闭环；后续 S2/新车都复用 | G4、G10/G13、G7/G8 |
-| **O2** | 老车 S2 双 LD06 拓扑 | A 独立 `/scan`+`/scan_low`；B 合并单帧 | A 语义清晰、配置多；B 下游简单、时间不同步 | 双雷达安装/标定 |
+| **O2** | 老车 S2 双 LD06 拓扑 | A 独立 `/scan`+`/scan_low`；B 合并单帧 | A 语义清晰、配置多；B 下游简单、时间不同步 | 双雷达安装/标定；逐层核对见 [dual-lidar-compatibility-survey.md](dual-lidar-compatibility-survey.md) |
 | **O3** | 新车探索传感器 | ① MID-360 首期；② MID-70 + 2D 补盲；③ VLP-16 过渡 | ① 最匹配、需采购；② FOV 仍不足；③ 零采购、重量/旧平台 | 预算、结构、算力 |
 | **O4** | 新车先验定位 | ① FAST_LIO_LOCALIZATION_ROS2；② LIO-Localization；③ NDT/Autoware；④ 3D→2D + AMCL | ① 同源迁移低；② 轻但文档少；③ 工业鲁棒但重；④ 复用 2D 经验、丢 3D | 先验 PCD、外参、算力 |
 | **O5** | 新车 3D 探索 | ① TARE ROS2 移植；② 3D→2D + explore_lite；③ 自研 frontier | ① 效果最好、工作量最大；② 务实、能力降级；③ 可控、周期长 | 算力、MID-360、SLAM |
@@ -594,3 +585,4 @@ this->declare_parameter<bool>("return_to_init", false);
 - [3d-lidar-2d-navigation-survey.md](3d-lidar-2d-navigation-survey.md)：低矮障碍感知的**数值与几何**（1.59 m 盲区等），本文引用不复制。
 - [sensor-mounting-layout-survey.md](sensor-mounting-layout-survey.md)：MID-70/D435 的**安装位置与倾角评价**，本文不重复。
 - [navigation-behavior-safety-survey.md](navigation-behavior-safety-survey.md)：导航行为病/安全设计，本文只引用其结论方向。
+- [dual-lidar-compatibility-survey.md](dual-lidar-compatibility-survey.md)：双雷达（LD06×2）逐层兼容性/拓扑选项/待实测，本文 §5.1 只保留同步结论与跳转链接。

@@ -7,6 +7,7 @@
 > 上位文档：[two-car-architecture.md §三/§八](../two-car-architecture.md)
 > 事件记录：[2026-11-06 LD06 VM 接入与冒烟](../retrospect/2026-11-06_ld06_vm_bringup_smoke.md)
 > 原始数据：`doc/raw_data/raw_ld06_*`（本地，不入 git）
+> 双雷达兼容性（S2 层面）：[dual-lidar-compatibility-survey.md](../surveys/dual-lidar-compatibility-survey.md)（2026-11-18）
 
 ---
 
@@ -93,8 +94,9 @@
 **改动点（实际落地）**：
 
 - 新增 9 个 `DeclareLaunchArgument`：`node_name` / `topic_name` / `frame_id` / `port_name` /
-  `port_baudrate` / `z` / `yaw` / `pitch` / `roll`；**2026-11-08 补 `x` / `y`（共 11 个）**——
-  此前平移 x/y 在 `arguments` 里写死 `'0','0'`，G10 实测后必须可传；
+  `port_baudrate` / `z` / `yaw` / `pitch` / `roll`；**2026-11-08 补 `x` / `y`（共 11 个实例/几何参数）**——
+  此前平移 x/y 在 `arguments` 里写死 `'0','0'`，G10 实测后必须可传；**2026-11-08 另增
+  `filtered_topic_name`，当前 launch 共 12 个 `DeclareLaunchArgument`**。
 - 静态 TF 节点名随 `frame_id` 派生（`base_link_to_<frame>_ld06`），避免两个 static TF 节点重名；
 - `port_baudrate` 用 `ParameterValue(..., value_type=int)` 传，避免 LaunchConfiguration
   的字符串类型不匹配；
@@ -106,7 +108,8 @@
 | 参数 | 默认值 | 说明 |
 |:---|:---|:---|
 | `node_name` | `LD06` | 多实例必须覆盖 |
-| `topic_name` | `scan` | 多实例必须覆盖 |
+| `topic_name` | `scan_raw` | 驱动原始话题；2026-11-08 起默认 `scan_raw`（原 `scan`） |
+| `filtered_topic_name` | `scan` | 过滤链输出；双实例必须覆盖 |
 | `frame_id` | `base_laser` | 多实例必须覆盖 |
 | `port_name` | `/dev/r2_ld06_a` | udev 符号链接；B 实例需覆盖 |
 | `port_baudrate` | `230400` | int |
@@ -115,6 +118,9 @@
 | `z` | `0.04` | 2026-11-08 实车实测（光学中心离地 16cm − base_link 12cm）；原占位 `0.18` |
 | `yaw` | `-1.5708` | 2026-11-08 实测（模块 0° 指向车体 −y）；原占位 `0.0` |
 | `pitch` / `roll` | `0.0` | 按水平安装，未单独量测 |
+
+> 2026-11-18 修正：原表 `topic_name` 默认写为 `scan`，与当前 launch（`scan_raw`）不符；
+> 已按 [ld06.launch.py:52](../../ldlidar_stl_ros2/launch/ld06.launch.py#L52) 更正，并补 `filtered_topic_name` 行。
 
 **验收结果（2026-11-06）**：
 
@@ -149,6 +155,10 @@ ros2 launch ldlidar_stl_ros2 ld06.launch.py \
 > `filtered_topic_name`，否则两个实例都发 `/scan` 互相打架——上面命令已按此补参。
 > 过滤原因与配置见 [sensor-mount §6.1.2](../phase0/sensor-mount.md)、
 > [ld06_scan_filter.yaml](../../ldlidar_stl_ros2/config/ld06_scan_filter.yaml)。
+>
+> ⚠️ **2026-11-18 核对**：11-06 双实例测试早于 11-08 过滤链；**双实例 + 过滤链的组合尚未复测**
+> （11-08 全链为单实例）。过滤节点名当前写死 `scan_to_scan_filter_chain`；兼容性核对见
+> [dual-lidar-compatibility-survey.md](../surveys/dual-lidar-compatibility-survey.md)。
 
 验证：
 
@@ -367,6 +377,7 @@ timeout -k 5 30 python3 scripts/probe_laserscan.py --topic /scan --count 3
 - 构建/部署/进程纪律：[ros2-ops.md §2/§7/§10](../ros2-ops.md)
 - 验收边界：[standards.md §1.15](../standards.md)
 - 驱动与 launch：[ldlidar_stl_ros2/launch/ld06.launch.py](../../ldlidar_stl_ros2/launch/ld06.launch.py)、[README_R2.md](../../ldlidar_stl_ros2/README_R2.md)
+- 双雷达兼容性（S2）：[dual-lidar-compatibility-survey.md](../surveys/dual-lidar-compatibility-survey.md)（2026-11-18）
 - 设备基线：2026-11-06 16:20 VM `lsusb` / `udevadm info` 实测；2026-11-06 18:49~18:52 N97 实测（本文件 §二）
 - LD06 `/scan` 规格与 crop：2026-11-07 N97 实测（本文件 P7），原始数据 `doc/raw_data/raw_ld06_scan_spec_2026-11-07_1133.txt` / `raw_ld06_crop_2026-11-07_1141.txt`（本地，不入 git）；探针工具 [scripts/probe_laserscan.py](../../scripts/probe_laserscan.py)
 - N97 重启复验：2026-11-07 11:25 重启后 `ls -l /dev/r2_*` + `udevadm info` 核对（本文件 P3）

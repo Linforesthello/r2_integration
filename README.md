@@ -140,7 +140,8 @@ r2_integration/
 │   │   ├── navigation-behavior-safety-survey.md       导航行为病×安全设计调研（Q1 灰格/Q2 转弯 margin/Q5 IMU 安全，09-06）
 │   │   ├── chassis-kinematics-controller-survey.md    底盘运动学×控制器选型调研（Q3 全向轮行为/Q4 舵轮 MPPI 路线，09-06）
 │   │   ├── sensor-mounting-layout-survey.md           MID-70+D435 安装位置与倾角评价（拟定装法覆盖包络/应用评价：FAST-LIO2·explore·视觉栈，09-16）
-│   │   └── exploration-prior-map-survey.md            自主探索×离线先验方案调研与文档核验（2D/3D 方案对比 + 硬件可行性 + P1~P5 核验，11-07）
+│   │   ├── exploration-prior-map-survey.md            自主探索×离线先验方案调研与文档核验（2D/3D 方案对比 + 硬件可行性 + P1~P5 核验，11-07）
+│   │   └── dual-lidar-compatibility-survey.md         双雷达（LD06×2）兼容调研（驱动/launch/TF/SLAM/Nav2/explore 逐层核对 + 拓扑选项 + 待实测，11-18）
 │   │
 │   ├── profiles/  ← 对象档案层（实体为中心横切视图：spec v0.1 + README，09-04 建）
 │   │   ├── spec.md              对象档案规范（建档门槛/模板/纪律，v0.1 试行）

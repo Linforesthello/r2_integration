@@ -647,13 +647,7 @@ coverage = ROI 内已知栅格数 / ROI 总栅格数
 
 ### 10.2 双雷达拓扑（二期，待用户定夺）
 
-| 方案 | 做法 | 影响 |
-|:---|:---|:---|
-| A. 分开 `/scan` + `/scan_low` | 一颗喂 slam_toolbox/Nav2，一颗只喂低带障碍层 | 保留几何语义；建图平面不被低平面污染；需要两套 TF/参数 |
-| B. 合并单 `/scan` | 两颗按角度合并成一条 LaserScan | Nav2 简单；不同高度的点混在一个平面，建图/避障可能失真 |
-| C. 单颗低装 | 只装一颗在低高度 | 低物覆盖改善；建图平面低、地面杂波多；无冗余 |
-
-> 首期**不预选**；S1 单 LD06 跑出基线后，再按上位文档 §十 决策。本文 Step 1~3 的参数只需把雷达源换掉，不改探索逻辑。
+> 双雷达拓扑与逐层兼容性已单独调研（2026-11-18）：**分开 `/scan` + `/scan_low` / 合并单 `/scan` / 单颗低装** 的选项×影响、SLAM/Nav2/时间同步核对、`ira_laser_tools` 现状与待实测项，见 [dual-lidar-compatibility-survey.md](../surveys/dual-lidar-compatibility-survey.md)。本节只保留首期纪律：**首期不预选**；S1 单 LD06 跑出基线后，再按上位文档 §十 决策。本文 Step 1~3 的参数只需把雷达源换掉，不改探索逻辑。
 
 ### 10.3 Step 0 前置检查（替换原 0.3/0.4 的雷达部分）
 
@@ -693,7 +687,7 @@ ros2 node list | grep -E "amcl|map_server" || echo "OK: no AMCL/map_server"
 |:---|:---|:---|
 | LD06 端口漂移/两颗互换 | 启动报错或数据错车 | udev 固定名；launch 用符号链接；启动前 `ls -l` |
 | 低装地面杂波 | costmap 假障碍、地图脏 | 调高度/俯仰；角度裁剪；先静态测；必要时地面过滤 |
-| 双雷达互扰 | 偶发噪点/丢帧 | 同开/单开对比；错开/遮挡；必要时分时 |
+| 双雷达互扰 | 偶发噪点/丢帧 | 同开/单开对比；错开/遮挡；必要时分时（详见 [双雷达兼容调研](../surveys/dual-lidar-compatibility-survey.md) §六） |
 | 旧参数残留 `velodyne_low` | 启动报找不到源/低带层空 | 老车用 `nav2_params_ld06.yaml`（11-07 已建）；不要直接改历史 `nav2_params_low.yaml` |
 | 静态 TF 沿用占位 0.18 | 地图尺度/障碍位置偏 | 实车量测后改 launch/URDF；用 `tf2_echo` 核对 |
 
@@ -705,3 +699,4 @@ ros2 node list | grep -E "amcl|map_server" || echo "OK: no AMCL/map_server"
 - 未实测项：LD06 实际频率/量程/地面杂波、双雷达互扰、低装建图质量——S1/S2 实车回填。
 - **2026-11-07 补测**：频率 10 Hz、beam 数/角分辨率、angle crop 掩盖已实测（[ld06-dual-lidar.md P7](../old-car/ld06-dual-lidar.md)）；
   剩余未实测 = 空旷场地量程、地面杂波、双雷达互扰、低装建图质量。
+- 双雷达兼容性（2026-11-18）：[dual-lidar-compatibility-survey.md](../surveys/dual-lidar-compatibility-survey.md)。
